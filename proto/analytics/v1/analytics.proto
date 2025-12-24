@@ -1,0 +1,133 @@
+syntax = "proto3";
+
+package zenx.analytics.v1;
+
+option go_package = "github.com/zenx/backend/proto/analytics/v1;analyticsv1";
+
+service AnalyticsService {
+  rpc GetProgressSnapshot(GetProgressSnapshotRequest) returns (ProgressSnapshot);
+  rpc ListPersonalRecords(ListPersonalRecordsRequest) returns (ListPersonalRecordsResponse);
+  rpc RecalculateMetrics(RecalculateMetricsRequest) returns (RecalculateMetricsResponse);
+  
+  // New analytics methods
+  rpc GetWorkoutCalendar(GetWorkoutCalendarRequest) returns (GetWorkoutCalendarResponse);
+  rpc GetMuscleGroupStats(GetMuscleGroupStatsRequest) returns (GetMuscleGroupStatsResponse);
+  rpc GetTopExercises(GetTopExercisesRequest) returns (GetTopExercisesResponse);
+  rpc GetExerciseStats(GetExerciseStatsRequest) returns (GetExerciseStatsResponse);
+}
+
+message DateRange {
+  string start_date = 1;
+  string end_date = 2;
+}
+
+message GetWorkoutCalendarRequest {
+  string user_id = 1;
+  DateRange date_range = 2;
+}
+
+message GetWorkoutCalendarResponse {
+  repeated string workout_days = 1;
+  int32 total_workouts = 2;
+}
+
+message GetMuscleGroupStatsRequest {
+  string user_id = 1;
+  DateRange date_range = 2;
+}
+
+message MuscleGroupStat {
+  string muscle_group = 1;
+  int32 set_count = 2;
+  double volume_kg = 3;
+  double percentage = 4;
+}
+
+message GetMuscleGroupStatsResponse {
+  repeated MuscleGroupStat stats = 1;
+}
+
+message GetTopExercisesRequest {
+  string user_id = 1;
+  int32 limit = 2;
+  DateRange date_range = 3;
+}
+
+message ExerciseRecord {
+  string exercise_id = 1;
+  string exercise_name = 2;
+  int32 workout_count = 3;
+  string last_performed = 4;
+  double average_weight = 5;
+}
+
+message GetTopExercisesResponse {
+  repeated ExerciseRecord exercises = 1;
+}
+
+message GetExerciseStatsRequest {
+  string user_id = 1;
+  string exercise_id = 2;
+}
+
+message WorkoutExerciseEntry {
+  string workout_id = 1;
+  string date = 2;
+  double weight = 3;
+  int32 reps = 4;
+  double one_rm = 5;
+  double volume = 6;
+}
+
+message ExercisePerformance {
+  string exercise_id = 1;
+  string exercise_name = 2;
+  double heaviest_weight = 3;
+  double projected_one_rm = 4;
+  double best_set_volume = 5;
+  double best_session_volume = 6;
+  int32 most_reps = 7;
+  repeated PersonalRecord personal_records = 8;
+  repeated WorkoutExerciseEntry history = 9;
+}
+
+message GetExerciseStatsResponse {
+  ExercisePerformance stats = 1;
+}
+
+message ProgressSnapshot {
+  string user_id = 1;
+  int64 captured_at = 2;
+  double total_volume_kg = 3;
+  double average_rpe = 4;
+  int32 workout_count = 5;
+  repeated PersonalRecord prs = 6;
+}
+
+message PersonalRecord {
+  string exercise_id = 1;
+  string record_type = 2;
+  double value = 3;
+  int64 achieved_at = 4;
+}
+
+message GetProgressSnapshotRequest {
+  string user_id = 1;
+}
+
+message ListPersonalRecordsRequest {
+  string user_id = 1;
+}
+
+message ListPersonalRecordsResponse {
+  repeated PersonalRecord records = 1;
+}
+
+message RecalculateMetricsRequest {
+  string user_id = 1;
+  string workout_id = 2;
+}
+
+message RecalculateMetricsResponse {
+  bool scheduled = 1;
+}

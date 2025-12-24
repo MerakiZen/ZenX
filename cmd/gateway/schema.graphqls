@@ -1,0 +1,281 @@
+type Query {
+  me: User!
+  workouts(limit: Int, after: String): [Workout!]!
+  exercises(query: String, category: String): [Exercise!]!
+  profile: Profile
+  progressSnapshot: ProgressSnapshot
+  personalRecords: [PersonalRecord!]!
+  measurements(range: MeasurementRangeInput): [Measurement!]!
+  feed(limit: Int, cursor: String): FeedConnection!
+  discoverFeed(limit: Int, cursor: String): FeedConnection!
+  feedComments(postId: ID!, limit: Int, cursor: String): FeedCommentConnection!
+  notifications(limit: Int, cursor: String, status: String): NotificationConnection!
+  
+  # Analytics
+  workoutCalendar(startDate: String!, endDate: String!): WorkoutCalendar
+  muscleGroupStats(dateRange: DateRangeInput): [MuscleGroupStat!]!
+  topExercises(limit: Int, dateRange: DateRangeInput): [ExerciseRecord!]!
+  exercisePerformance(exerciseId: ID!): ExercisePerformance
+}
+
+type Mutation {
+  register(email: String!, password: String!, displayName: String!): AuthPayload!
+  login(email: String!, password: String!): AuthPayload!
+  createWorkout(input: WorkoutInput!): Workout!
+  updateWorkout(id: ID!, input: UpdateWorkoutInput!): Workout!
+  refreshToken(refreshToken: String!): AuthPayload!
+  updateProfile(input: ProfileInput!): Profile!
+  recordMeasurement(input: MeasurementInput!): Measurement!
+  toggleFeedLike(postId: ID!): FeedPost!
+  addFeedComment(postId: ID!, body: String!): PostComment!
+  markNotificationRead(notificationId: ID!): Notification!
+}
+
+type AuthPayload {
+  accessToken: String!
+  refreshToken: String!
+  expiresAt: String!
+}
+
+type User {
+  id: ID!
+  email: String!
+  displayName: String
+  profile: Profile
+}
+
+type Workout {
+  id: ID!
+  userId: ID!
+  name: String!
+  notes: String
+  startedAt: String
+  completedAt: String
+  exercises: [WorkoutExercise!]!
+}
+
+type WorkoutExercise {
+  exerciseId: ID!
+  order: Int!
+  sets: [WorkoutSet!]!
+}
+
+type WorkoutSet {
+  setNumber: Int!
+  reps: Int
+  weightKg: Float
+  rpe: Float
+  completed: Boolean
+}
+
+type Exercise {
+  id: ID!
+  name: String!
+  description: String
+  category: String
+  primaryMuscleGroup: String
+  secondaryMuscleGroups: [String!]!
+  equipmentRequired: String
+  difficultyLevel: String
+  isCustom: Boolean!
+  createdAt: String
+}
+
+type Profile {
+  id: ID!
+  displayName: String
+  bio: String
+  avatarUrl: String
+  dateOfBirth: String
+  gender: String
+}
+
+type Measurement {
+  id: ID!
+  userId: ID!
+  measurementDate: String!
+  weightKg: Float
+  bodyFatPercentage: Float
+  muscleMassKg: Float
+  measurementsJson: String
+  createdAt: String!
+}
+
+type ProgressSnapshot {
+  userId: ID!
+  capturedAt: String!
+  totalVolumeKg: Float
+  averageRpe: Float
+  workoutCount: Int!
+  prs: [PersonalRecord!]!
+}
+
+type PersonalRecord {
+  exerciseId: ID!
+  recordType: String!
+  value: Float!
+  achievedAt: String!
+  exercise: Exercise
+}
+
+type FeedConnection {
+  edges: [FeedPost!]!
+  nextCursor: String
+}
+
+type FeedPost {
+  id: ID!
+  workoutId: ID!
+  userId: ID!
+  caption: String
+  imageUrl: String
+  createdAt: String!
+  updatedAt: String!
+  likesCount: Int!
+  commentsCount: Int!
+  isLiked: Boolean!
+  likedByUserIds: [ID!]
+  workout: Workout!
+  authorProfile: Profile
+}
+
+type FeedCommentConnection {
+  comments: [PostComment!]!
+  nextCursor: String
+}
+
+type PostComment {
+  id: ID!
+  postId: ID!
+  userId: ID!
+  body: String!
+  createdAt: String!
+  authorProfile: Profile
+}
+
+type NotificationConnection {
+  nodes: [Notification!]!
+  nextCursor: String
+  unreadCount: Int!
+}
+
+type Notification {
+  id: ID!
+  userId: ID!
+  type: String!
+  template: String
+  status: String
+  title: String!
+  body: String!
+  data: [NotificationDatum!]
+  isRead: Boolean!
+  scheduledFor: String
+  sentAt: String
+  createdAt: String!
+}
+
+type NotificationDatum {
+  key: String!
+  value: String!
+}
+
+# Analytics Types
+
+type WorkoutCalendar {
+  startDate: String!
+  endDate: String!
+  workoutDays: [String!]!
+  totalWorkouts: Int!
+}
+
+type MuscleGroupStat {
+  muscleGroup: String!
+  setCount: Int!
+  volume: Float!
+  percentage: Float!
+}
+
+type ExerciseRecord {
+  exerciseId: ID!
+  exerciseName: String!
+  workoutCount: Int!
+  lastPerformed: String
+  averageWeight: Float
+}
+
+type ExercisePerformance {
+  exerciseId: ID!
+  exerciseName: String!
+  heaviestWeight: Float
+  projectedOneRM: Float
+  bestSetVolume: Float
+  bestSessionVolume: Float
+  mostReps: Int
+  personalRecords: [PersonalRecord!]!
+  history: [WorkoutExerciseEntry!]!
+}
+
+type WorkoutExerciseEntry {
+  workoutId: ID!
+  date: String!
+  weight: Float!
+  reps: Int!
+  oneRM: Float
+  volume: Float
+}
+
+input DateRangeInput {
+  startDate: String!
+  endDate: String!
+}
+
+input WorkoutInput {
+  userId: ID!
+  name: String!
+  notes: String
+  exercises: [WorkoutExerciseInput!]
+}
+
+input UpdateWorkoutInput {
+  name: String
+  notes: String
+  exercises: [WorkoutExerciseInput!]
+  startedAt: String
+  completedAt: String
+}
+
+input WorkoutExerciseInput {
+  exerciseId: ID!
+  order: Int!
+  sets: [WorkoutSetInput!]!
+}
+
+input WorkoutSetInput {
+  setNumber: Int!
+  reps: Int
+  weightKg: Float
+  rpe: Float
+  notes: String
+  completed: Boolean
+}
+
+input ProfileInput {
+  displayName: String
+  bio: String
+  avatarUrl: String
+  dateOfBirth: String
+  gender: String
+}
+
+input MeasurementInput {
+  measurementDate: String!
+  weightKg: Float
+  bodyFatPercentage: Float
+  muscleMassKg: Float
+  measurementsJson: String
+}
+
+input MeasurementRangeInput {
+  start: String
+  end: String
+}

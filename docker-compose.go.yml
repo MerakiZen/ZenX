@@ -1,0 +1,138 @@
+services:
+  postgres-primary:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: zenx
+      POSTGRES_PASSWORD: zenx
+      POSTGRES_DB: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./deploy/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+
+  nats:
+    image: nats:2.10
+    restart: unless-stopped
+    command: [ "-js" ]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.57
+    restart: unless-stopped
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+
+  grafana:
+    image: grafana/grafana:10.4.2
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+      args:
+        SERVICE_PATH: services/auth-service
+    environment:
+      DATABASE_URL: postgres://zenx:zenx@postgres-primary:5432/zenx_auth?sslmode=disable
+      GRPC_PORT: "8080"
+    depends_on:
+      - postgres-primary
+
+  workout-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+      args:
+        SERVICE_PATH: services/workout-service
+    environment:
+      DATABASE_URL: postgres://zenx:zenx@postgres-primary:5432/zenx_workout?sslmode=disable
+      GRPC_PORT: "8081"
+      NATS_URL: nats://nats:4222
+    depends_on:
+      - postgres-primary
+      - nats
+
+  exercise-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+      args:
+        SERVICE_PATH: services/exercise-service
+    environment:
+      DATABASE_URL: postgres://zenx:zenx@postgres-primary:5432/zenx_exercise?sslmode=disable
+      GRPC_PORT: "8083"
+    depends_on:
+      - postgres-primary
+
+  profile-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+      args:
+        SERVICE_PATH: services/profile-service
+    environment:
+      DATABASE_URL: postgres://zenx:zenx@postgres-primary:5432/zenx_profile?sslmode=disable
+      GRPC_PORT: "8084"
+    depends_on:
+      - postgres-primary
+
+  analytics-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+      args:
+        SERVICE_PATH: services/analytics-service
+    environment:
+      DATABASE_URL: postgres://zenx:zenx@postgres-primary:5432/zenx_analytics?sslmode=disable
+      GRPC_PORT: "8085"
+      WORKOUT_SERVICE_ADDR: workout-service:8081
+    depends_on:
+      - postgres-primary
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+      args:
+        SERVICE_PATH: services/notification-service
+    environment:
+      DATABASE_URL: postgres://zenx:zenx@postgres-primary:5432/zenx_notification?sslmode=disable
+      GRPC_PORT: "8086"
+      NATS_URL: nats://nats:4222
+    depends_on:
+      - postgres-primary
+      - nats
+
+  gateway:
+    build:
+      context: .
+      dockerfile: cmd/gateway/Dockerfile
+    environment:
+      AUTH_ADDR: auth-service:8080
+      WORKOUT_ADDR: workout-service:8081
+      EXERCISE_ADDR: exercise-service:8083
+      PROFILE_ADDR: profile-service:8084
+      ANALYTICS_ADDR: analytics-service:8085
+      NOTIFICATION_ADDR: notification-service:8086
+      GATEWAY_LISTEN: ":4000"
+    ports:
+      - "4000:4000"
+    depends_on:
+      - auth-service
+      - workout-service
+      - exercise-service
+      - profile-service
+      - analytics-service
+      - notification-service
+
+volumes:
+  pgdata:

@@ -1,0 +1,63 @@
+schema @core(feature: "https://specs.apollo.dev/core/v0.2") {
+  query: Query
+  mutation: Mutation
+}
+
+type Query {
+  me: User @router(scope: "auth")
+  workouts(after: String, limit: Int = 20): [Workout!]! @router(scope: "workout")
+  exercises(query: String): [Exercise!]! @router(scope: "exercise")
+}
+
+type Mutation {
+  login(email: String!, password: String!): AuthPayload! @router(scope: "auth")
+  createWorkout(input: WorkoutInput!): Workout! @router(scope: "workout")
+}
+
+type User @key(fields: "id") {
+  id: ID!
+  email: String!
+  displayName: String
+  profile: Profile @router(scope: "profile")
+}
+
+type Workout @key(fields: "id") {
+  id: ID!
+  name: String!
+  notes: String
+  exercises: [WorkoutExercise!]!
+}
+
+type WorkoutExercise {
+  exercise: Exercise!
+  sets: [WorkoutSet!]!
+}
+
+type WorkoutSet {
+  reps: Int!
+  weightKg: Float
+  rpe: Float
+}
+
+type Exercise @key(fields: "id") {
+  id: ID!
+  name: String!
+  category: String
+}
+
+type Profile @key(fields: "id") {
+  id: ID!
+  displayName: String
+  avatarUrl: String
+}
+
+type AuthPayload {
+  accessToken: String!
+  refreshToken: String!
+  expiresAt: String!
+}
+
+input WorkoutInput {
+  name: String!
+  notes: String
+}

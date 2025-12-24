@@ -1,0 +1,4 @@
+tmp/
+.coverage
+bin/
+.env

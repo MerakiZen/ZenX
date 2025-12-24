@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  namespace: zenx
+  labels:
+    app: notification-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      containers:
+      - name: notification-service
+        image: zenx/notification-service:latest
+        ports:
+        - containerPort: 8086
+          name: grpc
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: notification-connection-string
+        - name: NATS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: zenx-config
+              key: nats-url
+        - name: GRPC_PORT
+          value: "8086"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:8086"]
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:8086"]
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  namespace: zenx
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8086
+    targetPort: 8086
+    protocol: TCP
+    name: grpc
+  selector:
+    app: notification-service
+
+

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zenx-config
+  namespace: zenx
+data:
+  nats-url: "nats://nats-service:4222"
+
+
