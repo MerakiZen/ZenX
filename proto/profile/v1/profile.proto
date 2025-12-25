@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package zenx.profile.v1;
+
+import "common/v1/common.proto";
+
+option go_package = "github.com/zenx/backend/proto/profile/v1;profilev1";
+
+service ProfileService {
+  rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
+  rpc UpdateProfile(UpdateProfileRequest) returns (Profile);
+  rpc RecordMeasurement(RecordMeasurementRequest) returns (Measurement);
+  rpc ListMeasurements(ListMeasurementsRequest) returns (ListMeasurementsResponse);
+}
+
+message Profile {
+  string id = 1;
+  string user_id = 2;
+  string display_name = 3;
+  string bio = 4;
+  string avatar_url = 5;
+  string date_of_birth = 6;
+  string gender = 7;
+}
+
+message Measurement {
+  string id = 1;
+  string user_id = 2;
+  string measurement_date = 3;
+  double weight_kg = 4;
+  double body_fat_percentage = 5;
+  double muscle_mass_kg = 6;
+  string measurements_json = 7;
+}
+
+message GetProfileRequest {
+  string user_id = 1;
+}
+
+message GetProfileResponse {
+  Profile profile = 1;
+}
+
+message UpdateProfileRequest {
+  Profile profile = 1;
+}
+
+message RecordMeasurementRequest {
+  Measurement measurement = 1;
+}
+
+message ListMeasurementsRequest {
+  string user_id = 1;
+  common.v1.TimestampRange range = 2;
+}
+
+message ListMeasurementsResponse {
+  repeated Measurement measurements = 1;
+}

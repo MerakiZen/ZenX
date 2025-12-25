@@ -1,0 +1,895 @@
+ZenX - Product Requirements Document (PRD)
+Version: 1.0
+Date: November 11, 2025
+Project Type: Fitness Tracking Application
+Status: Implementation Ready
+
+1. Executive Summary
+ZenX is a comprehensive fitness tracking application inspired by the Heavy fitness tracker. The application enables users to track workouts, exercises, sets, reps, and monitor their fitness progress over time. ZenX will be built using a modern, scalable microservices architecture with cross-platform support for Web, Android, iOS, and WatchOS.
+1.1 Project Goals
+
+Build a production-ready fitness tracking platform
+Ensure cross-platform compatibility (Web, Mobile, Wearables)
+Implement scalable microservices architecture
+Provide real-time workout tracking capabilities
+Enable comprehensive progress analytics and insights
+
+
+2. Technology Stack
+2.1 Frontend
+
+Framework: Flutter
+Platforms: Web, Android, iOS, WatchOS
+API Communication: GraphQL Client
+Rationale: Single codebase for all platforms, native performance, rich UI components
+
+2.2 Backend Services
+
+Language: Go (Golang)
+Architecture: Microservices
+API Gateway: GraphQL Federation
+Inter-Service Communication: gRPC with Protocol Buffers
+Rationale: High performance, strong typing, excellent concurrency support
+
+2.3 Data Layer
+
+Primary Database: PostgreSQL
+Rationale:
+
+Relational data model (Users → Workouts → Exercises → Sets)
+ACID compliance for data integrity
+Excellent support for complex queries and analytics
+Native JSON support for flexible schema extensions
+Strong time-series data capabilities
+
+
+
+2.4 Infrastructure & DevOps
+
+Containerization: Docker
+Orchestration: Kubernetes
+Infrastructure as Code: Terraform
+Message Queue/Event Streaming: NATS
+Service Mesh: Istio (implied with Kubernetes)
+Monitoring & Observability: Prometheus, Grafana, Jaeger (distributed tracing)
+
+2.5 Environments
+
+Development (dev): For active development and testing
+Production (prod): Live environment serving end users
+
+
+3. System Architecture
+3.1 High-Level Architecture
+┌─────────────────────────────────────────────────────────────────┐
+│                        Flutter Applications                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐       │
+│  │   Web    │  │ Android  │  │   iOS    │  │ WatchOS  │       │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘       │
+│       └─────────────┴──────────────┴─────────────┘             │
+│                           │                                     │
+│                   GraphQL Queries/Mutations                     │
+└───────────────────────────┼─────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    API Gateway Layer                             │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │         GraphQL Federation / Schema Stitching             │ │
+│  │  - Unified GraphQL endpoint                               │ │
+│  │  - Request routing                                        │ │
+│  │  - Authentication/Authorization                           │ │
+│  │  - Rate limiting                                          │ │
+│  └─────────────────────┬─────────────────────────────────────┘ │
+└────────────────────────┼─────────────────────────────────────────┘
+                         │
+                         │ (gRPC Communication)
+                         │
+        ┌────────────────┼────────────────┐
+        │                │                │
+        ▼                ▼                ▼
+┌───────────────┐ ┌───────────────┐ ┌───────────────┐
+│  Auth Service │ │Workout Service│ │Exercise Service│
+│               │ │               │ │               │
+│  - User auth  │ │  - Workouts   │ │  - Exercises  │
+│  - JWT tokens │ │  - Sessions   │ │  - Library    │
+│  - Sessions   │ │  - Tracking   │ │  - Templates  │
+└───────┬───────┘ └───────┬───────┘ └───────┬───────┘
+        │                 │                 │
+        │    ┌────────────┼────────────┐    │
+        │    │            │            │    │
+        ▼    ▼            ▼            ▼    ▼
+┌───────────────┐ ┌───────────────┐ ┌───────────────┐
+│Profile Service│ │Analytics Svc  │ │Notification   │
+│               │ │               │ │   Service     │
+│  - User data  │ │  - Progress   │ │  - Reminders  │
+│  - Settings   │ │  - Stats      │ │  - Alerts     │
+│  - Prefs      │ │  - Reports    │ │  - Push       │
+└───────┬───────┘ └───────┬───────┘ └───────┬───────┘
+        │                 │                 │
+        └─────────────────┼─────────────────┘
+                          │
+                          │ (Event Publishing via NATS)
+                          │
+                          ▼
+        ┌─────────────────────────────────┐
+        │      NATS Message Queue         │
+        │  - Event streaming              │
+        │  - Pub/Sub messaging            │
+        │  - Service decoupling           │
+        └─────────────────────────────────┘
+                          │
+                          │
+        ┌─────────────────┴─────────────────┐
+        │                                   │
+        ▼                                   ▼
+┌───────────────┐                 ┌───────────────┐
+│  PostgreSQL   │                 │  PostgreSQL   │
+│   (Primary)   │◄────Replication─┤   (Replica)   │
+│               │                 │   (Read)      │
+└───────────────┘                 └───────────────┘
+3.2 Microservices Breakdown
+3.2.1 Auth Service
+Responsibilities:
+
+User registration and authentication
+JWT token generation and validation
+Session management
+OAuth integration (Google, Apple)
+Password reset workflows
+
+Database Schema:
+
+users
+user_sessions
+refresh_tokens
+oauth_connections
+
+3.2.2 Workout Service
+Responsibilities:
+
+Workout session creation and management
+Real-time workout tracking
+Workout history
+Workout templates
+Set/rep logging
+
+Database Schema:
+
+workouts
+workout_exercises
+sets
+workout_templates
+
+3.2.3 Exercise Service
+Responsibilities:
+
+Exercise library management
+Exercise categorization (muscle groups, equipment)
+Custom exercise creation
+Exercise search and filtering
+
+Database Schema:
+
+exercises
+exercise_categories
+muscle_groups
+equipment_types
+
+3.2.4 Profile Service
+Responsibilities:
+
+User profile management
+Body measurements tracking
+User preferences and settings
+Profile photos
+
+Database Schema:
+
+user_profiles
+body_measurements
+user_settings
+
+3.2.5 Analytics Service
+Responsibilities:
+
+Progress tracking and calculations
+Personal records (PRs)
+Volume calculations
+Strength progression analytics
+Data aggregation for insights
+
+Database Schema:
+
+analytics_cache
+personal_records
+progress_snapshots
+
+3.2.6 Notification Service
+Responsibilities:
+
+Push notifications
+Workout reminders
+Achievement notifications
+Email notifications
+
+Database Schema:
+
+notifications
+notification_preferences
+scheduled_notifications
+
+
+4. API Gateway Implementation
+4.1 GraphQL Federation Strategy
+The API Gateway will implement GraphQL Federation using Apollo Federation or similar framework. Each microservice will expose its own GraphQL schema, and the gateway will federate these schemas into a unified API.
+Key Features:
+
+Single GraphQL endpoint for Flutter clients
+Automatic schema stitching from microservices
+Request batching and caching
+Query complexity analysis
+Rate limiting per user/IP
+
+4.2 Authentication Flow
+1. Client → Gateway: GraphQL mutation login(email, password)
+2. Gateway → Auth Service: gRPC ValidateCredentials()
+3. Auth Service → Gateway: JWT access token + refresh token
+4. Gateway → Client: Return tokens
+5. Client → Gateway: Subsequent requests with Authorization header
+6. Gateway: Validate JWT, extract user context
+7. Gateway → Services: Forward gRPC requests with user context
+4.3 gRPC Communication
+All inter-service communication uses gRPC with Protocol Buffers:
+Benefits:
+
+Type-safe contracts via .proto files
+Binary protocol for performance
+Built-in code generation
+HTTP/2 multiplexing
+Streaming support (for real-time features)
+
+Example .proto structure:
+protobufsyntax = "proto3";
+
+package workout.v1;
+
+service WorkoutService {
+  rpc CreateWorkout(CreateWorkoutRequest) returns (CreateWorkoutResponse);
+  rpc GetWorkout(GetWorkoutRequest) returns (GetWorkoutResponse);
+  rpc ListWorkouts(ListWorkoutsRequest) returns (ListWorkoutsResponse);
+  rpc StreamWorkout(StreamWorkoutRequest) returns (stream WorkoutUpdate);
+}
+
+message CreateWorkoutRequest {
+  string user_id = 1;
+  string name = 2;
+  repeated Exercise exercises = 3;
+}
+
+message CreateWorkoutResponse {
+  string workout_id = 1;
+  int64 created_at = 2;
+}
+
+5. Data Architecture
+5.1 PostgreSQL Schema Design
+Core Entities:
+sql-- Users (managed by Auth Service)
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- User Profiles (managed by Profile Service)
+CREATE TABLE user_profiles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    display_name VARCHAR(100),
+    bio TEXT,
+    avatar_url VARCHAR(500),
+    date_of_birth DATE,
+    gender VARCHAR(20),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Exercises (managed by Exercise Service)
+CREATE TABLE exercises (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(200) NOT NULL,
+    description TEXT,
+    category VARCHAR(100),
+    primary_muscle_group VARCHAR(100),
+    secondary_muscle_groups TEXT[],
+    equipment_required VARCHAR(100),
+    difficulty_level VARCHAR(20),
+    is_custom BOOLEAN DEFAULT FALSE,
+    created_by UUID REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Workouts (managed by Workout Service)
+CREATE TABLE workouts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(200),
+    notes TEXT,
+    started_at TIMESTAMP,
+    completed_at TIMESTAMP,
+    duration_seconds INTEGER,
+    total_volume_kg DECIMAL(10, 2),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Workout Exercises
+CREATE TABLE workout_exercises (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    workout_id UUID REFERENCES workouts(id) ON DELETE CASCADE,
+    exercise_id UUID REFERENCES exercises(id),
+    order_index INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Sets
+CREATE TABLE sets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    workout_exercise_id UUID REFERENCES workout_exercises(id) ON DELETE CASCADE,
+    set_number INTEGER NOT NULL,
+    reps INTEGER,
+    weight_kg DECIMAL(10, 2),
+    rpe DECIMAL(3, 1), -- Rate of Perceived Exertion
+    notes TEXT,
+    completed BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Personal Records (managed by Analytics Service)
+CREATE TABLE personal_records (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    exercise_id UUID REFERENCES exercises(id),
+    record_type VARCHAR(50), -- '1RM', 'max_reps', 'max_volume'
+    value DECIMAL(10, 2),
+    achieved_at TIMESTAMP,
+    workout_id UUID REFERENCES workouts(id),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Body Measurements (managed by Profile Service)
+CREATE TABLE body_measurements (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    measurement_date DATE NOT NULL,
+    weight_kg DECIMAL(5, 2),
+    body_fat_percentage DECIMAL(4, 2),
+    muscle_mass_kg DECIMAL(5, 2),
+    measurements JSONB, -- Flexible storage for various measurements
+    created_at TIMESTAMP DEFAULT NOW()
+);
+5.2 Database Replication
+
+Primary Database: Write operations
+Read Replicas: Read-heavy operations (analytics, history queries)
+Automatic failover: Using Kubernetes operators
+
+
+6. Infrastructure Setup
+6.1 Containerization with Docker
+Each microservice will be containerized with the following structure:
+dockerfile# Example Dockerfile for Go microservice
+FROM golang:1.21-alpine AS builder
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -o /service ./cmd/service
+
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+WORKDIR /root/
+COPY --from=builder /service .
+
+EXPOSE 8080 9090
+CMD ["./service"]
+6.2 Kubernetes Deployment
+Namespace Structure:
+
+zenx-dev: Development environment
+zenx-prod: Production environment
+
+Key Kubernetes Resources:
+
+Deployments: For each microservice
+Services: Internal service discovery
+Ingress: External access to API Gateway
+ConfigMaps: Configuration management
+Secrets: Sensitive data (DB credentials, JWT secrets)
+HorizontalPodAutoscaler: Auto-scaling based on CPU/memory
+PersistentVolumeClaims: For PostgreSQL data
+
+Example Deployment:
+yamlapiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workout-service
+  namespace: zenx-prod
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: workout-service
+  template:
+    metadata:
+      labels:
+        app: workout-service
+    spec:
+      containers:
+      - name: workout-service
+        image: zenx/workout-service:latest
+        ports:
+        - containerPort: 8080
+          name: grpc
+        - containerPort: 9090
+          name: metrics
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: connection-string
+        - name: NATS_URL
+          value: "nats://nats:4222"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          grpc:
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          grpc:
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+6.3 Terraform Infrastructure
+Terraform will manage:
+
+Kubernetes cluster provisioning (EKS, GKE, or AKS)
+VPC and networking setup
+PostgreSQL RDS instances (or managed database)
+NATS cluster setup
+Load balancers
+DNS records
+IAM roles and policies
+Monitoring infrastructure
+
+Directory Structure:
+terraform/
+├── environments/
+│   ├── dev/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── terraform.tfvars
+│   └── prod/
+│       ├── main.tf
+│       ├── variables.tf
+│       └── terraform.tfvars
+├── modules/
+│   ├── kubernetes/
+│   ├── database/
+│   ├── networking/
+│   └── monitoring/
+└── global/
+    └── backend.tf
+6.4 NATS Event Streaming
+NATS will handle:
+
+Event-driven architecture
+Pub/Sub messaging between services
+Asynchronous operations
+Service decoupling
+
+Event Examples:
+
+workout.created: Triggered when new workout is created
+workout.completed: Triggered when workout is finished
+pr.achieved: Triggered when personal record is beaten
+user.registered: Triggered on new user signup
+
+NATS Configuration:
+yamlapiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nats-config
+data:
+  nats.conf: |
+    port: 4222
+    http_port: 8222
+    jetstream {
+      store_dir: /data
+      max_memory_store: 1GB
+      max_file_store: 10GB
+    }
+
+7. Development Workflow
+7.1 Environment Setup
+Development Environment:
+
+Local Kubernetes cluster (Minikube or Kind)
+Local PostgreSQL instance or Docker container
+Local NATS server
+Hot reload for development
+
+Required Tools:
+
+Docker Desktop
+kubectl
+Terraform CLI
+Go 1.21+
+Flutter SDK
+Protocol Buffer Compiler (protoc)
+gRPC tools
+
+7.2 Service Development Process
+
+Define gRPC contracts (.proto files)
+Generate code (protoc code generation)
+Implement service logic (Go)
+Write unit tests (Go testing package)
+Build Docker image
+Deploy to dev environment (kubectl apply)
+Integration testing
+Code review and merge
+
+7.3 CI/CD Pipeline
+Continuous Integration:
+
+Automated testing on every commit
+Code quality checks (golangci-lint)
+Security scanning (Trivy, Snyk)
+Build Docker images
+Push to container registry
+
+Continuous Deployment:
+
+Dev Environment: Auto-deploy on merge to develop branch
+Prod Environment: Manual approval required, deploy from main branch
+
+Pipeline Tools:
+
+GitHub Actions / GitLab CI / Jenkins
+ArgoCD for GitOps-style deployments
+
+
+8. Monitoring & Observability
+8.1 Metrics
+
+Prometheus: Scrape metrics from all services
+Grafana: Visualization dashboards
+Key Metrics:
+
+Request rate, latency, error rate (RED metrics)
+Database query performance
+gRPC call latency
+NATS message throughput
+
+
+
+8.2 Logging
+
+Centralized logging: ELK Stack (Elasticsearch, Logstash, Kibana) or Loki
+Structured logging: JSON format with correlation IDs
+Log levels: DEBUG, INFO, WARN, ERROR
+
+8.3 Tracing
+
+Jaeger: Distributed tracing across microservices
+Trace context propagation: Through gRPC metadata
+Performance bottleneck identification
+
+8.4 Alerting
+
+Alertmanager: Integrated with Prometheus
+Alert channels: Slack, PagerDuty, Email
+Alert rules:
+
+Service down
+High error rate
+Database connection issues
+High latency
+
+
+
+
+9. Security Considerations
+9.1 Authentication & Authorization
+
+JWT tokens: Short-lived access tokens (15 minutes)
+Refresh tokens: Long-lived, stored securely (7 days)
+Role-based access control (RBAC)
+API rate limiting: Per user and IP address
+
+9.2 Data Security
+
+Encryption at rest: Database encryption
+Encryption in transit: TLS/SSL for all communications
+Secrets management: Kubernetes Secrets, HashiCorp Vault
+Password hashing: bcrypt with high cost factor
+
+9.3 Network Security
+
+Service mesh: Istio for mTLS between services
+Network policies: Kubernetes NetworkPolicies
+API Gateway: DDoS protection, request validation
+WAF (Web Application Firewall): CloudFlare or similar
+
+
+10. Scalability Strategy
+10.1 Horizontal Scaling
+
+Kubernetes HPA: Auto-scale based on CPU/memory
+Database read replicas: Scale read operations
+Stateless services: Easy to scale horizontally
+
+10.2 Caching Strategy
+
+Redis: Cache frequently accessed data
+
+User sessions
+Exercise library
+Recent workouts
+
+
+CDN: Cache static assets for Flutter web
+
+10.3 Performance Optimization
+
+Database indexing: Optimize query performance
+Connection pooling: Efficient database connections
+gRPC streaming: For real-time features
+GraphQL DataLoader: Batch and cache requests
+
+
+11. Testing Strategy
+11.1 Unit Testing
+
+Go services: testing package, table-driven tests
+Coverage target: 80%+ code coverage
+Mock gRPC clients: For isolated testing
+
+11.2 Integration Testing
+
+Testcontainers: Spin up PostgreSQL, NATS for tests
+End-to-end gRPC testing
+Database migration testing
+
+11.3 E2E Testing
+
+Flutter integration tests: Test complete user flows
+API Gateway testing: GraphQL query validation
+Load testing: k6 or Gatling
+
+
+12. Deployment Strategy
+12.1 Deployment Phases
+Phase 1: Infrastructure Setup
+
+Provision Kubernetes clusters (dev, prod)
+Set up databases
+Configure networking and DNS
+Deploy monitoring stack
+
+Phase 2: Service Deployment
+
+Deploy Auth Service
+Deploy Profile Service
+Deploy Exercise Service
+Deploy Workout Service
+Deploy Analytics Service
+Deploy Notification Service
+
+Phase 3: API Gateway Deployment
+
+Deploy GraphQL Federation Gateway
+Configure routing and authentication
+Set up rate limiting
+
+Phase 4: Frontend Deployment
+
+Deploy Flutter Web to CDN
+Publish Android app to Play Store
+Publish iOS app to App Store
+
+12.2 Rollback Strategy
+
+Blue-Green Deployment: Zero-downtime deployments
+Canary Releases: Gradual rollout to subset of users
+Automated rollback: On health check failures
+
+
+13. Success Metrics
+13.1 Technical Metrics
+
+Uptime: 99.9% availability
+API Latency: P95 < 200ms
+Error Rate: < 0.1%
+Deployment Frequency: Multiple per week
+
+13.2 Business Metrics
+
+User Registration Rate
+Daily Active Users (DAU)
+Workout Completion Rate
+User Retention (7-day, 30-day)
+
+
+14. Timeline & Milestones
+Week 1-2: Infrastructure Setup
+
+Terraform scripts for both environments
+Kubernetes cluster configuration
+Database provisioning
+NATS setup
+
+Week 3-4: Core Services Development
+
+Auth Service with JWT
+Profile Service
+Exercise Service with library
+
+Week 5-6: Workout Tracking
+
+Workout Service
+Real-time tracking with gRPC streaming
+Set/rep logging
+
+Week 7-8: Analytics & Features
+
+Analytics Service
+Personal records calculation
+Progress tracking
+
+Week 9-10: Flutter Development
+
+UI implementation (designs provided)
+GraphQL client integration
+Offline support
+
+Week 11-12: Testing & Polish
+
+Integration testing
+Performance optimization
+Bug fixes
+Security audit
+
+Week 13-14: Deployment
+
+Dev environment deployment
+User acceptance testing
+Production deployment
+Monitoring setup
+
+
+15. Team Structure & Responsibilities
+Backend Team
+
+Go Microservices Development
+gRPC API implementation
+Database schema and migrations
+NATS event handling
+
+Frontend Team
+
+Flutter UI implementation (designs provided)
+GraphQL query/mutation implementation
+State management
+Offline-first architecture
+
+DevOps Team
+
+Terraform infrastructure provisioning
+Kubernetes cluster management
+CI/CD pipeline setup
+Monitoring and alerting
+
+QA Team
+
+Test plan creation
+Manual testing
+Automated test maintenance
+Performance testing
+
+
+16. Documentation Requirements
+16.1 Technical Documentation
+
+API documentation (GraphQL schema docs)
+gRPC service documentation (.proto comments)
+Database schema documentation
+Infrastructure architecture diagrams
+Deployment runbooks
+
+16.2 Developer Documentation
+
+Local development setup guide
+Service development guidelines
+Code style guide
+Git workflow and branching strategy
+Troubleshooting guide
+
+
+17. Risk Assessment & Mitigation
+17.1 Technical Risks
+RiskImpactMitigationDatabase scalability issuesHighRead replicas, connection pooling, query optimizationService communication failuresHighCircuit breakers, retries with exponential backoff, fallback strategiesGraphQL query complexity attacksMediumQuery complexity analysis, depth limiting, rate limitingNATS message lossMediumJetStream for persistence, message acknowledgmentContainer orchestration complexityMediumManaged Kubernetes service, comprehensive monitoring
+17.2 Operational Risks
+RiskImpactMitigationTeam knowledge gapsMediumTraining sessions, comprehensive documentationEnvironment configuration driftMediumInfrastructure as Code (Terraform), GitOpsDeployment failuresHighAutomated testing, blue-green deployments, rollback proceduresData lossCriticalAutomated backups, point-in-time recovery, multi-region replication
+
+18. Future Enhancements (Post-MVP)
+18.1 Phase 2 Features
+
+Social features (friend workouts, leaderboards)
+Workout plans and programs
+AI-powered exercise recommendations
+Video exercise tutorials
+Integration with fitness wearables (Fitbit, Garmin, Apple Watch)
+
+18.2 Technical Improvements
+
+Multi-region deployment
+Advanced caching with Redis
+Machine learning for progression predictions
+WebSocket support for real-time collaboration
+Advanced analytics with data warehouse (Snowflake, BigQuery)
+
+
+19. Appendix
+19.1 Glossary
+
+gRPC: High-performance RPC framework using Protocol Buffers
+GraphQL Federation: Technique to combine multiple GraphQL schemas
+NATS: Lightweight message broker for cloud-native applications
+JWT: JSON Web Token for stateless authentication
+K8s: Kubernetes, container orchestration platform
+IaC: Infrastructure as Code
+HPA: Horizontal Pod Autoscaler
+
+19.2 References
+
+GraphQL Federation Documentation
+gRPC Go Documentation
+NATS Documentation
+Kubernetes Documentation
+Terraform Documentation
+Flutter Documentation
+PostgreSQL Documentation
+
+
+20. Sign-off
+This PRD represents the complete technical specification for the ZenX fitness tracking application. All development teams should refer to this document as the source of truth for implementation details.
+Prepared by: Development Lead
+Reviewed by: Technical Architect
+Approved for Implementation: Yes
+Next Steps:
+
+Share PRD with all development teams
+Schedule kickoff meeting
+Set up project management board
+Begin infrastructure provisioning
+Start service development
+
+
+Document Version History:
+
+v1.0 (Nov 11, 2025) - Initial PRD creation

@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package zenx.exercise.v1;
+
+option go_package = "github.com/zenx/backend/proto/exercise/v1;exercisev1";
+
+service ExerciseService {
+  rpc CreateExercise(CreateExerciseRequest) returns (Exercise);
+  rpc GetExercise(GetExerciseRequest) returns (Exercise);
+  rpc ListExercises(ListExercisesRequest) returns (ListExercisesResponse);
+}
+
+message Exercise {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string category = 4;
+  string primary_muscle_group = 5;
+  repeated string secondary_muscle_groups = 6;
+  string equipment_required = 7;
+  string difficulty_level = 8;
+  bool is_custom = 9;
+  string created_by = 10;
+}
+
+message CreateExerciseRequest {
+  Exercise exercise = 1;
+}
+
+message GetExerciseRequest {
+  string exercise_id = 1;
+}
+
+message ListExercisesRequest {
+  string query = 1;
+  repeated string categories = 2;
+}
+
+message ListExercisesResponse {
+  repeated Exercise exercises = 1;
+}

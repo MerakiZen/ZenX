@@ -1,34 +1,46 @@
-# Gradle files
-.gradle/
-build/
+# compiled output
+/dist
+/node_modules
 
-# Local configuration file (sdk path, etc)
-local.properties
-
-# Log/OS Files
+# Logs
+logs
 *.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
 
-# Android Studio generated files and folders
-captures/
-.externalNativeBuild/
-.cxx/
-*.aab
-*.apk
-output-metadata.json
+# OS
+.DS_Store
 
-# IntelliJ
-*.iml
-.idea/
-misc.xml
-deploymentTargetDropDown.xml
-render.experimental.xml
+# Tests
+/coverage
+/.nyc_output
 
-# Keystore files
-*.jks
-*.keystore
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
 
-# Google Services (e.g. APIs or Firebase)
-google-services.json
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 
-# Android Profiling
-*.hprof
+.buf-cache/
+.tooling/
+.npm-cache/
+go.work.sum
+
+.env
+*.env
+!.example.env
+
+test/graphql-schema.gql

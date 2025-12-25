@@ -1,0 +1,27 @@
+# syntax=docker/dockerfile:1
+
+ARG SERVICE_PATH=services/auth-service
+
+FROM golang:1.25-alpine AS builder
+ARG SERVICE_PATH
+WORKDIR /workspace
+ENV GOWORK=off
+
+COPY go.work go.work.sum ./
+COPY proto proto
+COPY services services
+
+RUN cd ${SERVICE_PATH} && go mod tidy && go mod download
+RUN cd ${SERVICE_PATH} && CGO_ENABLED=0 GOOS=linux go build -o /service ./cmd/server
+
+FROM alpine:3.19
+WORKDIR /app
+RUN apk --no-cache add ca-certificates wget
+# Install grpc-health-probe for Kubernetes health checks
+RUN GRPC_HEALTH_PROBE_VERSION=v0.4.24 && \
+    wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
+    chmod +x /bin/grpc_health_probe
+COPY --from=builder /service /app/service
+EXPOSE 8080
+ENTRYPOINT ["/app/service"]
+

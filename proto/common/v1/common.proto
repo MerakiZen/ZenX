@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package zenx.common.v1;
+
+option go_package = "github.com/zenx/backend/proto/common/v1;commonv1";
+
+message UserContext {
+  string user_id = 1;
+  string locale = 2;
+  repeated string roles = 3;
+}
+
+message Pagination {
+  int32 limit = 1;
+  string cursor = 2;
+}
+
+message TimestampRange {
+  int64 start = 1;
+  int64 end = 2;
+}

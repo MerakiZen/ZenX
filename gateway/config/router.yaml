@@ -1,0 +1,34 @@
+supergraph:
+  listen: 0.0.0.0:4000
+  path: /graphql
+headers:
+  all:
+    request:
+      - propagate:
+          matching: "Authorization"
+telemetry:
+  exporters:
+    tracing:
+      otlp:
+        endpoint: http://otel-collector:4317
+        protocol: grpc
+    metrics:
+      prometheus:
+        listen: 0.0.0.0:9090
+  sampling:
+    tracing:
+      probability: 0.1
+plugins:
+  authentication:
+    router: |
+      if !request.headers.contains("authorization") {
+        deny(401, "Missing JWT")
+      }
+      // TODO: call Auth Service via gRPC to validate token and enrich context
+  subgraph:
+    retry:
+      attempts: 2
+      backoff:
+        kind: exponential
+        min: 100ms
+        max: 2s

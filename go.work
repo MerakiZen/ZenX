@@ -1,0 +1,12 @@
+go 1.25
+
+use (
+	proto
+	services/auth-service
+	services/workout-service
+	services/exercise-service
+	services/profile-service
+	services/analytics-service
+	services/notification-service
+	cmd/gateway
+)

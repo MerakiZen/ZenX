@@ -1,0 +1,150 @@
+syntax = "proto3";
+
+package zenx.workout.v1;
+
+import "common/v1/common.proto";
+
+option go_package = "github.com/zenx/backend/proto/workout/v1;workoutv1";
+
+service WorkoutService {
+  rpc CreateWorkout(CreateWorkoutRequest) returns (CreateWorkoutResponse);
+  rpc GetWorkout(GetWorkoutRequest) returns (GetWorkoutResponse);
+  rpc ListWorkouts(ListWorkoutsRequest) returns (ListWorkoutsResponse);
+  rpc ListFeedPosts(ListFeedPostsRequest) returns (ListFeedPostsResponse);
+  rpc GetFeedPost(GetFeedPostRequest) returns (FeedPost);
+  rpc ToggleFeedLike(ToggleFeedLikeRequest) returns (ToggleFeedLikeResponse);
+  rpc AddFeedComment(AddFeedCommentRequest) returns (FeedComment);
+  rpc ListFeedComments(ListFeedCommentsRequest) returns (ListFeedCommentsResponse);
+  rpc StreamWorkout(StreamWorkoutRequest) returns (stream WorkoutUpdate);
+}
+
+message WorkoutExercise {
+  string exercise_id = 1;
+  int32 order = 2;
+  repeated WorkoutSet sets = 3;
+}
+
+message WorkoutSet {
+  int32 set_number = 1;
+  int32 reps = 2;
+  double weight_kg = 3;
+  double rpe = 4;
+  string notes = 5;
+  bool completed = 6;
+}
+
+message CreateWorkoutRequest {
+  string user_id = 1;
+  string name = 2;
+  string notes = 3;
+  repeated WorkoutExercise exercises = 4;
+}
+
+message CreateWorkoutResponse {
+  string workout_id = 1;
+  int64 created_at = 2;
+}
+
+message GetWorkoutRequest {
+  string workout_id = 1;
+}
+
+message GetWorkoutResponse {
+  Workout workout = 1;
+}
+
+message ListWorkoutsRequest {
+  string user_id = 1;
+  common.v1.Pagination pagination = 2;
+}
+
+message ListWorkoutsResponse {
+  repeated Workout workouts = 1;
+  string next_cursor = 2;
+}
+
+message ListFeedPostsRequest {
+  string user_id = 1;
+  common.v1.Pagination pagination = 2;
+  bool discover = 3;
+}
+
+message ListFeedPostsResponse {
+  repeated FeedPost posts = 1;
+  string next_cursor = 2;
+}
+
+message GetFeedPostRequest {
+  string post_id = 1;
+  string user_id = 2;
+}
+
+message FeedPost {
+  string id = 1;
+  string workout_id = 2;
+  string user_id = 3;
+  string caption = 4;
+  string image_url = 5;
+  int64 created_at = 6;
+  int64 updated_at = 7;
+  int32 likes_count = 8;
+  int32 comments_count = 9;
+  bool liked_by_viewer = 10;
+  repeated string sample_liker_ids = 11;
+  Workout workout = 12;
+}
+
+message ToggleFeedLikeRequest {
+  string post_id = 1;
+  string user_id = 2;
+}
+
+message ToggleFeedLikeResponse {
+  bool liked = 1;
+  int32 likes_count = 2;
+}
+
+message AddFeedCommentRequest {
+  string post_id = 1;
+  string user_id = 2;
+  string body = 3;
+}
+
+message FeedComment {
+  string id = 1;
+  string post_id = 2;
+  string user_id = 3;
+  string body = 4;
+  int64 created_at = 5;
+}
+
+message ListFeedCommentsRequest {
+  string post_id = 1;
+  common.v1.Pagination pagination = 2;
+}
+
+message ListFeedCommentsResponse {
+  repeated FeedComment comments = 1;
+  string next_cursor = 2;
+}
+
+message StreamWorkoutRequest {
+  string workout_id = 1;
+}
+
+message WorkoutUpdate {
+  string workout_id = 1;
+  string type = 2;
+  string payload = 3;
+  int64 occurred_at = 4;
+}
+
+message Workout {
+  string id = 1;
+  string user_id = 2;
+  string name = 3;
+  string notes = 4;
+  int64 started_at = 5;
+  int64 completed_at = 6;
+  repeated WorkoutExercise exercises = 7;
+}
