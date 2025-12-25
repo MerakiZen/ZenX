@@ -8,6 +8,8 @@ option go_package = "github.com/zenx/backend/proto/workout/v1;workoutv1";
 
 service WorkoutService {
   rpc CreateWorkout(CreateWorkoutRequest) returns (CreateWorkoutResponse);
+  rpc UpdateWorkout(UpdateWorkoutRequest) returns (Workout);
+  rpc DeleteWorkout(DeleteWorkoutRequest) returns (common.v1.Empty);
   rpc GetWorkout(GetWorkoutRequest) returns (GetWorkoutResponse);
   rpc ListWorkouts(ListWorkoutsRequest) returns (ListWorkoutsResponse);
   rpc ListFeedPosts(ListFeedPostsRequest) returns (ListFeedPostsResponse);
@@ -15,7 +17,13 @@ service WorkoutService {
   rpc ToggleFeedLike(ToggleFeedLikeRequest) returns (ToggleFeedLikeResponse);
   rpc AddFeedComment(AddFeedCommentRequest) returns (FeedComment);
   rpc ListFeedComments(ListFeedCommentsRequest) returns (ListFeedCommentsResponse);
+  rpc DeleteFeedComment(DeleteFeedCommentRequest) returns (common.v1.Empty);
   rpc StreamWorkout(StreamWorkoutRequest) returns (stream WorkoutUpdate);
+}
+
+message DeleteFeedCommentRequest {
+  string comment_id = 1;
+  string user_id = 2;
 }
 
 message WorkoutExercise {
@@ -43,6 +51,21 @@ message CreateWorkoutRequest {
 message CreateWorkoutResponse {
   string workout_id = 1;
   int64 created_at = 2;
+}
+
+message UpdateWorkoutRequest {
+  string workout_id = 1;
+  string user_id = 2;
+  string name = 3;
+  string notes = 4;
+  repeated WorkoutExercise exercises = 5;
+  int64 started_at = 6;
+  int64 completed_at = 7;
+}
+
+message DeleteWorkoutRequest {
+  string workout_id = 1;
+  string user_id = 2;
 }
 
 message GetWorkoutRequest {

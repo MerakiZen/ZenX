@@ -8,6 +8,7 @@ package profilev1
 
 import (
 	context "context"
+	v1 "github.com/zenx/backend/proto/common/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -23,6 +24,7 @@ const (
 	ProfileService_UpdateProfile_FullMethodName     = "/zenx.profile.v1.ProfileService/UpdateProfile"
 	ProfileService_RecordMeasurement_FullMethodName = "/zenx.profile.v1.ProfileService/RecordMeasurement"
 	ProfileService_ListMeasurements_FullMethodName  = "/zenx.profile.v1.ProfileService/ListMeasurements"
+	ProfileService_DeleteProfile_FullMethodName     = "/zenx.profile.v1.ProfileService/DeleteProfile"
 )
 
 // ProfileServiceClient is the client API for ProfileService service.
@@ -33,6 +35,7 @@ type ProfileServiceClient interface {
 	UpdateProfile(ctx context.Context, in *UpdateProfileRequest, opts ...grpc.CallOption) (*Profile, error)
 	RecordMeasurement(ctx context.Context, in *RecordMeasurementRequest, opts ...grpc.CallOption) (*Measurement, error)
 	ListMeasurements(ctx context.Context, in *ListMeasurementsRequest, opts ...grpc.CallOption) (*ListMeasurementsResponse, error)
+	DeleteProfile(ctx context.Context, in *DeleteProfileRequest, opts ...grpc.CallOption) (*v1.Empty, error)
 }
 
 type profileServiceClient struct {
@@ -83,6 +86,16 @@ func (c *profileServiceClient) ListMeasurements(ctx context.Context, in *ListMea
 	return out, nil
 }
 
+func (c *profileServiceClient) DeleteProfile(ctx context.Context, in *DeleteProfileRequest, opts ...grpc.CallOption) (*v1.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Empty)
+	err := c.cc.Invoke(ctx, ProfileService_DeleteProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProfileServiceServer is the server API for ProfileService service.
 // All implementations must embed UnimplementedProfileServiceServer
 // for forward compatibility.
@@ -91,6 +104,7 @@ type ProfileServiceServer interface {
 	UpdateProfile(context.Context, *UpdateProfileRequest) (*Profile, error)
 	RecordMeasurement(context.Context, *RecordMeasurementRequest) (*Measurement, error)
 	ListMeasurements(context.Context, *ListMeasurementsRequest) (*ListMeasurementsResponse, error)
+	DeleteProfile(context.Context, *DeleteProfileRequest) (*v1.Empty, error)
 	mustEmbedUnimplementedProfileServiceServer()
 }
 
@@ -112,6 +126,9 @@ func (UnimplementedProfileServiceServer) RecordMeasurement(context.Context, *Rec
 }
 func (UnimplementedProfileServiceServer) ListMeasurements(context.Context, *ListMeasurementsRequest) (*ListMeasurementsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListMeasurements not implemented")
+}
+func (UnimplementedProfileServiceServer) DeleteProfile(context.Context, *DeleteProfileRequest) (*v1.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteProfile not implemented")
 }
 func (UnimplementedProfileServiceServer) mustEmbedUnimplementedProfileServiceServer() {}
 func (UnimplementedProfileServiceServer) testEmbeddedByValue()                        {}
@@ -206,6 +223,24 @@ func _ProfileService_ListMeasurements_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProfileService_DeleteProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfileServiceServer).DeleteProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProfileService_DeleteProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfileServiceServer).DeleteProfile(ctx, req.(*DeleteProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProfileService_ServiceDesc is the grpc.ServiceDesc for ProfileService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -228,6 +263,10 @@ var ProfileService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListMeasurements",
 			Handler:    _ProfileService_ListMeasurements_Handler,
+		},
+		{
+			MethodName: "DeleteProfile",
+			Handler:    _ProfileService_DeleteProfile_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

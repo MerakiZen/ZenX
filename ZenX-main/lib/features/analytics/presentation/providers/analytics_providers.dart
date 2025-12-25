@@ -6,6 +6,7 @@ import '../../../../core/network/graphql_queries.dart';
 import '../../../workouts/presentation/providers/workout_providers.dart';
 
 /// Provides the aggregated progress snapshot for the signed-in athlete.
+<<<<<<< Updated upstream
 final progressSnapshotProvider =
     FutureProvider.autoDispose<ProgressSnapshotData>((ref) async {
   final client = ref.watch(graphqlProvider);
@@ -279,4 +280,88 @@ final muscleGroupStatsProvider = FutureProvider.family<List<MuscleGroupStat>, Da
 class _MuscleGroupData {
   int setCount = 0;
   double volume = 0;
+=======
+
+part 'analytics_providers.g.dart';
+
+@riverpod
+Future<WorkoutCalendar> workoutCalendar(WorkoutCalendarRef ref, {required DateTime startDate, required DateTime endDate}) async {
+  final client = ref.watch(graphqlClientProvider);
+  final result = await client.query(QueryOptions(
+    document: gql(GraphQLQueries.getWorkoutCalendar),
+    variables: {
+      'startDate': startDate.toIso8601String().split('T')[0],
+      'endDate': endDate.toIso8601String().split('T')[0],
+    },
+  ));
+  
+  if (result.hasException) {
+    throw result.exception!;
+  }
+  
+  return WorkoutCalendar.fromJson(result.data!['workoutCalendar']);
+}
+
+@riverpod
+Future<List<MuscleGroupStat>> muscleGroupStats(MuscleGroupStatsRef ref, {DateTime? startDate, DateTime? endDate}) async {
+  final client = ref.watch(graphqlClientProvider);
+  final variables = <String, dynamic>{};
+  if (startDate != null && endDate != null) {
+    variables['dateRange'] = {
+      'startDate': startDate.toIso8601String().split('T')[0],
+      'endDate': endDate.toIso8601String().split('T')[0],
+    };
+  }
+  
+  final result = await client.query(QueryOptions(
+    document: gql(GraphQLQueries.getMuscleGroupStats),
+    variables: variables,
+  ));
+  
+  if (result.hasException) {
+    throw result.exception!;
+  }
+  
+  final List data = result.data!['muscleGroupStats'];
+  return data.map((e) => MuscleGroupStat.fromJson(e)).toList();
+}
+
+@riverpod
+Future<List<ExerciseRecord>> topExercises(TopExercisesRef ref, {int limit = 10, DateTime? startDate, DateTime? endDate}) async {
+  final client = ref.watch(graphqlClientProvider);
+  final variables = <String, dynamic>{'limit': limit};
+  if (startDate != null && endDate != null) {
+    variables['dateRange'] = {
+      'startDate': startDate.toIso8601String().split('T')[0],
+      'endDate': endDate.toIso8601String().split('T')[0],
+    };
+  }
+  
+  final result = await client.query(QueryOptions(
+    document: gql(GraphQLQueries.getTopExercises),
+    variables: variables,
+  ));
+  
+  if (result.hasException) {
+    throw result.exception!;
+  }
+  
+  final List data = result.data!['topExercises'];
+  return data.map((e) => ExerciseRecord.fromJson(e)).toList();
+}
+
+@riverpod
+Future<ExercisePerformance> exercisePerformance(ExercisePerformanceRef ref, String exerciseId) async {
+  final client = ref.watch(graphqlClientProvider);
+  final result = await client.query(QueryOptions(
+    document: gql(GraphQLQueries.getExercisePerformance),
+    variables: {'exerciseId': exerciseId},
+  ));
+  
+  if (result.hasException) {
+    throw result.exception!;
+  }
+  
+  return ExercisePerformance.fromJson(result.data!['exercisePerformance']);
+>>>>>>> Stashed changes
 }

@@ -7,6 +7,13 @@ import '../../../../core/design/design_tokens.dart';
 import '../../../../core/design/hevy_colors.dart';
 import '../../../../core/utils/share_service.dart';
 import '../../../../core/utils/help_dialog_helper.dart';
+import '../providers/analytics_providers.dart';
+
+final selectedWeekProvider = StateProvider.autoDispose<DateTime>((ref) {
+  // Default to current week
+  final now = DateTime.now();
+  return now.subtract(Duration(days: now.weekday % 7));
+});
 
 /// Body distribution screen (Hevy style)
 class BodyDistributionScreen extends BaseScreen {
@@ -52,37 +59,77 @@ class BodyDistributionScreen extends BaseScreen {
 
   @override
   Widget buildBody(BuildContext context, WidgetRef ref) {
-    // Mock data - in a real app, this would come from analytics
-    final selectedWeek = DateTime(2025, 11, 4); // Week starting Nov 2
-    final weekStart = selectedWeek.subtract(Duration(days: selectedWeek.weekday % 7));
+    final selectedWeek = ref.watch(selectedWeekProvider);
+    final weekStart = selectedWeek;
     final weekEnd = weekStart.add(const Duration(days: 6));
     
-    final activeDays = [2, 3, 4, 5, 8]; // Days with workouts
-    
-    final muscleData = [
-      _MuscleData(name: 'Total', sets: 72),
-      _MuscleData(name: 'Abdominals', sets: 0),
-      _MuscleData(name: 'Abductors', sets: 0),
-      _MuscleData(name: 'Adductors', sets: 0),
-      _MuscleData(name: 'Biceps', sets: 10),
-      _MuscleData(name: 'Calves', sets: 0),
-      _MuscleData(name: 'Cardio', sets: 2),
-      _MuscleData(name: 'Chest', sets: 34),
-      _MuscleData(name: 'Forearms', sets: 7),
-      _MuscleData(name: 'Full Body', sets: 0),
-      _MuscleData(name: 'Glutes', sets: 0),
-      _MuscleData(name: 'Hamstrings', sets: 0),
-      _MuscleData(name: 'Lats', sets: 8.5),
-      _MuscleData(name: 'Lower Back', sets: 0),
-      _MuscleData(name: 'Neck', sets: 1),
-      _MuscleData(name: 'Quadriceps', sets: 0),
-      _MuscleData(name: 'Shoulders', sets: 8),
-      _MuscleData(name: 'Traps', sets: 2),
-      _MuscleData(name: 'Triceps', sets: 14),
-      _MuscleData(name: 'Upper Back', sets: 10.5),
-      _MuscleData(name: 'Other', sets: 0),
-    ];
+    // Fetch muscle group stats for the selected week
+    final muscleStatsAsync = ref.watch(muscleGroupStatsProvider(
+      startDate: weekStart,
+      endDate: weekEnd.add(const Duration(days: 1)), // Include end day
+    ));
 
+    return muscleStatsAsync.when(
+      data: (muscleStats) {
+        // Calculate which days had workouts (we could get this from workout calendar)
+        // For now, just show the data we have
+        final activeDays = <int>[]; // TODO: Get from workout calendar if needed
+        
+        // Convert to display format with "Total" as first item
+        final totalSets = muscleStats.fold<int>(0, (sum, stat) => sum + stat.setCount);
+        final muscleData = <_MuscleData>[
+          _MuscleData(name: 'Total', sets: totalSets.toDouble()),
+          ...muscleStats.map((stat) => _MuscleData(
+            name: stat.muscleGroup,
+            sets: stat.setCount.toDouble(),
+          )),
+        ];
+
+        return _BodyDistributionContent(
+          weekStart: weekStart,
+          weekEnd: weekEnd,
+          activeDays: activeDays,
+          muscleData: muscleData,
+          onPreviousWeek: () {
+            ref.read(selectedWeekProvider.notifier).state = 
+              weekStart.subtract(const Duration(days: 7));
+          },
+          onNextWeek: () {
+            ref.read(selectedWeekProvider.notifier).state = 
+              weekStart.add(const Duration(days: 7));
+          },
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(
+        child: Text(
+          'Error loading muscle stats: $error',
+          style: const TextStyle(color: HevyColors.textSecondary),
+        ),
+      ),
+    );
+  }
+}
+
+class _BodyDistributionContent extends StatelessWidget {
+  final DateTime weekStart;
+  final DateTime weekEnd;
+  final List<int> activeDays;
+  final List<_MuscleData> muscleData;
+  final VoidCallback onPreviousWeek;
+  final VoidCallback onNextWeek;
+
+  const _BodyDistributionContent({
+    required this.weekStart,
+    required this.weekEnd,
+    required this.activeDays,
+    required this.muscleData,
+    required this.onPreviousWeek,
+    required this.onNextWeek,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,9 +146,7 @@ class BodyDistributionScreen extends BaseScreen {
                 IconButton(
                   icon: const Icon(Icons.chevron_left),
                   color: HevyColors.textPrimary,
-                  onPressed: () {
-                    // TODO: Previous week
-                  },
+                  onPressed: onPreviousWeek,
                 ),
                 Text(
                   '${DateFormat('dd').format(weekStart)}-${DateFormat('dd MMMM yyyy').format(weekEnd)}',
@@ -114,9 +159,7 @@ class BodyDistributionScreen extends BaseScreen {
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
                   color: HevyColors.textPrimary,
-                  onPressed: () {
-                    // TODO: Next week
-                  },
+                  onPressed: onNextWeek,
                 ),
               ],
             ),
@@ -129,47 +172,17 @@ class BodyDistributionScreen extends BaseScreen {
               weekStart: weekStart,
               activeDays: activeDays,
               onDayTap: (day) {
-                // TODO: Filter by day
+                // TODO: Filter by day if needed
               },
             ),
           ),
 
           const SizedBox(height: DesignTokens.spacingL),
 
-          // Anatomical models
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: DesignTokens.paddingScreen),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                // Front view
-                Expanded(
-                  child: _AnatomicalModel(
-                    isFront: true,
-                    highlightedMuscles: {
-                      'Chest': HevyColors.primary,
-                      'Shoulders': HevyColors.primary,
-                      'Biceps': HevyColors.primary,
-                      'Forearms': HevyColors.primary,
-                    },
-                  ),
-                ),
-                SizedBox(width: DesignTokens.spacingM),
-                // Back view
-                Expanded(
-                  child: _AnatomicalModel(
-                    isFront: false,
-                    highlightedMuscles: {
-                      'Lats': HevyColors.primary,
-                      'Upper Back': HevyColors.primary,
-                      'Shoulders': HevyColors.primary,
-                      'Triceps': HevyColors.primary,
-                      'Forearms': HevyColors.primary,
-                    },
-                  ),
-                ),
-              ],
-            ),
+          // Anatomical models - simplified version
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: DesignTokens.paddingScreen),
+            child: _SimplifiedAnatomicalView(muscleData: muscleData),
           ),
 
           const SizedBox(height: DesignTokens.spacingXL),
@@ -279,6 +292,82 @@ class _WeeklyCalendar extends StatelessWidget {
           ),
         );
       }),
+    );
+  }
+}
+
+/// Simplified anatomical view showing muscle groups with color intensity based on work
+class _SimplifiedAnatomicalView extends StatelessWidget {
+  final List<_MuscleData> muscleData;
+
+  const _SimplifiedAnatomicalView({required this.muscleData});
+
+  @override
+  Widget build(BuildContext context) {
+    // Create a map of muscle names to their set counts for easy lookup
+    final muscleMap = {
+      for (var muscle in muscleData) muscle.name: muscle.sets
+    };
+    
+    // Get max sets for color intensity scaling (excluding "Total")
+    final maxSets = muscleData
+        .where((m) => m.name != 'Total')
+        .fold<double>(0, (max, m) => m.sets > max ? m.sets : max);
+
+    // Helper to get color intensity for a muscle
+    Color getMuscleColor(String muscleName) {
+      final sets = muscleMap[muscleName] ?? 0.0;
+      if (sets == 0 || maxSets == 0) return HevyColors.textTertiary.withValues(alpha: 0.2);
+      final intensity = (sets / maxSets).clamp(0.0, 1.0);
+      return HevyColors.primary.withValues(alpha: 0.3 + (intensity * 0.7));
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(DesignTokens.spacingL),
+      decoration: BoxDecoration(
+        color: HevyColors.surfaceElevated,
+        borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+        border: Border.all(color: HevyColors.border),
+      ),
+      child: Column(
+        children: [
+          const Text(
+            'Muscle Groups Worked',
+            style: TextStyle(
+              fontSize: DesignTokens.bodyMedium,
+              fontWeight: FontWeight.w600,
+              color: HevyColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: DesignTokens.spacingM),
+          // Simple grid showing muscles with color coding
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: muscleData
+                .where((m) => m.name != 'Total' && m.sets > 0)
+                .map((muscle) => Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: getMuscleColor(muscle.name),
+                        borderRadius: BorderRadius.circular(DesignTokens.radiusM),
+                        border: Border.all(color: HevyColors.border),
+                      ),
+                      child: Text(
+                        '${muscle.name} (${muscle.sets.toInt()})',
+                        style: const TextStyle(
+                          fontSize: DesignTokens.labelMedium,
+                          color: HevyColors.textPrimary,
+                        ),
+                      ),
+                    ))
+                .toList(),
+          ),
+        ],
+      ),
     );
   }
 }

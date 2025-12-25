@@ -7,6 +7,7 @@
 package exercisev1
 
 import (
+	v1 "github.com/zenx/backend/proto/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -181,6 +182,102 @@ func (x *CreateExerciseRequest) GetExercise() *Exercise {
 	return nil
 }
 
+type UpdateExerciseRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ExerciseId    string                 `protobuf:"bytes,1,opt,name=exercise_id,json=exerciseId,proto3" json:"exercise_id,omitempty"`
+	Exercise      *Exercise              `protobuf:"bytes,2,opt,name=exercise,proto3" json:"exercise,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateExerciseRequest) Reset() {
+	*x = UpdateExerciseRequest{}
+	mi := &file_exercise_v1_exercise_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateExerciseRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateExerciseRequest) ProtoMessage() {}
+
+func (x *UpdateExerciseRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exercise_v1_exercise_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateExerciseRequest.ProtoReflect.Descriptor instead.
+func (*UpdateExerciseRequest) Descriptor() ([]byte, []int) {
+	return file_exercise_v1_exercise_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *UpdateExerciseRequest) GetExerciseId() string {
+	if x != nil {
+		return x.ExerciseId
+	}
+	return ""
+}
+
+func (x *UpdateExerciseRequest) GetExercise() *Exercise {
+	if x != nil {
+		return x.Exercise
+	}
+	return nil
+}
+
+type DeleteExerciseRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ExerciseId    string                 `protobuf:"bytes,1,opt,name=exercise_id,json=exerciseId,proto3" json:"exercise_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteExerciseRequest) Reset() {
+	*x = DeleteExerciseRequest{}
+	mi := &file_exercise_v1_exercise_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteExerciseRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteExerciseRequest) ProtoMessage() {}
+
+func (x *DeleteExerciseRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exercise_v1_exercise_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteExerciseRequest.ProtoReflect.Descriptor instead.
+func (*DeleteExerciseRequest) Descriptor() ([]byte, []int) {
+	return file_exercise_v1_exercise_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *DeleteExerciseRequest) GetExerciseId() string {
+	if x != nil {
+		return x.ExerciseId
+	}
+	return ""
+}
+
 type GetExerciseRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ExerciseId    string                 `protobuf:"bytes,1,opt,name=exercise_id,json=exerciseId,proto3" json:"exercise_id,omitempty"`
@@ -190,7 +287,7 @@ type GetExerciseRequest struct {
 
 func (x *GetExerciseRequest) Reset() {
 	*x = GetExerciseRequest{}
-	mi := &file_exercise_v1_exercise_proto_msgTypes[2]
+	mi := &file_exercise_v1_exercise_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -202,7 +299,7 @@ func (x *GetExerciseRequest) String() string {
 func (*GetExerciseRequest) ProtoMessage() {}
 
 func (x *GetExerciseRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exercise_v1_exercise_proto_msgTypes[2]
+	mi := &file_exercise_v1_exercise_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -215,7 +312,7 @@ func (x *GetExerciseRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExerciseRequest.ProtoReflect.Descriptor instead.
 func (*GetExerciseRequest) Descriptor() ([]byte, []int) {
-	return file_exercise_v1_exercise_proto_rawDescGZIP(), []int{2}
+	return file_exercise_v1_exercise_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetExerciseRequest) GetExerciseId() string {
@@ -235,7 +332,7 @@ type ListExercisesRequest struct {
 
 func (x *ListExercisesRequest) Reset() {
 	*x = ListExercisesRequest{}
-	mi := &file_exercise_v1_exercise_proto_msgTypes[3]
+	mi := &file_exercise_v1_exercise_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -247,7 +344,7 @@ func (x *ListExercisesRequest) String() string {
 func (*ListExercisesRequest) ProtoMessage() {}
 
 func (x *ListExercisesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exercise_v1_exercise_proto_msgTypes[3]
+	mi := &file_exercise_v1_exercise_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -260,7 +357,7 @@ func (x *ListExercisesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListExercisesRequest.ProtoReflect.Descriptor instead.
 func (*ListExercisesRequest) Descriptor() ([]byte, []int) {
-	return file_exercise_v1_exercise_proto_rawDescGZIP(), []int{3}
+	return file_exercise_v1_exercise_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ListExercisesRequest) GetQuery() string {
@@ -286,7 +383,7 @@ type ListExercisesResponse struct {
 
 func (x *ListExercisesResponse) Reset() {
 	*x = ListExercisesResponse{}
-	mi := &file_exercise_v1_exercise_proto_msgTypes[4]
+	mi := &file_exercise_v1_exercise_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -298,7 +395,7 @@ func (x *ListExercisesResponse) String() string {
 func (*ListExercisesResponse) ProtoMessage() {}
 
 func (x *ListExercisesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exercise_v1_exercise_proto_msgTypes[4]
+	mi := &file_exercise_v1_exercise_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -311,7 +408,7 @@ func (x *ListExercisesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListExercisesResponse.ProtoReflect.Descriptor instead.
 func (*ListExercisesResponse) Descriptor() ([]byte, []int) {
-	return file_exercise_v1_exercise_proto_rawDescGZIP(), []int{4}
+	return file_exercise_v1_exercise_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ListExercisesResponse) GetExercises() []*Exercise {
@@ -325,7 +422,7 @@ var File_exercise_v1_exercise_proto protoreflect.FileDescriptor
 
 const file_exercise_v1_exercise_proto_rawDesc = "" +
 	"\n" +
-	"\x1aexercise/v1/exercise.proto\x12\x10zenx.exercise.v1\"\xec\x02\n" +
+	"\x1aexercise/v1/exercise.proto\x12\x10zenx.exercise.v1\x1a\x16common/v1/common.proto\"\xec\x02\n" +
 	"\bExercise\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -340,7 +437,14 @@ const file_exercise_v1_exercise_proto_rawDesc = "" +
 	"created_by\x18\n" +
 	" \x01(\tR\tcreatedBy\"O\n" +
 	"\x15CreateExerciseRequest\x126\n" +
-	"\bexercise\x18\x01 \x01(\v2\x1a.zenx.exercise.v1.ExerciseR\bexercise\"5\n" +
+	"\bexercise\x18\x01 \x01(\v2\x1a.zenx.exercise.v1.ExerciseR\bexercise\"p\n" +
+	"\x15UpdateExerciseRequest\x12\x1f\n" +
+	"\vexercise_id\x18\x01 \x01(\tR\n" +
+	"exerciseId\x126\n" +
+	"\bexercise\x18\x02 \x01(\v2\x1a.zenx.exercise.v1.ExerciseR\bexercise\"8\n" +
+	"\x15DeleteExerciseRequest\x12\x1f\n" +
+	"\vexercise_id\x18\x01 \x01(\tR\n" +
+	"exerciseId\"5\n" +
 	"\x12GetExerciseRequest\x12\x1f\n" +
 	"\vexercise_id\x18\x01 \x01(\tR\n" +
 	"exerciseId\"L\n" +
@@ -350,9 +454,11 @@ const file_exercise_v1_exercise_proto_rawDesc = "" +
 	"categories\x18\x02 \x03(\tR\n" +
 	"categories\"Q\n" +
 	"\x15ListExercisesResponse\x128\n" +
-	"\texercises\x18\x01 \x03(\v2\x1a.zenx.exercise.v1.ExerciseR\texercises2\x9b\x02\n" +
+	"\texercises\x18\x01 \x03(\v2\x1a.zenx.exercise.v1.ExerciseR\texercises2\xc4\x03\n" +
 	"\x0fExerciseService\x12U\n" +
-	"\x0eCreateExercise\x12'.zenx.exercise.v1.CreateExerciseRequest\x1a\x1a.zenx.exercise.v1.Exercise\x12O\n" +
+	"\x0eCreateExercise\x12'.zenx.exercise.v1.CreateExerciseRequest\x1a\x1a.zenx.exercise.v1.Exercise\x12U\n" +
+	"\x0eUpdateExercise\x12'.zenx.exercise.v1.UpdateExerciseRequest\x1a\x1a.zenx.exercise.v1.Exercise\x12P\n" +
+	"\x0eDeleteExercise\x12'.zenx.exercise.v1.DeleteExerciseRequest\x1a\x15.zenx.common.v1.Empty\x12O\n" +
 	"\vGetExercise\x12$.zenx.exercise.v1.GetExerciseRequest\x1a\x1a.zenx.exercise.v1.Exercise\x12`\n" +
 	"\rListExercises\x12&.zenx.exercise.v1.ListExercisesRequest\x1a'.zenx.exercise.v1.ListExercisesResponseB6Z4github.com/zenx/backend/proto/exercise/v1;exercisev1b\x06proto3"
 
@@ -368,28 +474,36 @@ func file_exercise_v1_exercise_proto_rawDescGZIP() []byte {
 	return file_exercise_v1_exercise_proto_rawDescData
 }
 
-var file_exercise_v1_exercise_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_exercise_v1_exercise_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_exercise_v1_exercise_proto_goTypes = []any{
 	(*Exercise)(nil),              // 0: zenx.exercise.v1.Exercise
 	(*CreateExerciseRequest)(nil), // 1: zenx.exercise.v1.CreateExerciseRequest
-	(*GetExerciseRequest)(nil),    // 2: zenx.exercise.v1.GetExerciseRequest
-	(*ListExercisesRequest)(nil),  // 3: zenx.exercise.v1.ListExercisesRequest
-	(*ListExercisesResponse)(nil), // 4: zenx.exercise.v1.ListExercisesResponse
+	(*UpdateExerciseRequest)(nil), // 2: zenx.exercise.v1.UpdateExerciseRequest
+	(*DeleteExerciseRequest)(nil), // 3: zenx.exercise.v1.DeleteExerciseRequest
+	(*GetExerciseRequest)(nil),    // 4: zenx.exercise.v1.GetExerciseRequest
+	(*ListExercisesRequest)(nil),  // 5: zenx.exercise.v1.ListExercisesRequest
+	(*ListExercisesResponse)(nil), // 6: zenx.exercise.v1.ListExercisesResponse
+	(*v1.Empty)(nil),              // 7: zenx.common.v1.Empty
 }
 var file_exercise_v1_exercise_proto_depIdxs = []int32{
 	0, // 0: zenx.exercise.v1.CreateExerciseRequest.exercise:type_name -> zenx.exercise.v1.Exercise
-	0, // 1: zenx.exercise.v1.ListExercisesResponse.exercises:type_name -> zenx.exercise.v1.Exercise
-	1, // 2: zenx.exercise.v1.ExerciseService.CreateExercise:input_type -> zenx.exercise.v1.CreateExerciseRequest
-	2, // 3: zenx.exercise.v1.ExerciseService.GetExercise:input_type -> zenx.exercise.v1.GetExerciseRequest
-	3, // 4: zenx.exercise.v1.ExerciseService.ListExercises:input_type -> zenx.exercise.v1.ListExercisesRequest
-	0, // 5: zenx.exercise.v1.ExerciseService.CreateExercise:output_type -> zenx.exercise.v1.Exercise
-	0, // 6: zenx.exercise.v1.ExerciseService.GetExercise:output_type -> zenx.exercise.v1.Exercise
-	4, // 7: zenx.exercise.v1.ExerciseService.ListExercises:output_type -> zenx.exercise.v1.ListExercisesResponse
-	5, // [5:8] is the sub-list for method output_type
-	2, // [2:5] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	0, // 1: zenx.exercise.v1.UpdateExerciseRequest.exercise:type_name -> zenx.exercise.v1.Exercise
+	0, // 2: zenx.exercise.v1.ListExercisesResponse.exercises:type_name -> zenx.exercise.v1.Exercise
+	1, // 3: zenx.exercise.v1.ExerciseService.CreateExercise:input_type -> zenx.exercise.v1.CreateExerciseRequest
+	2, // 4: zenx.exercise.v1.ExerciseService.UpdateExercise:input_type -> zenx.exercise.v1.UpdateExerciseRequest
+	3, // 5: zenx.exercise.v1.ExerciseService.DeleteExercise:input_type -> zenx.exercise.v1.DeleteExerciseRequest
+	4, // 6: zenx.exercise.v1.ExerciseService.GetExercise:input_type -> zenx.exercise.v1.GetExerciseRequest
+	5, // 7: zenx.exercise.v1.ExerciseService.ListExercises:input_type -> zenx.exercise.v1.ListExercisesRequest
+	0, // 8: zenx.exercise.v1.ExerciseService.CreateExercise:output_type -> zenx.exercise.v1.Exercise
+	0, // 9: zenx.exercise.v1.ExerciseService.UpdateExercise:output_type -> zenx.exercise.v1.Exercise
+	7, // 10: zenx.exercise.v1.ExerciseService.DeleteExercise:output_type -> zenx.common.v1.Empty
+	0, // 11: zenx.exercise.v1.ExerciseService.GetExercise:output_type -> zenx.exercise.v1.Exercise
+	6, // 12: zenx.exercise.v1.ExerciseService.ListExercises:output_type -> zenx.exercise.v1.ListExercisesResponse
+	8, // [8:13] is the sub-list for method output_type
+	3, // [3:8] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_exercise_v1_exercise_proto_init() }
@@ -403,7 +517,7 @@ func file_exercise_v1_exercise_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_exercise_v1_exercise_proto_rawDesc), len(file_exercise_v1_exercise_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

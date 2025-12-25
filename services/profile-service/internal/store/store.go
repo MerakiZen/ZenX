@@ -175,3 +175,24 @@ func (r *Repository) ListMeasurements(ctx context.Context, userID uuid.UUID, sta
 
 	return measurements, nil
 }
+
+// DeleteProfile removes a user profile and measurements.
+func (r *Repository) DeleteProfile(ctx context.Context, userID uuid.UUID) error {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("begin tx: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	// Delete measurements first
+	if _, err := tx.Exec(ctx, "DELETE FROM body_measurements WHERE user_id = $1", userID); err != nil {
+		return fmt.Errorf("delete measurements: %w", err)
+	}
+
+	// Delete profile
+	if _, err := tx.Exec(ctx, "DELETE FROM user_profiles WHERE user_id = $1", userID); err != nil {
+		return fmt.Errorf("delete profile: %w", err)
+	}
+
+	return tx.Commit(ctx)
+}

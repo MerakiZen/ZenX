@@ -8,6 +8,9 @@ import '../../../../core/design/design_tokens.dart';
 import '../../../../core/design/hevy_colors.dart';
 import '../../../../core/utils/share_service.dart';
 import '../../../../core/utils/help_dialog_helper.dart';
+import '../providers/analytics_providers.dart';
+
+final distributionRangeProvider = StateProvider.autoDispose<String>((ref) => 'Last 30 days');
 
 /// Muscle distribution screen with radar chart (Hevy style)
 class MuscleDistributionScreen extends BaseScreen {
@@ -53,135 +56,200 @@ class MuscleDistributionScreen extends BaseScreen {
 
   @override
   Widget buildBody(BuildContext context, WidgetRef ref) {
-    // Mock data matching the exact image values
-    const selectedDateRange = 'Last 30 days';
+    final selectedDateRange = ref.watch(distributionRangeProvider);
     
-    // Current period data - realistic deployment data matching image (higher Legs and Arms)
-    final currentData = {
-      'Back': 0.35,
-      'Chest': 0.25,
-      'Core': 0.25,
-      'Shoulders': 0.45,
-      'Arms': 0.95,
-      'Legs': 0.95,
-    };
-    
-    // Previous period data - more evenly distributed for comparison
-    final previousData = {
-      'Back': 0.45,
-      'Chest': 0.45,
-      'Core': 0.40,
-      'Shoulders': 0.45,
-      'Arms': 0.65,
-      'Legs': 0.65,
-    };
+    final now = DateTime.now();
+    DateTime start;
+    switch (selectedDateRange) {
+      case 'Last 7 days': start = now.subtract(const Duration(days: 7)); break;
+      case 'Last 30 days': start = now.subtract(const Duration(days: 30)); break;
+      case 'Last 3 months': start = now.subtract(const Duration(days: 90)); break;
+      case 'Last year': start = now.subtract(const Duration(days: 365)); break;
+      case 'All time': start = DateTime(2000); break;
+      default: start = now.subtract(const Duration(days: 30));
+    }
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Date range selector
-          Padding(
-            padding: const EdgeInsets.all(DesignTokens.paddingScreen),
-            child: _FilterButton(
-              label: selectedDateRange,
-              onTap: () {
-                // TODO: Show date range picker
-              },
-            ),
-          ),
+    final statsAsync = ref.watch(muscleGroupStatsProvider(startDate: start, endDate: now));
+    final calendarAsync = ref.watch(workoutCalendarProvider(startDate: start, endDate: now));
 
-          // Radar chart with black background
-          Container(
-            height: 350,
-            margin: const EdgeInsets.symmetric(horizontal: DesignTokens.paddingScreen),
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(DesignTokens.radiusL),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(DesignTokens.spacingL),
-              child: _RadarChart(
-                currentData: currentData,
-                previousData: previousData,
+    return statsAsync.when(
+      data: (stats) {
+        // Normalize data for radar chart (0.0 to 1.0)
+        final maxVolume = stats.fold(0.0, (max, s) => s.volume > max ? s.volume : max);
+        final currentData = <String, double>{};
+        
+        // Map specific muscles to broad categories for radar chart
+        final categories = ['Back', 'Chest', 'Core', 'Shoulders', 'Arms', 'Legs'];
+        for (var cat in categories) {
+          currentData[cat] = 0.0;
+        }
+        
+        double totalVolume = 0;
+        int totalSets = 0;
+
+        for (var s in stats) {
+          totalVolume += s.volume;
+          totalSets += s.setCount;
+
+          // Simple mapping logic
+          String cat = 'Other';
+          if (s.muscleGroup.contains('Back') || s.muscleGroup == 'Lats' || s.muscleGroup == 'Traps') cat = 'Back';
+          else if (s.muscleGroup.contains('Chest')) cat = 'Chest';
+          else if (s.muscleGroup.contains('Abs') || s.muscleGroup == 'Core') cat = 'Core';
+          else if (s.muscleGroup.contains('Shoulder')) cat = 'Shoulders';
+          else if (s.muscleGroup.contains('Bicep') || s.muscleGroup.contains('Tricep') || s.muscleGroup == 'Forearms') cat = 'Arms';
+          else if (s.muscleGroup.contains('Leg') || s.muscleGroup.contains('Calf') || s.muscleGroup.contains('Glute') || s.muscleGroup == 'Quads' || s.muscleGroup == 'Hamstrings') cat = 'Legs';
+          
+          if (currentData.containsKey(cat)) {
+            currentData[cat] = (currentData[cat] ?? 0) + s.volume;
+          }
+        }
+        
+        // Normalize
+        if (maxVolume > 0) {
+          currentData.forEach((key, value) {
+            currentData[key] = value / maxVolume;
+            // Cap at 1.0 just in case
+            if (currentData[key]! > 1.0) currentData[key] = 1.0;
+          });
+        }
+
+        // For previous period comparison, we'd need to fetch data for the previous time period
+        // For now, showing empty previous data (can be enhanced to query previous period)
+        final previousData = <String, double>{
+          'Back': 0.0, 'Chest': 0.0, 'Core': 0.0, 'Shoulders': 0.0, 'Arms': 0.0, 'Legs': 0.0,
+        };
+
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Date range selector
+              Padding(
+                padding: const EdgeInsets.all(DesignTokens.paddingScreen),
+                child: _FilterButton(
+                  label: selectedDateRange,
+                  onTap: () => _showRangePicker(context, ref, selectedDateRange),
+                ),
               ),
-            ),
-          ),
 
-          const SizedBox(height: DesignTokens.spacingM),
-
-          // Legend
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: DesignTokens.paddingScreen),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _LegendItem(
-                  color: HevyColors.primary,
-                  label: 'Current',
+              // Radar chart with black background
+              Container(
+                height: 350,
+                margin: const EdgeInsets.symmetric(horizontal: DesignTokens.paddingScreen),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusL),
                 ),
-                const SizedBox(width: DesignTokens.spacingL),
-                _LegendItem(
-                  color: HevyColors.textSecondary,
-                  label: 'Previous',
+                child: CustomPaint(
+                  painter: _RadarChartPainter(
+                    currentData: currentData,
+                    previousData: previousData,
+                  ),
+                  size: const Size(double.infinity, 350),
                 ),
-              ],
-            ),
-          ),
+              ),
+              
+              const SizedBox(height: DesignTokens.spacingM),
 
-          const SizedBox(height: DesignTokens.spacingXL),
+              // Legend
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: DesignTokens.paddingScreen),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _LegendItem(
+                      color: HevyColors.primary,
+                      label: 'Current',
+                    ),
+                    const SizedBox(width: DesignTokens.spacingL),
+                    _LegendItem(
+                      color: HevyColors.textSecondary,
+                      label: 'Previous',
+                    ),
+                  ],
+                ),
+              ),
 
-          // Summary cards - matching exact values from image
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: DesignTokens.paddingScreen),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _SummaryCard(
-                    label: 'Workouts',
-                    value: '15',
-                    change: '↑ 4',
+              const SizedBox(height: DesignTokens.spacingXL),
+
+              // Summary cards
+              calendarAsync.when(
+                data: (calendar) => Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: DesignTokens.paddingScreen),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _SummaryCard(
+                              label: 'Workouts',
+                              value: '${calendar.totalWorkouts}',
+                              change: '', // Change calculation requires previous period data
+                            ),
+                          ),
+                          const SizedBox(width: DesignTokens.spacingM),
+                          Expanded(
+                            child: _SummaryCard(
+                              label: 'Duration',
+                              value: '--', // Duration not available in API yet
+                              change: '',
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: DesignTokens.spacingM),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _SummaryCard(
+                              label: 'Volume',
+                              value: '${(totalVolume / 1000).toStringAsFixed(1)}k kg',
+                              change: '',
+                            ),
+                          ),
+                          const SizedBox(width: DesignTokens.spacingM),
+                          Expanded(
+                            child: _SummaryCard(
+                              label: 'Sets',
+                              value: '$totalSets',
+                              change: '',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: DesignTokens.spacingM),
-                Expanded(
-                  child: _SummaryCard(
-                    label: 'Duration',
-                    value: '17h 53min',
-                    change: '↑ 4h 29min',
-                  ),
-                ),
-              ],
-            ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => const SizedBox(),
+              ),
+
+              const SizedBox(height: DesignTokens.spacingXL),
+            ],
           ),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Error: $e')),
+    );
+  }
 
-          const SizedBox(height: DesignTokens.spacingM),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: DesignTokens.paddingScreen),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _SummaryCard(
-                    label: 'Volume',
-                    value: '104k kg',
-                    change: '↑ 62k kg',
-                  ),
-                ),
-                const SizedBox(width: DesignTokens.spacingM),
-                Expanded(
-                  child: _SummaryCard(
-                    label: 'Sets',
-                    value: '206',
-                    change: '↑ 89',
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: DesignTokens.spacingXL),
-        ],
+  void _showRangePicker(BuildContext context, WidgetRef ref, String current) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          'Last 7 days', 'Last 30 days', 'Last 3 months', 'Last year', 'All time'
+        ].map((range) => ListTile(
+          title: Text(range),
+          trailing: range == current ? const Icon(Icons.check) : null,
+          onTap: () {
+            ref.read(distributionRangeProvider.notifier).state = range;
+            context.pop();
+          },
+        )).toList(),
       ),
     );
   }

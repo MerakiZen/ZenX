@@ -2,10 +2,13 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"log"
 	"strings"
+	"time"
 
+	commonv1 "github.com/zenx/backend/proto/common/v1"
 	workoutv1 "github.com/zenx/backend/proto/workout/v1"
 	"github.com/zenx/backend/services/workout-service/internal/events"
 	"github.com/zenx/backend/services/workout-service/internal/store"
@@ -105,6 +108,84 @@ func (s *WorkoutService) CreateWorkout(ctx context.Context, req *workoutv1.Creat
 		WorkoutId: workoutID.String(),
 		CreatedAt: createdAt.Unix(),
 	}, nil
+}
+
+// UpdateWorkout updates an existing workout.
+func (s *WorkoutService) UpdateWorkout(ctx context.Context, req *workoutv1.UpdateWorkoutRequest) (*workoutv1.Workout, error) {
+	workoutID, err := store.ParseUUID(req.GetWorkoutId())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	userID, err := store.ParseUUID(req.GetUserId())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	exercises := make([]store.WorkoutExerciseInput, 0, len(req.GetExercises()))
+	for _, ex := range req.GetExercises() {
+		exerciseID, err := store.ParseUUID(ex.GetExerciseId())
+		if err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "exercise id invalid: %v", err)
+		}
+		sets := make([]store.WorkoutSetInput, 0, len(ex.GetSets()))
+		for _, set := range ex.GetSets() {
+			sets = append(sets, store.WorkoutSetInput{
+				Reps:      wrapInt32(set.Reps),
+				WeightKG:  wrapFloat64(set.WeightKg),
+				RPE:       wrapFloat64(set.Rpe),
+				Notes:     set.GetNotes(),
+				Completed: set.GetCompleted(),
+			})
+		}
+		exercises = append(exercises, store.WorkoutExerciseInput{
+			ExerciseID: exerciseID,
+			Sets:       sets,
+		})
+	}
+
+	workoutModel := store.BuildWorkoutFromRequest(userID, req.GetName(), req.GetNotes(), exercises)
+	if req.GetStartedAt() > 0 {
+		workoutModel.StartedAt = store.NullableTime(time.Unix(req.GetStartedAt(), 0))
+	}
+	if req.GetCompletedAt() > 0 {
+		workoutModel.CompletedAt = store.NullableTime(time.Unix(req.GetCompletedAt(), 0))
+	}
+
+	if err := s.repo.UpdateWorkout(ctx, workoutID, userID, workoutModel); err != nil {
+		if errors.Is(err, store.ErrWorkoutNotFound) {
+			return nil, status.Error(codes.NotFound, "workout not found")
+		}
+		return nil, status.Errorf(codes.Internal, "update workout: %v", err)
+	}
+
+	// Fetch the updated workout to return
+	updated, err := s.repo.GetWorkout(ctx, workoutID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "fetch updated workout: %v", err)
+	}
+
+	return toProtoWorkout(updated), nil
+}
+
+// DeleteWorkout removes a workout.
+func (s *WorkoutService) DeleteWorkout(ctx context.Context, req *workoutv1.DeleteWorkoutRequest) (*commonv1.Empty, error) {
+	workoutID, err := store.ParseUUID(req.GetWorkoutId())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	userID, err := store.ParseUUID(req.GetUserId())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if err := s.repo.DeleteWorkout(ctx, workoutID, userID); err != nil {
+		if errors.Is(err, store.ErrWorkoutNotFound) {
+			return nil, status.Error(codes.NotFound, "workout not found")
+		}
+		return nil, status.Errorf(codes.Internal, "delete workout: %v", err)
+	}
+
+	return &commonv1.Empty{}, nil
 }
 
 // GetWorkout returns detailed workout information.
@@ -297,6 +378,24 @@ func (s *WorkoutService) ListFeedComments(ctx context.Context, req *workoutv1.Li
 	return resp, nil
 }
 
+// DeleteFeedComment removes a comment.
+func (s *WorkoutService) DeleteFeedComment(ctx context.Context, req *workoutv1.DeleteFeedCommentRequest) (*commonv1.Empty, error) {
+	commentID, err := store.ParseUUID(req.GetCommentId())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	userID, err := store.ParseUUID(req.GetUserId())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if err := s.repo.DeleteFeedComment(ctx, commentID, userID); err != nil {
+		return nil, status.Errorf(codes.Internal, "delete feed comment: %v", err)
+	}
+
+	return &commonv1.Empty{}, nil
+}
+
 // StreamWorkout is not yet implemented; this will eventually forward real-time updates from NATS.
 func (s *WorkoutService) StreamWorkout(*workoutv1.StreamWorkoutRequest, workoutv1.WorkoutService_StreamWorkoutServer) error {
 	return status.Error(codes.Unimplemented, "stream workout not yet available")
@@ -378,4 +477,8 @@ func wrapFloat64(v float64) *float64 {
 	}
 	value := v
 	return &value
+}
+
+func NullableTime(t time.Time) sql.NullTime {
+	return sql.NullTime{Time: t, Valid: !t.IsZero()}
 }

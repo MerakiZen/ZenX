@@ -22,6 +22,50 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type DeleteProfileRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteProfileRequest) Reset() {
+	*x = DeleteProfileRequest{}
+	mi := &file_profile_v1_profile_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteProfileRequest) ProtoMessage() {}
+
+func (x *DeleteProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_profile_v1_profile_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteProfileRequest.ProtoReflect.Descriptor instead.
+func (*DeleteProfileRequest) Descriptor() ([]byte, []int) {
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *DeleteProfileRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
 type Profile struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -37,7 +81,7 @@ type Profile struct {
 
 func (x *Profile) Reset() {
 	*x = Profile{}
-	mi := &file_profile_v1_profile_proto_msgTypes[0]
+	mi := &file_profile_v1_profile_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -49,7 +93,7 @@ func (x *Profile) String() string {
 func (*Profile) ProtoMessage() {}
 
 func (x *Profile) ProtoReflect() protoreflect.Message {
-	mi := &file_profile_v1_profile_proto_msgTypes[0]
+	mi := &file_profile_v1_profile_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -62,7 +106,7 @@ func (x *Profile) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Profile.ProtoReflect.Descriptor instead.
 func (*Profile) Descriptor() ([]byte, []int) {
-	return file_profile_v1_profile_proto_rawDescGZIP(), []int{0}
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Profile) GetId() string {
@@ -129,7 +173,7 @@ type Measurement struct {
 
 func (x *Measurement) Reset() {
 	*x = Measurement{}
-	mi := &file_profile_v1_profile_proto_msgTypes[1]
+	mi := &file_profile_v1_profile_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -141,7 +185,7 @@ func (x *Measurement) String() string {
 func (*Measurement) ProtoMessage() {}
 
 func (x *Measurement) ProtoReflect() protoreflect.Message {
-	mi := &file_profile_v1_profile_proto_msgTypes[1]
+	mi := &file_profile_v1_profile_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -154,7 +198,7 @@ func (x *Measurement) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Measurement.ProtoReflect.Descriptor instead.
 func (*Measurement) Descriptor() ([]byte, []int) {
-	return file_profile_v1_profile_proto_rawDescGZIP(), []int{1}
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Measurement) GetId() string {
@@ -215,7 +259,7 @@ type GetProfileRequest struct {
 
 func (x *GetProfileRequest) Reset() {
 	*x = GetProfileRequest{}
-	mi := &file_profile_v1_profile_proto_msgTypes[2]
+	mi := &file_profile_v1_profile_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -227,7 +271,7 @@ func (x *GetProfileRequest) String() string {
 func (*GetProfileRequest) ProtoMessage() {}
 
 func (x *GetProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_profile_v1_profile_proto_msgTypes[2]
+	mi := &file_profile_v1_profile_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -240,7 +284,7 @@ func (x *GetProfileRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetProfileRequest.ProtoReflect.Descriptor instead.
 func (*GetProfileRequest) Descriptor() ([]byte, []int) {
-	return file_profile_v1_profile_proto_rawDescGZIP(), []int{2}
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GetProfileRequest) GetUserId() string {
@@ -259,7 +303,7 @@ type GetProfileResponse struct {
 
 func (x *GetProfileResponse) Reset() {
 	*x = GetProfileResponse{}
-	mi := &file_profile_v1_profile_proto_msgTypes[3]
+	mi := &file_profile_v1_profile_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -271,7 +315,7 @@ func (x *GetProfileResponse) String() string {
 func (*GetProfileResponse) ProtoMessage() {}
 
 func (x *GetProfileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_profile_v1_profile_proto_msgTypes[3]
+	mi := &file_profile_v1_profile_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -284,7 +328,7 @@ func (x *GetProfileResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetProfileResponse.ProtoReflect.Descriptor instead.
 func (*GetProfileResponse) Descriptor() ([]byte, []int) {
-	return file_profile_v1_profile_proto_rawDescGZIP(), []int{3}
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetProfileResponse) GetProfile() *Profile {
@@ -303,7 +347,7 @@ type UpdateProfileRequest struct {
 
 func (x *UpdateProfileRequest) Reset() {
 	*x = UpdateProfileRequest{}
-	mi := &file_profile_v1_profile_proto_msgTypes[4]
+	mi := &file_profile_v1_profile_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -315,7 +359,7 @@ func (x *UpdateProfileRequest) String() string {
 func (*UpdateProfileRequest) ProtoMessage() {}
 
 func (x *UpdateProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_profile_v1_profile_proto_msgTypes[4]
+	mi := &file_profile_v1_profile_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -328,7 +372,7 @@ func (x *UpdateProfileRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateProfileRequest.ProtoReflect.Descriptor instead.
 func (*UpdateProfileRequest) Descriptor() ([]byte, []int) {
-	return file_profile_v1_profile_proto_rawDescGZIP(), []int{4}
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *UpdateProfileRequest) GetProfile() *Profile {
@@ -347,7 +391,7 @@ type RecordMeasurementRequest struct {
 
 func (x *RecordMeasurementRequest) Reset() {
 	*x = RecordMeasurementRequest{}
-	mi := &file_profile_v1_profile_proto_msgTypes[5]
+	mi := &file_profile_v1_profile_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -359,7 +403,7 @@ func (x *RecordMeasurementRequest) String() string {
 func (*RecordMeasurementRequest) ProtoMessage() {}
 
 func (x *RecordMeasurementRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_profile_v1_profile_proto_msgTypes[5]
+	mi := &file_profile_v1_profile_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -372,7 +416,7 @@ func (x *RecordMeasurementRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RecordMeasurementRequest.ProtoReflect.Descriptor instead.
 func (*RecordMeasurementRequest) Descriptor() ([]byte, []int) {
-	return file_profile_v1_profile_proto_rawDescGZIP(), []int{5}
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *RecordMeasurementRequest) GetMeasurement() *Measurement {
@@ -392,7 +436,7 @@ type ListMeasurementsRequest struct {
 
 func (x *ListMeasurementsRequest) Reset() {
 	*x = ListMeasurementsRequest{}
-	mi := &file_profile_v1_profile_proto_msgTypes[6]
+	mi := &file_profile_v1_profile_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -404,7 +448,7 @@ func (x *ListMeasurementsRequest) String() string {
 func (*ListMeasurementsRequest) ProtoMessage() {}
 
 func (x *ListMeasurementsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_profile_v1_profile_proto_msgTypes[6]
+	mi := &file_profile_v1_profile_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -417,7 +461,7 @@ func (x *ListMeasurementsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMeasurementsRequest.ProtoReflect.Descriptor instead.
 func (*ListMeasurementsRequest) Descriptor() ([]byte, []int) {
-	return file_profile_v1_profile_proto_rawDescGZIP(), []int{6}
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ListMeasurementsRequest) GetUserId() string {
@@ -443,7 +487,7 @@ type ListMeasurementsResponse struct {
 
 func (x *ListMeasurementsResponse) Reset() {
 	*x = ListMeasurementsResponse{}
-	mi := &file_profile_v1_profile_proto_msgTypes[7]
+	mi := &file_profile_v1_profile_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -455,7 +499,7 @@ func (x *ListMeasurementsResponse) String() string {
 func (*ListMeasurementsResponse) ProtoMessage() {}
 
 func (x *ListMeasurementsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_profile_v1_profile_proto_msgTypes[7]
+	mi := &file_profile_v1_profile_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -468,7 +512,7 @@ func (x *ListMeasurementsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMeasurementsResponse.ProtoReflect.Descriptor instead.
 func (*ListMeasurementsResponse) Descriptor() ([]byte, []int) {
-	return file_profile_v1_profile_proto_rawDescGZIP(), []int{7}
+	return file_profile_v1_profile_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ListMeasurementsResponse) GetMeasurements() []*Measurement {
@@ -482,7 +526,9 @@ var File_profile_v1_profile_proto protoreflect.FileDescriptor
 
 const file_profile_v1_profile_proto_rawDesc = "" +
 	"\n" +
-	"\x18profile/v1/profile.proto\x12\x0fzenx.profile.v1\x1a\x16common/v1/common.proto\"\xc2\x01\n" +
+	"\x18profile/v1/profile.proto\x12\x0fzenx.profile.v1\x1a\x16common/v1/common.proto\"/\n" +
+	"\x14DeleteProfileRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"\xc2\x01\n" +
 	"\aProfile\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12!\n" +
@@ -512,13 +558,14 @@ const file_profile_v1_profile_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x124\n" +
 	"\x05range\x18\x02 \x01(\v2\x1e.zenx.common.v1.TimestampRangeR\x05range\"\\\n" +
 	"\x18ListMeasurementsResponse\x12@\n" +
-	"\fmeasurements\x18\x01 \x03(\v2\x1c.zenx.profile.v1.MeasurementR\fmeasurements2\x80\x03\n" +
+	"\fmeasurements\x18\x01 \x03(\v2\x1c.zenx.profile.v1.MeasurementR\fmeasurements2\xcf\x03\n" +
 	"\x0eProfileService\x12U\n" +
 	"\n" +
 	"GetProfile\x12\".zenx.profile.v1.GetProfileRequest\x1a#.zenx.profile.v1.GetProfileResponse\x12P\n" +
 	"\rUpdateProfile\x12%.zenx.profile.v1.UpdateProfileRequest\x1a\x18.zenx.profile.v1.Profile\x12\\\n" +
 	"\x11RecordMeasurement\x12).zenx.profile.v1.RecordMeasurementRequest\x1a\x1c.zenx.profile.v1.Measurement\x12g\n" +
-	"\x10ListMeasurements\x12(.zenx.profile.v1.ListMeasurementsRequest\x1a).zenx.profile.v1.ListMeasurementsResponseB4Z2github.com/zenx/backend/proto/profile/v1;profilev1b\x06proto3"
+	"\x10ListMeasurements\x12(.zenx.profile.v1.ListMeasurementsRequest\x1a).zenx.profile.v1.ListMeasurementsResponse\x12M\n" +
+	"\rDeleteProfile\x12%.zenx.profile.v1.DeleteProfileRequest\x1a\x15.zenx.common.v1.EmptyB4Z2github.com/zenx/backend/proto/profile/v1;profilev1b\x06proto3"
 
 var (
 	file_profile_v1_profile_proto_rawDescOnce sync.Once
@@ -532,37 +579,41 @@ func file_profile_v1_profile_proto_rawDescGZIP() []byte {
 	return file_profile_v1_profile_proto_rawDescData
 }
 
-var file_profile_v1_profile_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_profile_v1_profile_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_profile_v1_profile_proto_goTypes = []any{
-	(*Profile)(nil),                  // 0: zenx.profile.v1.Profile
-	(*Measurement)(nil),              // 1: zenx.profile.v1.Measurement
-	(*GetProfileRequest)(nil),        // 2: zenx.profile.v1.GetProfileRequest
-	(*GetProfileResponse)(nil),       // 3: zenx.profile.v1.GetProfileResponse
-	(*UpdateProfileRequest)(nil),     // 4: zenx.profile.v1.UpdateProfileRequest
-	(*RecordMeasurementRequest)(nil), // 5: zenx.profile.v1.RecordMeasurementRequest
-	(*ListMeasurementsRequest)(nil),  // 6: zenx.profile.v1.ListMeasurementsRequest
-	(*ListMeasurementsResponse)(nil), // 7: zenx.profile.v1.ListMeasurementsResponse
-	(*v1.TimestampRange)(nil),        // 8: zenx.common.v1.TimestampRange
+	(*DeleteProfileRequest)(nil),     // 0: zenx.profile.v1.DeleteProfileRequest
+	(*Profile)(nil),                  // 1: zenx.profile.v1.Profile
+	(*Measurement)(nil),              // 2: zenx.profile.v1.Measurement
+	(*GetProfileRequest)(nil),        // 3: zenx.profile.v1.GetProfileRequest
+	(*GetProfileResponse)(nil),       // 4: zenx.profile.v1.GetProfileResponse
+	(*UpdateProfileRequest)(nil),     // 5: zenx.profile.v1.UpdateProfileRequest
+	(*RecordMeasurementRequest)(nil), // 6: zenx.profile.v1.RecordMeasurementRequest
+	(*ListMeasurementsRequest)(nil),  // 7: zenx.profile.v1.ListMeasurementsRequest
+	(*ListMeasurementsResponse)(nil), // 8: zenx.profile.v1.ListMeasurementsResponse
+	(*v1.TimestampRange)(nil),        // 9: zenx.common.v1.TimestampRange
+	(*v1.Empty)(nil),                 // 10: zenx.common.v1.Empty
 }
 var file_profile_v1_profile_proto_depIdxs = []int32{
-	0, // 0: zenx.profile.v1.GetProfileResponse.profile:type_name -> zenx.profile.v1.Profile
-	0, // 1: zenx.profile.v1.UpdateProfileRequest.profile:type_name -> zenx.profile.v1.Profile
-	1, // 2: zenx.profile.v1.RecordMeasurementRequest.measurement:type_name -> zenx.profile.v1.Measurement
-	8, // 3: zenx.profile.v1.ListMeasurementsRequest.range:type_name -> zenx.common.v1.TimestampRange
-	1, // 4: zenx.profile.v1.ListMeasurementsResponse.measurements:type_name -> zenx.profile.v1.Measurement
-	2, // 5: zenx.profile.v1.ProfileService.GetProfile:input_type -> zenx.profile.v1.GetProfileRequest
-	4, // 6: zenx.profile.v1.ProfileService.UpdateProfile:input_type -> zenx.profile.v1.UpdateProfileRequest
-	5, // 7: zenx.profile.v1.ProfileService.RecordMeasurement:input_type -> zenx.profile.v1.RecordMeasurementRequest
-	6, // 8: zenx.profile.v1.ProfileService.ListMeasurements:input_type -> zenx.profile.v1.ListMeasurementsRequest
-	3, // 9: zenx.profile.v1.ProfileService.GetProfile:output_type -> zenx.profile.v1.GetProfileResponse
-	0, // 10: zenx.profile.v1.ProfileService.UpdateProfile:output_type -> zenx.profile.v1.Profile
-	1, // 11: zenx.profile.v1.ProfileService.RecordMeasurement:output_type -> zenx.profile.v1.Measurement
-	7, // 12: zenx.profile.v1.ProfileService.ListMeasurements:output_type -> zenx.profile.v1.ListMeasurementsResponse
-	9, // [9:13] is the sub-list for method output_type
-	5, // [5:9] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	1,  // 0: zenx.profile.v1.GetProfileResponse.profile:type_name -> zenx.profile.v1.Profile
+	1,  // 1: zenx.profile.v1.UpdateProfileRequest.profile:type_name -> zenx.profile.v1.Profile
+	2,  // 2: zenx.profile.v1.RecordMeasurementRequest.measurement:type_name -> zenx.profile.v1.Measurement
+	9,  // 3: zenx.profile.v1.ListMeasurementsRequest.range:type_name -> zenx.common.v1.TimestampRange
+	2,  // 4: zenx.profile.v1.ListMeasurementsResponse.measurements:type_name -> zenx.profile.v1.Measurement
+	3,  // 5: zenx.profile.v1.ProfileService.GetProfile:input_type -> zenx.profile.v1.GetProfileRequest
+	5,  // 6: zenx.profile.v1.ProfileService.UpdateProfile:input_type -> zenx.profile.v1.UpdateProfileRequest
+	6,  // 7: zenx.profile.v1.ProfileService.RecordMeasurement:input_type -> zenx.profile.v1.RecordMeasurementRequest
+	7,  // 8: zenx.profile.v1.ProfileService.ListMeasurements:input_type -> zenx.profile.v1.ListMeasurementsRequest
+	0,  // 9: zenx.profile.v1.ProfileService.DeleteProfile:input_type -> zenx.profile.v1.DeleteProfileRequest
+	4,  // 10: zenx.profile.v1.ProfileService.GetProfile:output_type -> zenx.profile.v1.GetProfileResponse
+	1,  // 11: zenx.profile.v1.ProfileService.UpdateProfile:output_type -> zenx.profile.v1.Profile
+	2,  // 12: zenx.profile.v1.ProfileService.RecordMeasurement:output_type -> zenx.profile.v1.Measurement
+	8,  // 13: zenx.profile.v1.ProfileService.ListMeasurements:output_type -> zenx.profile.v1.ListMeasurementsResponse
+	10, // 14: zenx.profile.v1.ProfileService.DeleteProfile:output_type -> zenx.common.v1.Empty
+	10, // [10:15] is the sub-list for method output_type
+	5,  // [5:10] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_profile_v1_profile_proto_init() }
@@ -576,7 +627,7 @@ func file_profile_v1_profile_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_profile_v1_profile_proto_rawDesc), len(file_profile_v1_profile_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

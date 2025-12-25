@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
@@ -161,3 +162,59 @@ class ExerciseRepository {
   }
 }
 
+=======
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:zenx/core/network/graphql_client.dart';
+import 'package:zenx/core/network/graphql_queries.dart';
+import 'package:zenx/features/exercises/domain/models/exercise.dart';
+
+part 'exercise_providers.g.dart';
+
+/// Provider to fetch all exercises with optional filters
+@riverpod
+Future<List<Exercise>> exercises(ExercisesRef ref, {String? query, String? category}) async {
+  final client = ref.watch(graphqlClientProvider);
+  
+  final variables = <String, dynamic>{};
+  if (query != null && query.isNotEmpty) {
+    variables['query'] = query;
+  }
+  if (category != null && category.isNotEmpty) {
+    variables['category'] = category;
+  }
+  
+  final result = await client.query(QueryOptions(
+    document: gql(GraphQLQueries.getExercises),
+    variables: variables,
+  ));
+  
+  if (result.hasException) {
+    throw result.exception!;
+  }
+  
+  final exercisesJson = result.data?['exercises'] as List<dynamic>?;
+  if (exercisesJson == null) {
+    return [];
+  }
+  
+  return exercisesJson
+      .map((json) => Exercise.fromJson(json as Map<String, dynamic>))
+      .toList();
+}
+
+/// Provider to search exercises by name
+@riverpod
+Future<List<Exercise>> searchExercises(SearchExercisesRef ref, String searchQuery) async {
+  if (searchQuery.isEmpty) {
+    return ref.watch(exercisesProvider(query: null, category: null).future);
+  }
+  return ref.watch(exercisesProvider(query: searchQuery, category: null).future);
+}
+
+/// Provider to filter exercises by category
+@riverpod
+Future<List<Exercise>> exercisesByCategory(ExercisesByCategoryRef ref, String category) async {
+  return ref.watch(exercisesProvider(query: null, category: category).future);
+}
+>>>>>>> Stashed changes

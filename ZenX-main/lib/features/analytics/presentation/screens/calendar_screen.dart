@@ -7,13 +7,79 @@ import '../../../../core/design/hevy_colors.dart';
 import '../../../../core/utils/share_service.dart';
 import '../../../../core/utils/help_dialog_helper.dart';
 import 'package:intl/intl.dart';
+import '../providers/analytics_providers.dart';
 
 /// Calendar screen - Shows workout calendar with months
 class CalendarScreen extends BaseScreen {
   const CalendarScreen({super.key});
 
   @override
+<<<<<<< Updated upstream
   PreferredSizeWidget? buildAppBar(BuildContext context, WidgetRef ref) {
+=======
+  ConsumerState<CalendarScreen> createState() => _CalendarScreenState();
+}
+
+class _CalendarScreenState extends ConsumerState<CalendarScreen> {
+  static const List<String> _timeFilters = ['All Workouts', 'Strength', 'Cardio', 'Rest Days'];
+  final List<DateTime> _availableMonths = List.generate(
+    12,
+    (index) => DateTime(2025, 12 - index),
+  );
+
+  late DateTime _selectedMonth;
+  String _selectedFilter = _timeFilters.first;
+  bool _isFilterExpanded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedMonth = DateTime.now();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Calculate range for current view (selected month + next month)
+    // Actually, let's just fetch for the selected month and the next one to match UI
+    final start = DateTime(_selectedMonth.year, _selectedMonth.month, 1);
+    final end = DateTime(_selectedMonth.year, _selectedMonth.month + 2, 0);
+
+    final calendarAsync = ref.watch(workoutCalendarProvider(startDate: start, endDate: end));
+
+    return Scaffold(
+      backgroundColor: HevyColors.background,
+      appBar: _buildAppBar(),
+      body: calendarAsync.when(
+        data: (calendar) {
+          final workoutsByMonth = _processWorkouts(calendar.workoutDays);
+          return _buildBody(workoutsByMonth);
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text('Error: $e')),
+      ),
+    );
+  }
+
+  Map<String, Map<int, String>> _processWorkouts(List<String> workoutDays) {
+    final Map<String, Map<int, String>> result = {};
+    
+    for (final dateStr in workoutDays) {
+      final date = DateTime.parse(dateStr);
+      final monthKey = _formatMonthKey(date);
+      
+      if (!result.containsKey(monthKey)) {
+        result[monthKey] = {};
+      }
+      
+      // We don't have workout names, so just use "Workout"
+      result[monthKey]![date.day] = 'Workout';
+    }
+    
+    return result;
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+>>>>>>> Stashed changes
     return AppBar(
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
@@ -63,17 +129,35 @@ class CalendarScreen extends BaseScreen {
     );
   }
 
+<<<<<<< Updated upstream
   @override
   Widget buildBody(BuildContext context, WidgetRef ref) {
+=======
+  Widget _buildBody(Map<String, Map<int, String>> workoutsByMonth) {
+    // Always show current month and next month
+    final monthsToDisplay = <DateTime>[
+      _selectedMonth,
+      DateTime(_selectedMonth.year, _selectedMonth.month + 1),
+    ];
+
+>>>>>>> Stashed changes
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Summary bar
           Padding(
+<<<<<<< Updated upstream
             padding: const EdgeInsets.symmetric(
               horizontal: DesignTokens.paddingScreen,
               vertical: DesignTokens.spacingM,
+=======
+            padding: const EdgeInsets.symmetric(horizontal: DesignTokens.paddingScreen),
+            child: _MonthCalendar(
+              year: monthsToDisplay[0].year,
+              month: monthsToDisplay[0].month,
+              workouts: _filterWorkouts(workoutsByMonth[_formatMonthKey(monthsToDisplay[0])] ?? {}),
+>>>>>>> Stashed changes
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -96,6 +180,7 @@ class CalendarScreen extends BaseScreen {
                     ),
                   ],
                 ),
+<<<<<<< Updated upstream
                 Row(
                   children: [
                     const Icon(
@@ -113,6 +198,13 @@ class CalendarScreen extends BaseScreen {
                       ),
                     ),
                   ],
+=======
+                const SizedBox(height: DesignTokens.spacingM),
+                _MonthCalendar(
+                  year: monthsToDisplay[1].year,
+                  month: monthsToDisplay[1].month,
+                  workouts: _filterWorkouts(workoutsByMonth[_formatMonthKey(monthsToDisplay[1])] ?? {}),
+>>>>>>> Stashed changes
                 ),
               ],
             ),
@@ -161,6 +253,7 @@ class CalendarScreen extends BaseScreen {
     );
   }
 
+<<<<<<< Updated upstream
   Map<int, String> _getOctoberWorkouts() {
     return {
       6: 'Let workout',
@@ -194,6 +287,215 @@ class CalendarScreen extends BaseScreen {
       22: 'Back workou',
       24: 'Legs',
     };
+=======
+  // Removed _loadWorkouts
+
+  String _formatMonthKey(DateTime date) => DateFormat('yyyy-MM').format(date);
+
+  void _showMonthPicker() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: HevyColors.surface,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(DesignTokens.radiusXL),
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: HevyColors.textSecondary.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: DesignTokens.spacingL,
+                  vertical: DesignTokens.spacingM,
+                ),
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Select Month',
+                        style: TextStyle(
+                          fontSize: DesignTokens.titleMedium,
+                          fontWeight: FontWeight.w600,
+                          color: HevyColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: HevyColors.textSecondary),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(color: HevyColors.border),
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: _availableMonths.length,
+                itemBuilder: (context, index) {
+                  final month = _availableMonths[index];
+                  final title = DateFormat('MMMM yyyy').format(month);
+                  final isSelected =
+                      month.year == _selectedMonth.year && month.month == _selectedMonth.month;
+                  return ListTile(
+                    title: Text(
+                      title,
+                      style: TextStyle(
+                        color: isSelected ? HevyColors.primary : HevyColors.textPrimary,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      ),
+                    ),
+                    trailing: isSelected ? const Icon(Icons.check, color: HevyColors.primary) : null,
+                    onTap: () {
+                      setState(() {
+                        _selectedMonth = month;
+                      });
+                      Navigator.pop(context);
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _toggleFilterPanel() {
+    setState(() {
+      _isFilterExpanded = !_isFilterExpanded;
+    });
+  }
+
+  Widget _buildFilterPanel() {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      padding: const EdgeInsets.symmetric(
+        horizontal: DesignTokens.paddingScreen,
+        vertical: DesignTokens.spacingM,
+      ),
+      color: HevyColors.surface,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Show',
+            style: TextStyle(
+              fontSize: DesignTokens.bodyMedium,
+              fontWeight: FontWeight.w600,
+              color: HevyColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: DesignTokens.spacingS),
+          Wrap(
+            spacing: DesignTokens.spacingS,
+            runSpacing: DesignTokens.spacingS,
+            children: _timeFilters.map((filter) {
+              final isSelected = filter == _selectedFilter;
+              return ChoiceChip(
+                label: Text(filter),
+                selected: isSelected,
+                onSelected: (selected) {
+                  if (!selected) return;
+                  setState(() {
+                    _selectedFilter = filter;
+                  });
+                },
+                labelStyle: TextStyle(
+                  color: isSelected ? Colors.white : HevyColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+                selectedColor: HevyColors.primary,
+                backgroundColor: HevyColors.surfaceElevated,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusM),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: DesignTokens.paddingScreen,
+        vertical: DesignTokens.spacingM,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.local_fire_department,
+                color: Colors.orange,
+                size: 20,
+              ),
+              const SizedBox(width: DesignTokens.spacingXS),
+              const Text(
+                '9 week streak',
+                style: TextStyle(
+                  fontSize: DesignTokens.bodyMedium,
+                  fontWeight: FontWeight.w500,
+                  color: HevyColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              const Icon(
+                Icons.nightlight_round,
+                color: HevyColors.textSecondary,
+                size: 20,
+              ),
+              const SizedBox(width: DesignTokens.spacingXS),
+              const Text(
+                '1 rest day',
+                style: TextStyle(
+                  fontSize: DesignTokens.bodyMedium,
+                  fontWeight: FontWeight.w500,
+                  color: HevyColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Map<int, String> _filterWorkouts(Map<int, String> workouts) {
+    if (_selectedFilter == 'All Workouts') return Map.from(workouts);
+
+    final filter = _selectedFilter.toLowerCase();
+    return Map.fromEntries(
+      workouts.entries.where((entry) {
+        final value = entry.value.toLowerCase();
+        if (_selectedFilter == 'Rest Days') {
+          return value.contains('rest');
+        }
+        return value.contains(filter);
+      }),
+    );
+>>>>>>> Stashed changes
   }
 }
 

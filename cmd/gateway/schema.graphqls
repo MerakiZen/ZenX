@@ -22,10 +22,15 @@ type Mutation {
   register(email: String!, password: String!, displayName: String!): AuthPayload!
   login(email: String!, password: String!): AuthPayload!
   createWorkout(input: WorkoutInput!): Workout!
-  updateWorkout(id: ID!, input: UpdateWorkoutInput!): Workout!
+  deleteWorkout(id: ID!): Boolean!
   refreshToken(refreshToken: String!): AuthPayload!
   updateProfile(input: ProfileInput!): Profile!
   recordMeasurement(input: MeasurementInput!): Measurement!
+  createExercise(input: ExerciseInput!): Exercise!
+  updateExercise(id: ID!, input: UpdateExerciseInput!): Exercise!
+  deleteExercise(id: ID!): Boolean!
+  deleteProfile: Boolean!
+  deleteFeedComment(commentId: ID!): Boolean!
   toggleFeedLike(postId: ID!): FeedPost!
   addFeedComment(postId: ID!, body: String!): PostComment!
   markNotificationRead(notificationId: ID!): Notification!
@@ -278,4 +283,26 @@ input MeasurementInput {
 input MeasurementRangeInput {
   start: String
   end: String
+}
+
+input ExerciseInput {
+  name: String!
+  description: String
+  category: String
+  primaryMuscleGroup: String
+  secondaryMuscleGroups: [String!]
+  equipmentRequired: String
+  difficultyLevel: String
+  isCustom: Boolean
+}
+
+input UpdateExerciseInput {
+  name: String
+  description: String
+  category: String
+  primaryMuscleGroup: String
+  secondaryMuscleGroups: [String!]
+  equipmentRequired: String
+  difficultyLevel: String
+  isCustom: Boolean
 }

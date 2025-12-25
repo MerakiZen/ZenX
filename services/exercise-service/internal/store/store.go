@@ -74,6 +74,50 @@ func (r *Repository) CreateExercise(ctx context.Context, input Exercise) (Exerci
 	return ex, nil
 }
 
+// UpdateExercise updates an existing exercise.
+func (r *Repository) UpdateExercise(ctx context.Context, id uuid.UUID, input Exercise) (Exercise, error) {
+	query := `UPDATE exercises SET
+		name = $1, description = $2, category_id = $3, primary_muscle_group = $4,
+		secondary_muscle_groups = $5, equipment_required = $6, difficulty_level = $7,
+		is_custom = $8, updated_at = NOW()
+		WHERE id = $9
+		RETURNING created_at, updated_at;`
+
+	var ex Exercise = input
+	ex.ID = id
+	if err := r.pool.QueryRow(ctx, query,
+		input.Name,
+		input.Description,
+		input.CategoryID,
+		input.PrimaryMuscleGroup,
+		input.SecondaryMuscleGroup,
+		input.EquipmentRequired,
+		input.DifficultyLevel,
+		input.IsCustom,
+		id,
+	).Scan(&ex.CreatedAt, &ex.UpdatedAt); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return Exercise{}, ErrExerciseNotFound
+		}
+		return Exercise{}, fmt.Errorf("update exercise: %w", err)
+	}
+
+	return ex, nil
+}
+
+// DeleteExercise removes an exercise.
+func (r *Repository) DeleteExercise(ctx context.Context, id uuid.UUID) error {
+	query := `DELETE FROM exercises WHERE id = $1`
+	tag, err := r.pool.Exec(ctx, query, id)
+	if err != nil {
+		return fmt.Errorf("delete exercise: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrExerciseNotFound
+	}
+	return nil
+}
+
 // GetExercise fetches an exercise by ID.
 func (r *Repository) GetExercise(ctx context.Context, id uuid.UUID) (Exercise, error) {
 	query := `SELECT id, name, COALESCE(description,''), category_id, COALESCE(primary_muscle_group,''), 

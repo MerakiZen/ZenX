@@ -4,9 +4,19 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/presentation/base_screen.dart';
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/design/hevy_colors.dart';
+<<<<<<< Updated upstream
 import '../../../../core/presentation/widgets/loading_widget.dart';
 import '../providers/exercise_providers.dart';
 import '../../domain/entities/exercise.dart';
+=======
+import '../providers/exercise_providers.dart';
+
+/// Provider for exercise search query
+final exerciseSearchQueryProvider = StateProvider.autoDispose<String>((ref) => '');
+
+/// Provider for exercise category filter
+final exerciseCategoryFilterProvider = StateProvider.autoDispose<String?>((ref) => null);
+>>>>>>> Stashed changes
 
 /// Exercise library screen with search and categories (Hevy style)
 class ExerciseLibraryScreen extends ConsumerStatefulWidget {
@@ -105,9 +115,13 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
             ),
             style: TextStyle(color: HevyColors.textPrimary),
             onChanged: (value) {
+<<<<<<< Updated upstream
               setState(() {
                 _searchQuery = value;
               });
+=======
+              ref.read(exerciseSearchQueryProvider.notifier).state = value;
+>>>>>>> Stashed changes
             },
           ),
         ),
@@ -120,6 +134,7 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
             padding: const EdgeInsets.symmetric(horizontal: DesignTokens.paddingScreen),
             children: [
               _CategoryChip(
+<<<<<<< Updated upstream
                 label: 'All',
                 isSelected: _selectedCategory == 'All',
                 onSelected: (selected) {
@@ -198,6 +213,25 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
                   });
                 },
               ),
+=======
+                label: 'All', 
+                isSelected: ref.watch(exerciseCategoryFilterProvider) == null,
+                onSelected: (_) => ref.read(exerciseCategoryFilterProvider.notifier).state = null,
+              ),
+              const SizedBox(width: DesignTokens.spacingXS),
+              ...['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Cardio', 'Full Body'].map((category) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: DesignTokens.spacingXS),
+                  child: _CategoryChip(
+                    label: category,
+                    isSelected: ref.watch(exerciseCategoryFilterProvider) == category,
+                    onSelected: (selected) {
+                      ref.read(exerciseCategoryFilterProvider.notifier).state = selected ? category : null;
+                    },
+                  ),
+                );
+              }),
+>>>>>>> Stashed changes
             ],
           ),
         ),
@@ -220,12 +254,21 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
 class _CategoryChip extends StatelessWidget {
   final String label;
   final bool isSelected;
+<<<<<<< Updated upstream
   final ValueChanged<bool> onSelected;
 
   const _CategoryChip({
     required this.label,
     required this.isSelected,
     required this.onSelected,
+=======
+  final ValueChanged<bool>? onSelected;
+
+  const _CategoryChip({
+    required this.label,
+    this.isSelected = false,
+    this.onSelected,
+>>>>>>> Stashed changes
   });
 
   @override
@@ -253,6 +296,7 @@ class _CategoryChip extends StatelessWidget {
 
 /// Exercise list widget
 class _ExerciseList extends ConsumerWidget {
+<<<<<<< Updated upstream
   final String searchQuery;
   final String? category;
 
@@ -268,10 +312,21 @@ class _ExerciseList extends ConsumerWidget {
         : category != null
             ? ref.watch(exercisesByCategoryProvider(category!))
             : ref.watch(exercisesProvider);
+=======
+  const _ExerciseList();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final searchQuery = ref.watch(exerciseSearchQueryProvider);
+    final category = ref.watch(exerciseCategoryFilterProvider);
+    // Debounce search if needed, but for now direct watch is fine as the provider handles it
+    final exercisesAsync = ref.watch(exercisesProvider(query: searchQuery, category: category));
+>>>>>>> Stashed changes
 
     return exercisesAsync.when(
       data: (exercises) {
         if (exercises.isEmpty) {
+<<<<<<< Updated upstream
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -304,13 +359,31 @@ class _ExerciseList extends ConsumerWidget {
           );
         }
 
+=======
+          return const Center(
+            child: Text(
+              'No exercises found',
+              style: TextStyle(color: HevyColors.textSecondary),
+            ),
+          );
+        }
+        
+>>>>>>> Stashed changes
         return ListView.builder(
           padding: const EdgeInsets.all(DesignTokens.paddingScreen),
           itemCount: exercises.length,
           itemBuilder: (context, index) {
             final exercise = exercises[index];
             return _ExerciseCard(
+<<<<<<< Updated upstream
               exercise: exercise,
+=======
+              id: exercise.id,
+              name: exercise.name,
+              category: exercise.category ?? 'Unknown',
+              muscleGroup: exercise.primaryMuscleGroup ?? 'Unknown',
+              equipment: exercise.equipmentRequired ?? 'Unknown',
+>>>>>>> Stashed changes
               onTap: () {
                 context.push('/exercises/${exercise.id}');
               },
@@ -318,6 +391,7 @@ class _ExerciseList extends ConsumerWidget {
           },
         );
       },
+<<<<<<< Updated upstream
       loading: () => const Center(child: LoadingWidget()),
       error: (error, stack) => Center(
         child: Padding(
@@ -342,6 +416,21 @@ class _ExerciseList extends ConsumerWidget {
               ),
             ],
           ),
+=======
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(
+              'Error loading exercises: $error',
+              style: const TextStyle(color: HevyColors.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+          ],
+>>>>>>> Stashed changes
         ),
       ),
     );
@@ -350,11 +439,23 @@ class _ExerciseList extends ConsumerWidget {
 
 /// Exercise card widget
 class _ExerciseCard extends StatelessWidget {
+<<<<<<< Updated upstream
   final Exercise exercise;
+=======
+  final String id;
+  final String name;
+  final String category;
+  final String muscleGroup;
+  final String equipment;
+>>>>>>> Stashed changes
   final VoidCallback onTap;
 
   const _ExerciseCard({
-    required this.exercise,
+    required this.id,
+    required this.name,
+    required this.category,
+    required this.muscleGroup,
+    required this.equipment,
     required this.onTap,
   });
 
@@ -404,7 +505,11 @@ class _ExerciseCard extends StatelessWidget {
                 width: 4,
                 height: 50,
                 decoration: BoxDecoration(
+<<<<<<< Updated upstream
                   color: categoryColor,
+=======
+                  color: _getCategoryColor(category),
+>>>>>>> Stashed changes
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -415,11 +520,16 @@ class _ExerciseCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
+<<<<<<< Updated upstream
                       exercise.name,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: HevyColors.textPrimary,
                             fontWeight: FontWeight.w600,
                           ),
+=======
+                      name,
+                      style: Theme.of(context).textTheme.titleMedium,
+>>>>>>> Stashed changes
                     ),
                     const SizedBox(height: DesignTokens.spacingXXS),
                     Row(
@@ -432,9 +542,13 @@ class _ExerciseCard extends StatelessWidget {
                         const SizedBox(width: DesignTokens.spacingXXS),
                         Text(
                           muscleGroup,
+<<<<<<< Updated upstream
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: HevyColors.textSecondary,
                               ),
+=======
+                          style: Theme.of(context).textTheme.bodySmall,
+>>>>>>> Stashed changes
                         ),
                         const SizedBox(width: DesignTokens.spacingS),
                         Icon(
@@ -445,9 +559,13 @@ class _ExerciseCard extends StatelessWidget {
                         const SizedBox(width: DesignTokens.spacingXXS),
                         Text(
                           equipment,
+<<<<<<< Updated upstream
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: HevyColors.textSecondary,
                               ),
+=======
+                          style: Theme.of(context).textTheme.bodySmall,
+>>>>>>> Stashed changes
                         ),
                       ],
                     ),

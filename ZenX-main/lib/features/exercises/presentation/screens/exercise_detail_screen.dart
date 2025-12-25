@@ -5,6 +5,8 @@ import '../../../../core/presentation/base_screen.dart';
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/design/hevy_colors.dart';
 
+import '../../../analytics/presentation/providers/analytics_providers.dart';
+
 /// Exercise detail screen (Hevy style)
 class ExerciseDetailScreen extends BaseScreen {
   final String exerciseId;
@@ -14,174 +16,10 @@ class ExerciseDetailScreen extends BaseScreen {
     required this.exerciseId,
   });
 
-  _ExerciseData _getExerciseData(String exerciseId) {
-    // Map exercise IDs to their data
-    final exercisesMap = {
-      'leg_press_machine': _ExerciseData(
-        name: 'Leg Press (Machine)',
-        category: 'Legs',
-        primaryMuscle: 'Quadriceps',
-        secondaryMuscles: ['Glutes', 'Hamstrings'],
-        equipment: 'Machine',
-        description: 'A compound leg exercise performed on a leg press machine, targeting the quadriceps, glutes, and hamstrings.',
-        oneRM: 200.0,
-        maxReps: 12,
-        maxVolume: 2400.0,
-        recentWorkouts: [
-          _RecentWorkout(date: DateTime.now().subtract(const Duration(days: 2)), sets: 4, volume: 3200),
-          _RecentWorkout(date: DateTime.now().subtract(const Duration(days: 9)), sets: 4, volume: 3000),
-        ],
-      ),
-      'bench_press_barbell': _ExerciseData(
-        name: 'Bench Press (Barbell)',
-        category: 'Chest',
-        primaryMuscle: 'Chest',
-        secondaryMuscles: ['Shoulders', 'Triceps'],
-        equipment: 'Barbell',
-        description: 'A compound exercise targeting the chest, shoulders, and triceps.',
-        oneRM: 120.0,
-        maxReps: 10,
-        maxVolume: 1440.0,
-        recentWorkouts: [
-          _RecentWorkout(date: DateTime.now().subtract(const Duration(days: 1)), sets: 4, volume: 480),
-          _RecentWorkout(date: DateTime.now().subtract(const Duration(days: 5)), sets: 4, volume: 460),
-        ],
-      ),
-      'squat_barbell': _ExerciseData(
-        name: 'Squat (Barbell)',
-        category: 'Legs',
-        primaryMuscle: 'Quadriceps',
-        secondaryMuscles: ['Glutes', 'Hamstrings'],
-        equipment: 'Barbell',
-        description: 'A fundamental compound exercise targeting the entire lower body.',
-        oneRM: 180.0,
-        maxReps: 8,
-        maxVolume: 2160.0,
-        recentWorkouts: [
-          _RecentWorkout(date: DateTime.now().subtract(const Duration(days: 3)), sets: 5, volume: 2700),
-        ],
-      ),
-      'deadlift_barbell': _ExerciseData(
-        name: 'Deadlift (Barbell)',
-        category: 'Back',
-        primaryMuscle: 'Upper Back',
-        secondaryMuscles: ['Hamstrings', 'Glutes'],
-        equipment: 'Barbell',
-        description: 'A compound exercise targeting the posterior chain including back, glutes, and hamstrings.',
-        oneRM: 220.0,
-        maxReps: 6,
-        maxVolume: 2640.0,
-        recentWorkouts: [
-          _RecentWorkout(date: DateTime.now().subtract(const Duration(days: 4)), sets: 3, volume: 1980),
-        ],
-      ),
-      'lat_pulldown_cable': _ExerciseData(
-        name: 'Lat Pulldown (Cable)',
-        category: 'Back',
-        primaryMuscle: 'Lats',
-        secondaryMuscles: ['Biceps', 'Upper Back'],
-        equipment: 'Cable',
-        description: 'A pulling exercise targeting the latissimus dorsi and biceps.',
-        oneRM: 90.0,
-        maxReps: 12,
-        maxVolume: 1080.0,
-        recentWorkouts: [
-          _RecentWorkout(date: DateTime.now().subtract(const Duration(days: 2)), sets: 4, volume: 1440),
-        ],
-      ),
-      'shoulder_press_dumbbell': _ExerciseData(
-        name: 'Shoulder Press (Dumbbell)',
-        category: 'Shoulders',
-        primaryMuscle: 'Shoulders',
-        secondaryMuscles: ['Triceps'],
-        equipment: 'Dumbbell',
-        description: 'An overhead pressing movement targeting the shoulders and triceps.',
-        oneRM: 45.0,
-        maxReps: 10,
-        maxVolume: 540.0,
-        recentWorkouts: [
-          _RecentWorkout(date: DateTime.now().subtract(const Duration(days: 5)), sets: 4, volume: 720),
-        ],
-      ),
-      'triceps_rope_pushdown': _ExerciseData(
-        name: 'Triceps Rope Pushdown',
-        category: 'Arms',
-        primaryMuscle: 'Triceps',
-        secondaryMuscles: [],
-        equipment: 'Cable',
-        description: 'An isolation exercise targeting the triceps muscles.',
-        oneRM: 50.0,
-        maxReps: 15,
-        maxVolume: 750.0,
-        recentWorkouts: [
-          _RecentWorkout(date: DateTime.now().subtract(const Duration(days: 1)), sets: 4, volume: 1000),
-        ],
-      ),
-      'bicep_curl_dumbbell': _ExerciseData(
-        name: 'Bicep Curl (Dumbbell)',
-        category: 'Arms',
-        primaryMuscle: 'Biceps',
-        secondaryMuscles: [],
-        equipment: 'Dumbbell',
-        description: 'An isolation exercise targeting the biceps muscles.',
-        oneRM: 25.0,
-        maxReps: 12,
-        maxVolume: 360.0,
-        recentWorkouts: [
-          _RecentWorkout(date: DateTime.now().subtract(const Duration(days: 2)), sets: 4, volume: 480),
-        ],
-      ),
-      'row_cable': _ExerciseData(
-        name: 'Seated Cable Row',
-        category: 'Back',
-        primaryMuscle: 'Upper Back',
-        secondaryMuscles: ['Biceps', 'Lats'],
-        equipment: 'Cable',
-        description: 'A horizontal pulling exercise targeting the upper back and biceps.',
-        oneRM: 80.0,
-        maxReps: 10,
-        maxVolume: 960.0,
-        recentWorkouts: [
-          _RecentWorkout(date: DateTime.now().subtract(const Duration(days: 3)), sets: 4, volume: 1280),
-        ],
-      ),
-      'leg_extension_machine': _ExerciseData(
-        name: 'Leg Extension (Machine)',
-        category: 'Legs',
-        primaryMuscle: 'Quadriceps',
-        secondaryMuscles: [],
-        equipment: 'Machine',
-        description: 'An isolation exercise targeting the quadriceps muscles.',
-        oneRM: 100.0,
-        maxReps: 15,
-        maxVolume: 1500.0,
-        recentWorkouts: [
-          _RecentWorkout(date: DateTime.now().subtract(const Duration(days: 6)), sets: 3, volume: 900),
-        ],
-      ),
-    };
-
-    // Return exercise data or default to Bench Press
-    return exercisesMap[exerciseId] ?? _ExerciseData(
-      name: 'Bench Press',
-      category: 'Chest',
-      primaryMuscle: 'Chest',
-      secondaryMuscles: ['Shoulders', 'Triceps'],
-      equipment: 'Barbell',
-      description: 'A compound exercise targeting the chest, shoulders, and triceps.',
-      oneRM: 100.0,
-      maxReps: 12,
-      maxVolume: 1200.0,
-      recentWorkouts: [
-        _RecentWorkout(date: DateTime.now().subtract(const Duration(days: 2)), sets: 3, volume: 630),
-        _RecentWorkout(date: DateTime.now().subtract(const Duration(days: 5)), sets: 3, volume: 600),
-      ],
-    );
-  }
-
   @override
   PreferredSizeWidget? buildAppBar(BuildContext context, WidgetRef ref) {
-    final exerciseData = _getExerciseData(exerciseId);
+    final performanceAsync = ref.watch(exercisePerformanceProvider(exerciseId));
+    final title = performanceAsync.value?.exerciseName ?? exerciseId;
     
     return AppBar(
       backgroundColor: HevyColors.background,
@@ -192,7 +30,7 @@ class ExerciseDetailScreen extends BaseScreen {
         onPressed: () => context.pop(),
       ),
       title: Text(
-        exerciseData.name,
+        title,
         style: const TextStyle(
           fontSize: DesignTokens.titleLarge,
           fontWeight: FontWeight.w600,
@@ -220,109 +58,97 @@ class ExerciseDetailScreen extends BaseScreen {
 
   @override
   Widget buildBody(BuildContext context, WidgetRef ref) {
-    final exerciseData = _getExerciseData(exerciseId);
+    final performanceAsync = ref.watch(exercisePerformanceProvider(exerciseId));
 
-    return CustomScrollView(
-      slivers: [
-        // Exercise info
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(DesignTokens.paddingScreen),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  exerciseData.name,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(height: DesignTokens.spacingM),
-                Wrap(
-                  spacing: DesignTokens.spacingS,
-                  runSpacing: DesignTokens.spacingS,
+    return performanceAsync.when(
+      data: (performance) {
+        return CustomScrollView(
+          slivers: [
+            // Exercise info
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(DesignTokens.paddingScreen),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _InfoChip(
-                      icon: Icons.fitness_center,
-                      label: exerciseData.primaryMuscle,
+                    Text(
+                      performance.exerciseName,
+                      style: Theme.of(context).textTheme.headlineMedium,
                     ),
-                    if (exerciseData.secondaryMuscles.isNotEmpty)
-                      _InfoChip(
-                        icon: Icons.fitness_center_outlined,
-                        label: exerciseData.secondaryMuscles.join(', '),
-                      ),
-                    _InfoChip(
-                      icon: Icons.sports_gymnastics,
-                      label: exerciseData.equipment,
+                    const SizedBox(height: DesignTokens.spacingM),
+                    // Metadata not available in analytics API yet
+                    /*
+                    Wrap(
+                      spacing: DesignTokens.spacingS,
+                      runSpacing: DesignTokens.spacingS,
+                      children: [
+                        _InfoChip(
+                          icon: Icons.fitness_center,
+                          label: 'Muscle',
+                        ),
+                      ],
                     ),
-                    _InfoChip(
-                      icon: Icons.category,
-                      label: exerciseData.category,
-                    ),
+                    */
                   ],
                 ),
-                const SizedBox(height: DesignTokens.spacingL),
-                Text(
-                  'Description',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: DesignTokens.spacingS),
-                Text(
-                  exerciseData.description,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
 
-        // Personal records
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: DesignTokens.paddingScreen,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Personal Records',
-                  style: Theme.of(context).textTheme.titleLarge,
+            // Personal records
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: DesignTokens.paddingScreen,
                 ),
-                const SizedBox(height: DesignTokens.spacingM),
-                _PRRow(label: '1RM', value: '${exerciseData.oneRM.toInt()} kg'),
-                const SizedBox(height: DesignTokens.spacingS),
-                _PRRow(label: 'Max Reps', value: exerciseData.maxReps.toString()),
-                const SizedBox(height: DesignTokens.spacingS),
-                _PRRow(label: 'Max Volume', value: '${exerciseData.maxVolume.toInt()} kg'),
-              ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Personal Records',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: DesignTokens.spacingM),
+                    _PRRow(label: '1RM', value: '${(performance.projectedOneRM ?? 0).toInt()} kg'),
+                    const SizedBox(height: DesignTokens.spacingS),
+                    _PRRow(label: 'Max Reps', value: (performance.mostReps ?? 0).toString()),
+                    const SizedBox(height: DesignTokens.spacingS),
+                    _PRRow(label: 'Max Volume', value: '${(performance.bestSessionVolume ?? 0).toInt()} kg'),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
 
-        // Recent workouts
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(DesignTokens.paddingScreen),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Recent Workouts',
-                  style: Theme.of(context).textTheme.titleLarge,
+            // Recent workouts
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(DesignTokens.paddingScreen),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Recent Workouts',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: DesignTokens.spacingM),
+                    if (performance.history.isEmpty)
+                      const Text('No recent workouts', style: TextStyle(color: HevyColors.textSecondary)),
+                    ...performance.history.map((workout) => Padding(
+                      padding: const EdgeInsets.only(bottom: DesignTokens.spacingS),
+                      child: _RecentWorkoutRow(
+                        date: DateTime.parse(workout.date),
+                        sets: '-- sets', // Not available
+                        volume: '${(workout.volume ?? 0).toInt()} kg',
+                      ),
+                    )),
+                  ],
                 ),
-                const SizedBox(height: DesignTokens.spacingM),
-                ...exerciseData.recentWorkouts.map((workout) => Padding(
-                  padding: const EdgeInsets.only(bottom: DesignTokens.spacingS),
-                  child: _RecentWorkoutRow(
-                    date: workout.date,
-                    sets: '${workout.sets} sets',
-                    volume: '${workout.volume.toInt()} kg',
-                  ),
-                )),
-              ],
+              ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Error: $e', style: const TextStyle(color: Colors.red))),
     );
   }
 }

@@ -31,6 +31,7 @@ class StatisticsScreen extends BaseScreen {
 
   @override
   Widget buildBody(BuildContext context, WidgetRef ref) {
+<<<<<<< Updated upstream
     // Calculate date range for the last 7 days (including today)
     final now = DateTime.now();
     // Start of current day
@@ -40,6 +41,15 @@ class StatisticsScreen extends BaseScreen {
     
     // Fetch aggregated data
     final calendarAsync = ref.watch(workoutCalendarProvider(startDate));
+=======
+    final now = DateTime.now();
+    // Start of current week (Monday)
+    final weekStart = now.subtract(Duration(days: now.weekday - 1));
+    final weekEnd = weekStart.add(const Duration(days: 6));
+
+    final calendarAsync = ref.watch(workoutCalendarProvider(startDate: weekStart, endDate: weekEnd));
+    final muscleStatsAsync = ref.watch(muscleGroupStatsProvider(startDate: weekStart, endDate: weekEnd));
+>>>>>>> Stashed changes
 
     return SingleChildScrollView(
       child: Column(
@@ -75,6 +85,7 @@ class StatisticsScreen extends BaseScreen {
 
                 // Weekly calendar
                 calendarAsync.when(
+<<<<<<< Updated upstream
                   loading: () => const Center(child: CircularProgressIndicator()),
                   error: (e, _) => Text('Error loading calendar: $e', 
                     style: const TextStyle(color: HevyColors.error),
@@ -88,45 +99,57 @@ class StatisticsScreen extends BaseScreen {
                     return _WeeklyCalendar(
                       weekStart: startDate,
                       activeDays: activeDayNumbers,
+=======
+                  data: (calendar) {
+                    final activeDays = calendar.workoutDays
+                        .map((d) => DateTime.parse(d).day)
+                        .toList();
+                    return _WeeklyCalendar(
+                      weekStart: weekStart,
+                      activeDays: activeDays,
+>>>>>>> Stashed changes
                       onDayTap: (day) {
                         // TODO: Filter by day
                       },
                     );
                   },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (e, _) => Text('Error: $e'),
                 ),
                 const SizedBox(height: DesignTokens.spacingL),
 
                 // Anatomical models
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    // Front view
-                    Expanded(
-                      child: _AnatomicalModel(
-                        isFront: true,
-                        highlightedMuscles: {
-                          'Chest': HevyColors.primary,
-                          'Shoulders': HevyColors.primary,
-                          'Biceps': HevyColors.primary,
-                          'Forearms': HevyColors.primary,
-                        },
-                      ),
-                    ),
-                    SizedBox(width: DesignTokens.spacingM),
-                    // Back view
-                    Expanded(
-                      child: _AnatomicalModel(
-                        isFront: false,
-                        highlightedMuscles: {
-                          'Lats': HevyColors.primary,
-                          'Upper Back': HevyColors.primary,
-                          'Shoulders': HevyColors.primary,
-                          'Triceps': HevyColors.primary,
-                          'Forearms': HevyColors.primary,
-                        },
-                      ),
-                    ),
-                  ],
+                muscleStatsAsync.when(
+                  data: (stats) {
+                    final highlightedMuscles = <String, Color>{};
+                    for (var stat in stats) {
+                      if (stat.volume > 0) {
+                        highlightedMuscles[stat.muscleGroup] = HevyColors.primary;
+                      }
+                    }
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // Front view
+                        Expanded(
+                          child: _AnatomicalModel(
+                            isFront: true,
+                            highlightedMuscles: highlightedMuscles,
+                          ),
+                        ),
+                        const SizedBox(width: DesignTokens.spacingM),
+                        // Back view
+                        Expanded(
+                          child: _AnatomicalModel(
+                            isFront: false,
+                            highlightedMuscles: highlightedMuscles,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (e, _) => Text('Error: $e'),
                 ),
               ],
             ),

@@ -2,15 +2,22 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+<<<<<<< Updated upstream
 import 'package:intl/intl.dart';
 import 'package:intl/intl.dart';
 import '../../../workouts/presentation/providers/workout_providers.dart';
 import '../../../workouts/domain/entities/workout.dart';
+=======
+>>>>>>> Stashed changes
 import '../../../../core/presentation/base_screen.dart';
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/design/hevy_colors.dart';
 import '../../../../core/utils/share_service.dart';
 import '../../../../core/utils/help_dialog_helper.dart';
+import '../providers/analytics_providers.dart';
+
+final selectedRangeProvider = StateProvider.autoDispose<String>((ref) => 'Last 30 days');
+final selectedMusclesProvider = StateProvider.autoDispose<Set<String>>((ref) => {});
 
 /// Set count per muscle screen - Exact clone from screenshots
 class SetCountPerMuscleScreen extends BaseScreen {
@@ -62,6 +69,7 @@ class SetCountPerMuscleScreen extends BaseScreen {
   Widget buildBody(BuildContext context, WidgetRef ref) {
     const padding = DesignTokens.paddingScreen;
     
+<<<<<<< Updated upstream
     // Real data calculation
     final now = DateTime.now();
     final startDate = now.subtract(const Duration(days: 30));
@@ -119,102 +127,158 @@ class SetCountPerMuscleScreen extends BaseScreen {
         if (muscleGroups.isEmpty) {
            return const Center(child: Text('No workout data in last 30 days'));
         }
+=======
+    final selectedRange = ref.watch(selectedRangeProvider);
+    final selectedMuscles = ref.watch(selectedMusclesProvider);
+    
+    final now = DateTime.now();
+    DateTime start;
+    switch (selectedRange) {
+      case 'Last 7 days':
+        start = now.subtract(const Duration(days: 7));
+        break;
+      case 'Last 30 days':
+        start = now.subtract(const Duration(days: 30));
+        break;
+      case 'Last 3 months':
+        start = now.subtract(const Duration(days: 90));
+        break;
+      case 'Last year':
+        start = now.subtract(const Duration(days: 365));
+        break;
+      case 'All time':
+        start = DateTime(2000);
+        break;
+      default:
+        start = now.subtract(const Duration(days: 30));
+    }
+    
+    final statsAsync = ref.watch(muscleGroupStatsProvider(startDate: start, endDate: now));
+    
+    return statsAsync.when(
+      data: (stats) {
+        // Filter and map stats to UI model
+        final muscleGroups = stats.map((s) => _MuscleGroupData(
+          name: s.muscleGroup,
+          color: _getMuscleColor(s.muscleGroup),
+          isSelected: selectedMuscles.contains(s.muscleGroup) || selectedMuscles.isEmpty,
+          totalSets: s.setCount.toDouble(),
+        )).toList();
+        
+        // Sort by sets desc
+        muscleGroups.sort((a, b) => b.totalSets.compareTo(a.totalSets));
+>>>>>>> Stashed changes
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: padding),
+              
+              // Filter buttons
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: padding),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _FilterButton(
+                        label: selectedRange,
+                        isSelected: true,
+                        onTap: () => _showRangePicker(context, ref, selectedRange),
+                      ),
+                    ),
+                    const SizedBox(width: DesignTokens.spacingM),
+                    // Granularity is fixed for now or can be derived
+                    Expanded(
+                      child: _FilterButton(
+                        label: 'Week', 
+                        isSelected: false,
+                        onTap: () {}, // Not implemented yet
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(height: padding),
+              
+              // Graph section - Simple bar chart showing current period totals
+              Container(
+                height: 300,
+                margin: const EdgeInsets.symmetric(horizontal: padding),
+                padding: const EdgeInsets.all(DesignTokens.spacingM),
+                decoration: BoxDecoration(
+                  color: HevyColors.surfaceElevated,
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+                  border: Border.all(color: HevyColors.border),
+                ),
+                child: muscleGroups.isEmpty 
+                  ? const Center(child: Text('No data for selected period', style: TextStyle(color: HevyColors.textSecondary)))
+                  : _MuscleGroupChart(muscleGroups: muscleGroups.take(5).toList()), // Show top 5 muscles
+              ),
+              
+              const SizedBox(height: padding),
+              
+              // Muscle list
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: padding),
+                child: Column(
+                  children: muscleGroups.map((muscle) => _MuscleListItem(
+                    muscle: muscle,
+                    onTap: () {
+                      final current = ref.read(selectedMusclesProvider);
+                      final newSet = Set<String>.from(current);
+                      if (newSet.contains(muscle.name)) {
+                        newSet.remove(muscle.name);
+                      } else {
+                        newSet.add(muscle.name);
+                      }
+                      ref.read(selectedMusclesProvider.notifier).state = newSet;
+                    },
+                  )).toList(),
+                ),
+              ),
+              const SizedBox(height: padding),
+            ],
+          ),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Error: $e')),
+    );
+  }
+  
+  void _showRangePicker(BuildContext context, WidgetRef ref, String current) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(height: padding),
-          
-          // Filter buttons
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: padding),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _FilterButton(
-                    label: selectedDateRange,
-                    isSelected: true,
-                    onTap: () {
-                      // TODO: Show date range picker
-                    },
-                  ),
-                ),
-                const SizedBox(width: DesignTokens.spacingM),
-                Expanded(
-                  child: _FilterButton(
-                    label: selectedTimeGranularity,
-                    isSelected: false,
-                    onTap: () {
-                      // TODO: Show time granularity picker
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          SizedBox(height: padding),
-          
-          // Graph section
-          Container(
-            height: 300,
-            margin: EdgeInsets.symmetric(horizontal: padding),
-            padding: const EdgeInsets.all(DesignTokens.spacingM),
-            decoration: BoxDecoration(
-              color: HevyColors.surfaceElevated,
-              borderRadius: BorderRadius.circular(DesignTokens.radiusL),
-              border: Border.all(
-                color: HevyColors.border,
-                width: 0.5,
-              ),
-            ),
-            child: _MuscleGroupGraph(
-              muscleGroups: muscleGroups.where((m) => m.isSelected).toList(),
-            ),
-          ),
-          
-          const SizedBox(height: DesignTokens.spacingM),
-          
-          // Date range label
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: padding),
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              decoration: BoxDecoration(
-                color: HevyColors.surfaceElevated,
-                borderRadius: BorderRadius.circular(DesignTokens.radiusM),
-              ),
-              child: Center(
-                child: Text(
-                'Sets: $dateRange',
-                style: const TextStyle(
-                  fontSize: DesignTokens.bodySmall,
-                  color: HevyColors.textSecondary,
-                  letterSpacing: -0.08,
-                  height: 1.29,
-                ),
-                ),
-              ),
-            ),
-          ),
-          
-          const SizedBox(height: DesignTokens.spacingL),
-          
-          // Muscle list
-          ...muscleGroups.map((muscle) => _MuscleGroupListItem(
-            muscle: muscle,
-            onToggle: () {
-              // TODO: Toggle muscle group visibility
-            },
-          )),
-          
-          SizedBox(height: padding),
-        ],
+          'Last 7 days', 'Last 30 days', 'Last 3 months', 'Last year', 'All time'
+        ].map((range) => ListTile(
+          title: Text(range),
+          trailing: range == current ? const Icon(Icons.check) : null,
+          onTap: () {
+            ref.read(selectedRangeProvider.notifier).state = range;
+            context.pop();
+          },
+        )).toList(),
       ),
     );
       },
     );
+  }
+  
+  Color _getMuscleColor(String muscle) {
+    // Map muscle names to colors
+    switch (muscle.toLowerCase()) {
+      case 'chest': return Colors.blue;
+      case 'back': return Colors.grey;
+      case 'legs': return Colors.red;
+      case 'shoulders': return Colors.orange;
+      case 'arms': return Colors.yellow;
+      default: return Colors.teal;
+    }
   }
 }
 
@@ -276,164 +340,112 @@ class _FilterButton extends StatelessWidget {
   }
 }
 
-/// Muscle group graph
-class _MuscleGroupGraph extends StatelessWidget {
+/// Muscle group graph - Simple bar chart showing current totals
+class _MuscleGroupChart extends StatelessWidget {
   final List<_MuscleGroupData> muscleGroups;
 
-  const _MuscleGroupGraph({
+  const _MuscleGroupChart({
     required this.muscleGroups,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Mock graph data matching screenshot
-    final dates = [
-      DateTime(2025, 10, 19),
-      DateTime(2025, 10, 28),
-      DateTime(2025, 11, 7),
-      DateTime(2025, 11, 16),
-    ];
-    
-    // Mock data points matching screenshot
-    final chestData = [12.0, 0.0, 9.0, 0.0]; // Blue line
-    final bicepsData = [0.0, 12.0, 6.0, 6.0]; // Yellow line
-    final tricepsData = [3.0, 10.5, 13.5, 7.5]; // Purple line
-    
-    return CustomPaint(
-      painter: _MuscleGroupGraphPainter(
-        dates: dates,
-        chestData: chestData,
-        bicepsData: bicepsData,
-        tricepsData: tricepsData,
-      ),
-      child: Container(),
-    );
-  }
-}
-
-/// Muscle group graph painter
-class _MuscleGroupGraphPainter extends CustomPainter {
-  final List<DateTime> dates;
-  final List<double> chestData;
-  final List<double> bicepsData;
-  final List<double> tricepsData;
-
-  _MuscleGroupGraphPainter({
-    required this.dates,
-    required this.chestData,
-    required this.bicepsData,
-    required this.tricepsData,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const padding = 40.0;
-    final graphWidth = size.width - padding * 2;
-    final graphHeight = size.height - padding * 2;
-    const maxValue = 15.0;
-    
-    // Draw grid lines (dashed)
-    final gridPaint = Paint()
-      ..color = HevyColors.textTertiary.withValues(alpha: 0.3)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
-    
-    // Horizontal grid lines at 3, 6, 9, 12, 15
-    for (int i = 1; i <= 5; i++) {
-      final value = i * 3;
-      final y = padding + graphHeight - (value / maxValue) * graphHeight;
-      final path = Path()
-        ..moveTo(padding, y)
-        ..lineTo(size.width - padding, y);
-      canvas.drawPath(path, gridPaint);
-    }
-    
-    // Y-axis labels
-    const textStyle = TextStyle(
-      color: HevyColors.textSecondary,
-      fontSize: DesignTokens.labelSmall,
-      letterSpacing: -0.08,
-      height: 1.29,
-    );
-    for (int i = 0; i <= 5; i++) {
-      final value = i * 3;
-      final y = padding + graphHeight - (value / maxValue) * graphHeight;
-      final textPainter = TextPainter(
-        text: TextSpan(text: value.toString(), style: textStyle),
-        textDirection: ui.TextDirection.ltr,
-      );
-      textPainter.layout();
-      textPainter.paint(
-        canvas,
-        Offset(padding - textPainter.width - 8, y - textPainter.height / 2),
-      );
-    }
-    
-    // X-axis labels
-    final dateFormat = DateFormat('MMM d');
-    for (int i = 0; i < dates.length; i++) {
-      final x = padding + (graphWidth / (dates.length - 1)) * i;
-      final dateText = dateFormat.format(dates[i]);
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: dateText,
-          style: textStyle,
+    if (muscleGroups.isEmpty) {
+      return const Center(
+        child: Text(
+          'No muscle group data',
+          style: TextStyle(color: HevyColors.textSecondary),
         ),
-        textDirection: ui.TextDirection.ltr,
-      );
-      textPainter.layout();
-      textPainter.paint(
-        canvas,
-        Offset(x - textPainter.width / 2, size.height - padding + 8),
       );
     }
+
+    // Find max value for scaling
+    final maxSets = muscleGroups.map((m) => m.totalSets).reduce((a, b) => a > b ? a : b);
     
-    // Draw lines for each muscle group
-    final lineData = [
-      {'data': chestData, 'color': Colors.blue},
-      {'data': bicepsData, 'color': Colors.yellow},
-      {'data': tricepsData, 'color': Colors.purple},
-    ];
-    
-    for (var line in lineData) {
-      final data = line['data'] as List<double>;
-      final color = line['color'] as Color;
-      
-      final linePaint = Paint()
-        ..color = color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.5;
-      
-      final pointPaint = Paint()
-        ..color = color
-        ..style = PaintingStyle.fill;
-      
-      final points = <Offset>[];
-      for (int i = 0; i < data.length; i++) {
-        final x = padding + (graphWidth / (dates.length - 1)) * i;
-        final y = padding + graphHeight - (data[i] / maxValue) * graphHeight;
-        points.add(Offset(x, y));
-      }
-      
-      // Draw line
-      if (points.length > 1) {
-        final path = Path();
-        path.moveTo(points[0].dx, points[0].dy);
-        for (int i = 1; i < points.length; i++) {
-          path.lineTo(points[i].dx, points[i].dy);
-        }
-        canvas.drawPath(path, linePaint);
-      }
-      
-      // Draw points
-      for (final point in points) {
-        canvas.drawCircle(point, 4, pointPaint);
-      }
-    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Set Count by Muscle Group',
+          style: TextStyle(
+            fontSize: DesignTokens.bodyMedium,
+            color: HevyColors.textSecondary,
+            letterSpacing: -0.41,
+          ),
+        ),
+        const SizedBox(height: DesignTokens.spacingM),
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: muscleGroups.map((muscle) {
+              final heightFraction = muscle.totalSets / maxSets;
+              return Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      // Set count label
+                      Text(
+                        muscle.totalSets.toInt().toString(),
+                        style: const TextStyle(
+                          fontSize: DesignTokens.labelSmall,
+                          color: HevyColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      // Bar
+                      Container(
+                        width: double.infinity,
+                        height: 180 * heightFraction,
+                        decoration: BoxDecoration(
+                          color: muscle.color,
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(4),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      // Muscle name (abbreviated)
+                      Text(
+                        _abbreviateMuscle(muscle.name),
+                        style: const TextStyle(
+                          fontSize: DesignTokens.labelSmall,
+                          color: HevyColors.textSecondary,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
   }
 
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  String _abbreviateMuscle(String name) {
+    // Abbreviate long muscle names for chart labels
+    final abbreviations = {
+      'Chest': 'Chest',
+      'Back': 'Back',
+      'Shoulders': 'Shld',
+      'Biceps': 'Bi',
+      'Triceps': 'Tri',
+      'Forearms': 'Fore',
+      'Abs': 'Abs',
+      'Quads': 'Quad',
+      'Hamstrings': 'Ham',
+      'Glutes': 'Glute',
+      'Calves': 'Calf',
+      'Cardio': 'Card',
+    };
+    return abbreviations[name] ?? name.substring(0, name.length > 4 ? 4 : name.length);
+  }
 }
 
 /// Muscle group data
@@ -452,13 +464,13 @@ class _MuscleGroupData {
 }
 
 /// Muscle group list item
-class _MuscleGroupListItem extends StatelessWidget {
+class _MuscleListItem extends StatelessWidget {
   final _MuscleGroupData muscle;
-  final VoidCallback onToggle;
+  final VoidCallback onTap;
 
-  const _MuscleGroupListItem({
+  const _MuscleListItem({
     required this.muscle,
-    required this.onToggle,
+    required this.onTap,
   });
 
   @override
@@ -466,7 +478,7 @@ class _MuscleGroupListItem extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onToggle,
+        onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: DesignTokens.paddingScreen,

@@ -108,9 +108,21 @@ func (r *mutationResolver) CreateWorkout(ctx context.Context, input model.Workou
 	return convertWorkout(workoutResp.GetWorkout()), nil
 }
 
-// UpdateWorkout is the resolver for the updateWorkout field.
-func (r *mutationResolver) UpdateWorkout(ctx context.Context, id string, input model.UpdateWorkoutInput) (*model.Workout, error) {
-	panic(fmt.Errorf("not implemented: UpdateWorkout - updateWorkout"))
+// DeleteWorkout is the resolver for the deleteWorkout field.
+func (r *mutationResolver) DeleteWorkout(ctx context.Context, id string) (bool, error) {
+	uc, ok := GetUserContext(ctx)
+	if !ok {
+		return false, fmt.Errorf("unauthorized")
+	}
+
+	_, err := r.WorkoutClient.DeleteWorkout(ctx, &workoutv1.DeleteWorkoutRequest{
+		WorkoutId: id,
+		UserId:    uc.UserID,
+	})
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // RefreshToken is the resolver for the refreshToken field.
@@ -188,6 +200,102 @@ func (r *mutationResolver) RecordMeasurement(ctx context.Context, input model.Me
 		return nil, err
 	}
 	return convertMeasurement(resp), nil
+}
+
+// CreateExercise is the resolver for the createExercise field.
+func (r *mutationResolver) CreateExercise(ctx context.Context, input model.ExerciseInput) (*model.Exercise, error) {
+	uc, ok := GetUserContext(ctx)
+	var createdBy string
+	if ok {
+		createdBy = uc.UserID
+	}
+
+	req := &exercisev1.CreateExerciseRequest{
+		Exercise: &exercisev1.Exercise{
+			Name:                  input.Name,
+			Description:           getStringValue(input.Description),
+			Category:              getStringValue(input.Category),
+			PrimaryMuscleGroup:    getStringValue(input.PrimaryMuscleGroup),
+			SecondaryMuscleGroups: input.SecondaryMuscleGroups,
+			EquipmentRequired:     getStringValue(input.EquipmentRequired),
+			DifficultyLevel:       getStringValue(input.DifficultyLevel),
+			IsCustom:              getBoolValue(input.IsCustom),
+			CreatedBy:             createdBy,
+		},
+	}
+
+	resp, err := r.ExerciseClient.CreateExercise(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return convertExerciseProto(resp), nil
+}
+
+// UpdateExercise is the resolver for the updateExercise field.
+func (r *mutationResolver) UpdateExercise(ctx context.Context, id string, input model.UpdateExerciseInput) (*model.Exercise, error) {
+	req := &exercisev1.UpdateExerciseRequest{
+		ExerciseId: id,
+		Exercise: &exercisev1.Exercise{
+			Name:                  getStringValue(input.Name),
+			Description:           getStringValue(input.Description),
+			Category:              getStringValue(input.Category),
+			PrimaryMuscleGroup:    getStringValue(input.PrimaryMuscleGroup),
+			SecondaryMuscleGroups: input.SecondaryMuscleGroups,
+			EquipmentRequired:     getStringValue(input.EquipmentRequired),
+			DifficultyLevel:       getStringValue(input.DifficultyLevel),
+			IsCustom:              getBoolValue(input.IsCustom),
+		},
+	}
+
+	resp, err := r.ExerciseClient.UpdateExercise(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return convertExerciseProto(resp), nil
+}
+
+// DeleteExercise is the resolver for the deleteExercise field.
+func (r *mutationResolver) DeleteExercise(ctx context.Context, id string) (bool, error) {
+	_, err := r.ExerciseClient.DeleteExercise(ctx, &exercisev1.DeleteExerciseRequest{
+		ExerciseId: id,
+	})
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+// DeleteProfile is the resolver for the deleteProfile field.
+func (r *mutationResolver) DeleteProfile(ctx context.Context) (bool, error) {
+	uc, ok := GetUserContext(ctx)
+	if !ok {
+		return false, fmt.Errorf("unauthorized")
+	}
+
+	_, err := r.ProfileClient.DeleteProfile(ctx, &profilev1.DeleteProfileRequest{
+		UserId: uc.UserID,
+	})
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+// DeleteFeedComment is the resolver for the deleteFeedComment field.
+func (r *mutationResolver) DeleteFeedComment(ctx context.Context, commentID string) (bool, error) {
+	uc, ok := GetUserContext(ctx)
+	if !ok {
+		return false, fmt.Errorf("unauthorized")
+	}
+
+	_, err := r.WorkoutClient.DeleteFeedComment(ctx, &workoutv1.DeleteFeedCommentRequest{
+		CommentId: commentID,
+		UserId:    uc.UserID,
+	})
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // ToggleFeedLike is the resolver for the toggleFeedLike field.
@@ -331,7 +439,7 @@ func (r *queryResolver) Exercises(ctx context.Context, query *string, category *
 	for _, ex := range resp.GetExercises() {
 		exCategory := nullableString(ex.GetCategory())
 		// Client-side category filtering
-		if category != nil && exCategory != nil && strings.ToLower(*exCategory) != strings.ToLower(*category) {
+		if category != nil && exCategory != nil && strings.EqualFold(*exCategory, *category) {
 			continue
 		}
 		result = append(result, &model.Exercise{
@@ -524,9 +632,9 @@ func (r *queryResolver) Notifications(ctx context.Context, limit *int, cursor *s
 
 // WorkoutCalendar is the resolver for the workoutCalendar field.
 func (r *queryResolver) WorkoutCalendar(ctx context.Context, startDate string, endDate string) (*model.WorkoutCalendar, error) {
-	uc, err := getUserContext(ctx)
-	if err != nil {
-		return nil, err
+	uc, ok := GetUserContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("unauthorized")
 	}
 
 	resp, err := r.AnalyticsClient.GetWorkoutCalendar(ctx, &analyticsv1.GetWorkoutCalendarRequest{
@@ -550,9 +658,9 @@ func (r *queryResolver) WorkoutCalendar(ctx context.Context, startDate string, e
 
 // MuscleGroupStats is the resolver for the muscleGroupStats field.
 func (r *queryResolver) MuscleGroupStats(ctx context.Context, dateRange *model.DateRangeInput) ([]*model.MuscleGroupStat, error) {
-	uc, err := getUserContext(ctx)
-	if err != nil {
-		return nil, err
+	uc, ok := GetUserContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("unauthorized")
 	}
 
 	req := &analyticsv1.GetMuscleGroupStatsRequest{
@@ -584,9 +692,9 @@ func (r *queryResolver) MuscleGroupStats(ctx context.Context, dateRange *model.D
 
 // TopExercises is the resolver for the topExercises field.
 func (r *queryResolver) TopExercises(ctx context.Context, limit *int, dateRange *model.DateRangeInput) ([]*model.ExerciseRecord, error) {
-	uc, err := getUserContext(ctx)
-	if err != nil {
-		return nil, err
+	uc, ok := GetUserContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("unauthorized")
 	}
 
 	req := &analyticsv1.GetTopExercisesRequest{
@@ -622,9 +730,9 @@ func (r *queryResolver) TopExercises(ctx context.Context, limit *int, dateRange 
 
 // ExercisePerformance is the resolver for the exercisePerformance field.
 func (r *queryResolver) ExercisePerformance(ctx context.Context, exerciseID string) (*model.ExercisePerformance, error) {
-	uc, err := getUserContext(ctx)
-	if err != nil {
-		return nil, err
+	uc, ok := GetUserContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("unauthorized")
 	}
 
 	resp, err := r.AnalyticsClient.GetExerciseStats(ctx, &analyticsv1.GetExerciseStatsRequest{
@@ -647,7 +755,7 @@ func (r *queryResolver) ExercisePerformance(ctx context.Context, exerciseID stri
 			Date:      h.GetDate(),
 			Weight:    h.GetWeight(),
 			Reps:      int(h.GetReps()),
-			OneRM:     nullableFloat(h.GetOneRm()),
+			OneRm:     nullableFloat(h.GetOneRm()),
 			Volume:    nullableFloat(h.GetVolume()),
 		})
 	}
@@ -666,7 +774,7 @@ func (r *queryResolver) ExercisePerformance(ctx context.Context, exerciseID stri
 		ExerciseID:        stats.GetExerciseId(),
 		ExerciseName:      stats.GetExerciseName(),
 		HeaviestWeight:    nullableFloat(stats.GetHeaviestWeight()),
-		ProjectedOneRM:    nullableFloat(stats.GetProjectedOneRm()),
+		ProjectedOneRm:    nullableFloat(stats.GetProjectedOneRm()),
 		BestSetVolume:     nullableFloat(stats.GetBestSetVolume()),
 		BestSessionVolume: nullableFloat(stats.GetBestSessionVolume()),
 		MostReps:          nullableInt(stats.GetMostReps()),

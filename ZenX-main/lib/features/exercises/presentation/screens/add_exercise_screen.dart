@@ -5,9 +5,18 @@ import 'package:go_router/go_router.dart';
 // import '../../../../core/presentation/base_screen.dart'; // Removing BaseScreen to use Stateful
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/design/hevy_colors.dart';
+<<<<<<< Updated upstream
 import '../../../../core/presentation/widgets/loading_widget.dart';
 import '../providers/exercise_providers.dart';
 import '../../domain/entities/exercise.dart';
+=======
+import '../providers/exercise_providers.dart';
+
+// State providers for filters and search
+final searchQueryProvider = StateProvider.autoDispose<String>((ref) => '');
+final selectedEquipmentFilterProvider = StateProvider.autoDispose<String>((ref) => 'All Equipment');
+final selectedMuscleFilterProvider = StateProvider.autoDispose<String>((ref) => 'All Muscles');
+>>>>>>> Stashed changes
 
 /// Add Exercise screen (Hevy style) - Refactored to use real data
 class AddExerciseScreen extends ConsumerStatefulWidget {
@@ -69,14 +78,32 @@ class _AddExerciseScreenState extends ConsumerState<AddExerciseScreen> {
     );
   }
 
+<<<<<<< Updated upstream
   Widget _buildBody(BuildContext context, WidgetRef ref) {
+=======
+  @override
+  Widget buildBody(BuildContext context, WidgetRef ref) {
+    final searchQuery = ref.watch(searchQueryProvider);
+    final selectedEquipmentFilter = ref.watch(selectedEquipmentFilterProvider);
+    final selectedMuscleFilter = ref.watch(selectedMuscleFilterProvider);
+
+    // Fetch exercises from backend
+    final exercisesAsync = ref.watch(exercisesProvider(query: searchQuery.isEmpty ? null : searchQuery, category: null));
+
+>>>>>>> Stashed changes
     return Column(
       children: [
         // Search bar
         Padding(
           padding: const EdgeInsets.all(DesignTokens.paddingScreen),
           child: TextField(
+<<<<<<< Updated upstream
             controller: _searchController,
+=======
+            onChanged: (value) {
+              ref.read(searchQueryProvider.notifier).state = value;
+            },
+>>>>>>> Stashed changes
             decoration: InputDecoration(
               hintText: 'Search exercise',
               hintStyle: const TextStyle(color: HevyColors.textSecondary),
@@ -173,6 +200,7 @@ class _AddExerciseScreenState extends ConsumerState<AddExerciseScreen> {
           ),
         ),
 
+<<<<<<< Updated upstream
         const SizedBox(height: DesignTokens.spacingS),
         const Divider(height: 1, color: HevyColors.border),
 
@@ -192,7 +220,72 @@ class _AddExerciseScreenState extends ConsumerState<AddExerciseScreen> {
                  'exerciseId': exercise.id, // Adding ID is crucial for real backend linking
                  'equipment': exercise.equipmentRequired ?? 'Other',
                });
+=======
+        const SizedBox(height: DesignTokens.spacingL),
+
+        // Exercise list
+        Expanded(
+          child: exercisesAsync.when(
+            data: (exercises) {
+              if (exercises.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'No exercises found',
+                    style: TextStyle(color: HevyColors.textSecondary),
+                  ),
+                );
+              }
+              
+              // Filter by equipment and muscle if needed
+              var filteredExercises = exercises;
+              if (selectedEquipmentFilter != 'All Equipment') {
+                filteredExercises = filteredExercises
+                    .where((e) => e.equipmentRequired == selectedEquipmentFilter)
+                    .toList();
+              }
+              if (selectedMuscleFilter != 'All Muscles') {
+                filteredExercises = filteredExercises
+                    .where((e) => e.primaryMuscleGroup == selectedMuscleFilter)
+                    .toList();
+              }
+              
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: DesignTokens.paddingScreen),
+                itemCount: filteredExercises.length,
+                itemBuilder: (context, index) {
+                  final exercise = filteredExercises[index];
+                  return _ExerciseListItem(
+                    name: exercise.name,
+                    muscleGroup: exercise.primaryMuscleGroup ?? 'Unknown',
+                    equipment: exercise.equipmentRequired ?? '',
+                    onTap: () {
+                      // Return exercise data as a map so it can be used in workout screen
+                      context.pop({
+                        'id': exercise.id,
+                        'name': exercise.name,
+                        'muscleGroup': exercise.primaryMuscleGroup ?? 'Unknown',
+                      });
+                    },
+                  );
+                },
+              );
+>>>>>>> Stashed changes
             },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error loading exercises: $error',
+                    style: const TextStyle(color: HevyColors.textSecondary),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ],
@@ -332,11 +425,19 @@ class _ExerciseList extends ConsumerWidget {
 }
 
 class _ExerciseListItem extends StatelessWidget {
+<<<<<<< Updated upstream
   final Exercise exercise;
+=======
+  final String name;
+  final String muscleGroup;
+  final String equipment;
+>>>>>>> Stashed changes
   final VoidCallback onTap;
 
   const _ExerciseListItem({
-    required this.exercise,
+    required this.name,
+    required this.muscleGroup,
+    required this.equipment,
     required this.onTap,
   });
 
@@ -369,7 +470,7 @@ class _ExerciseListItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    exercise.name,
+                    name,
                     style: const TextStyle(
                       fontSize: DesignTokens.bodyLarge,
                       fontWeight: FontWeight.w500,
@@ -378,7 +479,11 @@ class _ExerciseListItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
+<<<<<<< Updated upstream
                     exercise.primaryMuscleGroup ?? 'Other',
+=======
+                    muscleGroup,
+>>>>>>> Stashed changes
                     style: const TextStyle(
                       fontSize: DesignTokens.bodySmall,
                       color: HevyColors.textSecondary,

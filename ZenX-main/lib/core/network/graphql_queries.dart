@@ -172,21 +172,75 @@ class GraphQLQueries {
     }
   ''';
 
-  static const String updateWorkout = '''
-    mutation UpdateWorkout(\$id: ID!, \$input: UpdateWorkoutInput!) {
-      updateWorkout(id: \$id, input: \$input) {
-        id
-        name
-        notes
-        updatedAt
+  // Analytics
+  static const String getWorkoutCalendar = '''
+    query GetWorkoutCalendar(\$startDate: String!, \$endDate: String!) {
+      workoutCalendar(startDate: \$startDate, endDate: \$endDate) {
+        workoutDays
+        totalWorkouts
+      }
+    }
+  ''';
+
+  static const String getMuscleGroupStats = '''
+    query GetMuscleGroupStats(\$dateRange: DateRangeInput) {
+      muscleGroupStats(dateRange: \$dateRange) {
+        muscleGroup
+        setCount
+        volume
+        percentage
+      }
+    }
+  ''';
+
+  static const String getTopExercises = '''
+    query GetTopExercises(\$limit: Int, \$dateRange: DateRangeInput) {
+      topExercises(limit: \$limit, dateRange: \$dateRange) {
+        exerciseId
+        exerciseName
+        workoutCount
+        lastPerformed
+        averageWeight
+      }
+    }
+  ''';
+
+  static const String getExercisePerformance = '''
+    query GetExercisePerformance(\$exerciseId: ID!) {
+      exercisePerformance(exerciseId: \$exerciseId) {
+        exerciseId
+        exerciseName
+        heaviestWeight
+        projectedOneRM
+        bestSetVolume
+        bestSessionVolume
+        mostReps
+        personalRecords {
+          recordType
+          value
+          achievedAt
+        }
+        history {
+          workoutId
+          date
+          weight
+          reps
+          oneRM
+          volume
+        }
       }
     }
   ''';
 
   // Exercises
   static const String getExercises = '''
+<<<<<<< Updated upstream
     query GetExercises(\$category: String) {
       exercises(category: \$category) {
+=======
+    query GetExercises(\$query: String, \$category: String) {
+      exercises(query: \$query, category: \$category) {
+>>>>>>> Stashed changes
         id
         name
         description
@@ -200,6 +254,7 @@ class GraphQLQueries {
       }
     }
   ''';
+<<<<<<< Updated upstream
 
   static const String getExercise = '''
     query GetExercise(\$id: ID!) {
@@ -418,6 +473,8 @@ class GraphQLQueries {
       }
     }
   ''';
+=======
+>>>>>>> Stashed changes
 }
 
 /// GraphQL subscriptions for real-time updates

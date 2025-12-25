@@ -26,6 +26,17 @@ type Exercise struct {
 	CreatedAt             *string  `json:"createdAt,omitempty"`
 }
 
+type ExerciseInput struct {
+	Name                  string   `json:"name"`
+	Description           *string  `json:"description,omitempty"`
+	Category              *string  `json:"category,omitempty"`
+	PrimaryMuscleGroup    *string  `json:"primaryMuscleGroup,omitempty"`
+	SecondaryMuscleGroups []string `json:"secondaryMuscleGroups,omitempty"`
+	EquipmentRequired     *string  `json:"equipmentRequired,omitempty"`
+	DifficultyLevel       *string  `json:"difficultyLevel,omitempty"`
+	IsCustom              *bool    `json:"isCustom,omitempty"`
+}
+
 type ExercisePerformance struct {
 	ExerciseID        string                  `json:"exerciseId"`
 	ExerciseName      string                  `json:"exerciseName"`
@@ -176,6 +187,17 @@ type ProgressSnapshot struct {
 }
 
 type Query struct {
+}
+
+type UpdateExerciseInput struct {
+	Name                  *string  `json:"name,omitempty"`
+	Description           *string  `json:"description,omitempty"`
+	Category              *string  `json:"category,omitempty"`
+	PrimaryMuscleGroup    *string  `json:"primaryMuscleGroup,omitempty"`
+	SecondaryMuscleGroups []string `json:"secondaryMuscleGroups,omitempty"`
+	EquipmentRequired     *string  `json:"equipmentRequired,omitempty"`
+	DifficultyLevel       *string  `json:"difficultyLevel,omitempty"`
+	IsCustom              *bool    `json:"isCustom,omitempty"`
 }
 
 type UpdateWorkoutInput struct {

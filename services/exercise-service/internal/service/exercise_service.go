@@ -69,6 +69,72 @@ func (s *ExerciseService) CreateExercise(ctx context.Context, req *exercisev1.Cr
 	return s.toProto(ctx, ex), nil
 }
 
+// UpdateExercise updates an existing exercise.
+func (s *ExerciseService) UpdateExercise(ctx context.Context, req *exercisev1.UpdateExerciseRequest) (*exercisev1.Exercise, error) {
+	id, err := uuid.Parse(req.GetExerciseId())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid exercise id")
+	}
+
+	payload := req.GetExercise()
+	if payload == nil {
+		return nil, status.Error(codes.InvalidArgument, "exercise payload required")
+	}
+
+	var categoryID *uuid.UUID
+	if payload.GetCategory() != "" {
+		cid, err := uuid.Parse(payload.GetCategory())
+		if err == nil {
+			categoryID = &cid
+		}
+	}
+
+	var createdBy *uuid.UUID
+	if payload.GetCreatedBy() != "" {
+		uid, err := uuid.Parse(payload.GetCreatedBy())
+		if err == nil {
+			createdBy = &uid
+		}
+	}
+
+	ex, err := s.repo.UpdateExercise(ctx, id, store.Exercise{
+		Name:                 payload.GetName(),
+		Description:          payload.GetDescription(),
+		CategoryID:           categoryID,
+		PrimaryMuscleGroup:   payload.GetPrimaryMuscleGroup(),
+		SecondaryMuscleGroup: payload.GetSecondaryMuscleGroups(),
+		EquipmentRequired:    payload.GetEquipmentRequired(),
+		DifficultyLevel:      payload.GetDifficultyLevel(),
+		IsCustom:             payload.GetIsCustom(),
+		CreatedBy:            createdBy,
+	})
+	if err != nil {
+		if errors.Is(err, store.ErrExerciseNotFound) {
+			return nil, status.Error(codes.NotFound, "exercise not found")
+		}
+		return nil, status.Errorf(codes.Internal, "update exercise: %v", err)
+	}
+
+	return s.toProto(ctx, ex), nil
+}
+
+// DeleteExercise removes an exercise.
+func (s *ExerciseService) DeleteExercise(ctx context.Context, req *exercisev1.DeleteExerciseRequest) (*commonv1.Empty, error) {
+	id, err := uuid.Parse(req.GetExerciseId())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid exercise id")
+	}
+
+	if err := s.repo.DeleteExercise(ctx, id); err != nil {
+		if errors.Is(err, store.ErrExerciseNotFound) {
+			return nil, status.Error(codes.NotFound, "exercise not found")
+		}
+		return nil, status.Errorf(codes.Internal, "delete exercise: %v", err)
+	}
+
+	return &commonv1.Empty{}, nil
+}
+
 // GetExercise returns a single exercise.
 func (s *ExerciseService) GetExercise(ctx context.Context, req *exercisev1.GetExerciseRequest) (*exercisev1.Exercise, error) {
 	id, err := uuid.Parse(req.GetExerciseId())

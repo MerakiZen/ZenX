@@ -59,8 +59,17 @@ class AppConfig {
         return 'https://api-staging.zenx.app/graphql';
       case 'development':
       default:
+<<<<<<< Updated upstream
         // Default to LAN IP, but can be overridden
         return 'http://192.168.1.10:4000/graphql';
+=======
+        // Use 10.0.2.2 to connect to host's localhost from Android emulator
+        // Use localhost for iOS simulator
+        return kIsWeb ? 'http://localhost:4000/graphql' : 
+               (defaultTargetPlatform == TargetPlatform.android 
+                 ? 'http://10.0.2.2:4000/graphql' 
+                 : 'http://localhost:4000/graphql');
+>>>>>>> Stashed changes
     }
   }
 
