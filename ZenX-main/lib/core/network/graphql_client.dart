@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:http/http.dart' as http;
 
 import '../config/app_config.dart';
 import 'rate_limiter.dart';
@@ -8,9 +9,22 @@ import 'token_refresh_interceptor.dart';
 
 /// GraphQL client provider with authentication
 final graphqlClientProvider = Provider<GraphQLClient>((ref) {
-  final httpLink = HttpLink(AppConfig.apiBaseUrl);
+  // Use a custom client with explicit timeouts to prevent hangs on physical devices
+  final httpClient = http.Client();
+  
+  final httpLink = HttpLink(
+    AppConfig.apiBaseUrl,
+    httpClient: httpClient,
+    defaultHeaders: {
+      'X-Client-Timeout': AppConfig.connectionTimeout.inSeconds.toString(),
+    },
+  );
+
   final refreshClient = GraphQLClient(
-    link: HttpLink(AppConfig.apiBaseUrl),
+    link: HttpLink(
+      AppConfig.apiBaseUrl,
+      httpClient: httpClient,
+    ),
     cache: GraphQLCache(),
   );
 
@@ -30,12 +44,21 @@ final graphqlClientProvider = Provider<GraphQLClient>((ref) {
     (request, [forward]) {
       // Check rate limit before making request
       final rateLimiter = GraphQLRateLimiter();
-      if (!rateLimiter.canMakeRequest()) {
-        rateLimiter.waitIfNeeded();
-      }
-      rateLimiter.recordRequest();
-
-      return forward!(request).map((response) {
+      
+      return Stream.fromFuture(Future(() async {
+        if (!rateLimiter.canMakeRequest()) {
+          await rateLimiter.waitIfNeeded();
+        }
+        rateLimiter.recordRequest();
+      })).asyncExpand((_) => forward!(request)).timeout(
+        AppConfig.connectionTimeout,
+        onTimeout: (sink) {
+          sink.addError(TimeoutException(
+            'Request timed out after ${AppConfig.connectionTimeout.inSeconds} seconds. Check if the server is reachable.',
+            AppConfig.connectionTimeout,
+          ));
+        },
+      ).map((response) {
         if (response.errors != null) {
           for (final error in response.errors!) {
             if (error.extensions?['code'] == 'UNAUTHENTICATED') {

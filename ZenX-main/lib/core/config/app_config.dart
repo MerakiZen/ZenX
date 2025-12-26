@@ -59,17 +59,14 @@ class AppConfig {
         return 'https://api-staging.zenx.app/graphql';
       case 'development':
       default:
-<<<<<<< Updated upstream
-        // Default to LAN IP, but can be overridden
-        return 'http://192.168.1.10:4000/graphql';
-=======
-        // Use 10.0.2.2 to connect to host's localhost from Android emulator
-        // Use localhost for iOS simulator
+        // Prefer explicit LAN IP for development, fallback to localhost/10.0.2.2 for simulators
+        // If you are using a physical device, ensure you set a custom URL or update this IP
+        const String defaultLanIp = '192.168.1.10'; // Replace with your machine's LAN IP
+        
         return kIsWeb ? 'http://localhost:4000/graphql' : 
                (defaultTargetPlatform == TargetPlatform.android 
                  ? 'http://10.0.2.2:4000/graphql' 
                  : 'http://localhost:4000/graphql');
->>>>>>> Stashed changes
     }
   }
 
@@ -95,6 +92,9 @@ class AppConfig {
 
   /// JWT token expiry duration (15 minutes)
   static const Duration tokenExpiry = Duration(minutes: 15);
+
+  /// Connection timeout for network requests
+  static const Duration connectionTimeout = Duration(seconds: 10);
 
   /// Refresh token expiry duration (7 days)
   static const Duration refreshTokenExpiry = Duration(days: 7);

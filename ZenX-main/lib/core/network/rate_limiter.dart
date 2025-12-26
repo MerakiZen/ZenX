@@ -84,6 +84,7 @@ class GraphQLRateLimiter {
   Future<void> waitIfNeeded() async {
     final waitTime = getTimeUntilNextRequest();
     if (waitTime != null) {
+      debugPrint('Rate limit hit, waiting ${waitTime.inMilliseconds}ms');
       await Future.delayed(waitTime);
     }
   }

@@ -78,15 +78,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       context.go('/home');
     } catch (error) {
       if (!mounted) return;
+      
       String errorMessage = 'Login failed. Please check your credentials.';
-      if (error.toString().contains('unauthorized') || 
-          error.toString().contains('invalid') ||
-          error.toString().contains('credentials')) {
+      final errorStr = error.toString().toLowerCase();
+      
+      if (errorStr.contains('timeout') || errorStr.contains('deadline')) {
+        errorMessage = 'Connection timed out. Ensure the server IP is correct.';
+      } else if (errorStr.contains('connection refused') || errorStr.contains('socketexception')) {
+        errorMessage = 'Could not reach server. Check if it\'s running on the target IP.';
+      } else if (errorStr.contains('unauthorized') || 
+                 errorStr.contains('invalid') ||
+                 errorStr.contains('credentials')) {
         errorMessage = 'Invalid email or password. Please try again.';
-      } else if (error.toString().contains('network') || 
-                 error.toString().contains('connection')) {
+      } else if (errorStr.contains('network') || 
+                 errorStr.contains('connection')) {
         errorMessage = 'Network error. Please check your connection.';
       }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -94,7 +102,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             style: const TextStyle(color: HevyColors.textPrimary),
           ),
           backgroundColor: HevyColors.error,
-          duration: const Duration(seconds: 4),
+          duration: const Duration(seconds: 5),
+          action: SnackBarAction(
+            label: 'CONFIG',
+            textColor: Colors.white,
+            onPressed: () => _showServerConfigDialog(context),
+          ),
         ),
       );
     } finally {
