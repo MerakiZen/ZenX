@@ -4,19 +4,15 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/presentation/base_screen.dart';
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/design/hevy_colors.dart';
-<<<<<<< Updated upstream
 import '../../../../core/presentation/widgets/loading_widget.dart';
 import '../providers/exercise_providers.dart';
-import '../../domain/entities/exercise.dart';
-=======
-import '../providers/exercise_providers.dart';
+import '../../domain/models/exercise.dart';
 
 /// Provider for exercise search query
 final exerciseSearchQueryProvider = StateProvider.autoDispose<String>((ref) => '');
 
 /// Provider for exercise category filter
 final exerciseCategoryFilterProvider = StateProvider.autoDispose<String?>((ref) => null);
->>>>>>> Stashed changes
 
 /// Exercise library screen with search and categories (Hevy style)
 class ExerciseLibraryScreen extends ConsumerStatefulWidget {
@@ -28,8 +24,6 @@ class ExerciseLibraryScreen extends ConsumerStatefulWidget {
 
 class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
   final TextEditingController _searchController = TextEditingController();
-  String _selectedCategory = 'All';
-  String _searchQuery = '';
 
   @override
   void dispose() {
@@ -71,6 +65,8 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
   }
 
   Widget _buildBody(BuildContext context, WidgetRef ref) {
+    final searchQuery = ref.watch(exerciseSearchQueryProvider);
+
     return Column(
       children: [
         // Search bar
@@ -82,14 +78,12 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
               hintText: 'Search exercises...',
               hintStyle: TextStyle(color: HevyColors.textTertiary),
               prefixIcon: Icon(Icons.search, color: HevyColors.textSecondary),
-              suffixIcon: _searchQuery.isNotEmpty
+              suffixIcon: searchQuery.isNotEmpty
                   ? IconButton(
                       icon: Icon(Icons.clear, color: HevyColors.textSecondary),
                       onPressed: () {
                         _searchController.clear();
-                        setState(() {
-                          _searchQuery = '';
-                        });
+                        ref.read(exerciseSearchQueryProvider.notifier).state = '';
                       },
                     )
                   : IconButton(
@@ -115,13 +109,7 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
             ),
             style: TextStyle(color: HevyColors.textPrimary),
             onChanged: (value) {
-<<<<<<< Updated upstream
-              setState(() {
-                _searchQuery = value;
-              });
-=======
               ref.read(exerciseSearchQueryProvider.notifier).state = value;
->>>>>>> Stashed changes
             },
           ),
         ),
@@ -134,86 +122,6 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
             padding: const EdgeInsets.symmetric(horizontal: DesignTokens.paddingScreen),
             children: [
               _CategoryChip(
-<<<<<<< Updated upstream
-                label: 'All',
-                isSelected: _selectedCategory == 'All',
-                onSelected: (selected) {
-                  setState(() {
-                    _selectedCategory = 'All';
-                  });
-                },
-              ),
-              const SizedBox(width: DesignTokens.spacingXS),
-              _CategoryChip(
-                label: 'Chest',
-                isSelected: _selectedCategory == 'Chest',
-                onSelected: (selected) {
-                  setState(() {
-                    _selectedCategory = 'Chest';
-                  });
-                },
-              ),
-              const SizedBox(width: DesignTokens.spacingXS),
-              _CategoryChip(
-                label: 'Back',
-                isSelected: _selectedCategory == 'Back',
-                onSelected: (selected) {
-                  setState(() {
-                    _selectedCategory = 'Back';
-                  });
-                },
-              ),
-              const SizedBox(width: DesignTokens.spacingXS),
-              _CategoryChip(
-                label: 'Legs',
-                isSelected: _selectedCategory == 'Legs',
-                onSelected: (selected) {
-                  setState(() {
-                    _selectedCategory = 'Legs';
-                  });
-                },
-              ),
-              const SizedBox(width: DesignTokens.spacingXS),
-              _CategoryChip(
-                label: 'Shoulders',
-                isSelected: _selectedCategory == 'Shoulders',
-                onSelected: (selected) {
-                  setState(() {
-                    _selectedCategory = 'Shoulders';
-                  });
-                },
-              ),
-              const SizedBox(width: DesignTokens.spacingXS),
-              _CategoryChip(
-                label: 'Arms',
-                isSelected: _selectedCategory == 'Arms',
-                onSelected: (selected) {
-                  setState(() {
-                    _selectedCategory = 'Arms';
-                  });
-                },
-              ),
-              const SizedBox(width: DesignTokens.spacingXS),
-              _CategoryChip(
-                label: 'Core',
-                isSelected: _selectedCategory == 'Core',
-                onSelected: (selected) {
-                  setState(() {
-                    _selectedCategory = 'Core';
-                  });
-                },
-              ),
-              const SizedBox(width: DesignTokens.spacingXS),
-              _CategoryChip(
-                label: 'Cardio',
-                isSelected: _selectedCategory == 'Cardio',
-                onSelected: (selected) {
-                  setState(() {
-                    _selectedCategory = 'Cardio';
-                  });
-                },
-              ),
-=======
                 label: 'All', 
                 isSelected: ref.watch(exerciseCategoryFilterProvider) == null,
                 onSelected: (_) => ref.read(exerciseCategoryFilterProvider.notifier).state = null,
@@ -231,7 +139,6 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
                   ),
                 );
               }),
->>>>>>> Stashed changes
             ],
           ),
         ),
@@ -239,11 +146,8 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
         const Divider(height: 1),
 
         // Exercise list
-        Expanded(
-          child: _ExerciseList(
-            searchQuery: _searchQuery,
-            category: _selectedCategory == 'All' ? null : _selectedCategory,
-          ),
+        const Expanded(
+          child: _ExerciseList(),
         ),
       ],
     );
@@ -254,21 +158,12 @@ class _ExerciseLibraryScreenState extends ConsumerState<ExerciseLibraryScreen> {
 class _CategoryChip extends StatelessWidget {
   final String label;
   final bool isSelected;
-<<<<<<< Updated upstream
-  final ValueChanged<bool> onSelected;
-
-  const _CategoryChip({
-    required this.label,
-    required this.isSelected,
-    required this.onSelected,
-=======
   final ValueChanged<bool>? onSelected;
 
   const _CategoryChip({
     required this.label,
     this.isSelected = false,
     this.onSelected,
->>>>>>> Stashed changes
   });
 
   @override
@@ -296,37 +191,17 @@ class _CategoryChip extends StatelessWidget {
 
 /// Exercise list widget
 class _ExerciseList extends ConsumerWidget {
-<<<<<<< Updated upstream
-  final String searchQuery;
-  final String? category;
-
-  const _ExerciseList({
-    required this.searchQuery,
-    this.category,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final exercisesAsync = searchQuery.isNotEmpty
-        ? ref.watch(searchExercisesProvider(searchQuery))
-        : category != null
-            ? ref.watch(exercisesByCategoryProvider(category!))
-            : ref.watch(exercisesProvider);
-=======
   const _ExerciseList();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchQuery = ref.watch(exerciseSearchQueryProvider);
     final category = ref.watch(exerciseCategoryFilterProvider);
-    // Debounce search if needed, but for now direct watch is fine as the provider handles it
     final exercisesAsync = ref.watch(exercisesProvider(query: searchQuery, category: category));
->>>>>>> Stashed changes
 
     return exercisesAsync.when(
       data: (exercises) {
         if (exercises.isEmpty) {
-<<<<<<< Updated upstream
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -358,32 +233,14 @@ class _ExerciseList extends ConsumerWidget {
             ),
           );
         }
-
-=======
-          return const Center(
-            child: Text(
-              'No exercises found',
-              style: TextStyle(color: HevyColors.textSecondary),
-            ),
-          );
-        }
         
->>>>>>> Stashed changes
         return ListView.builder(
           padding: const EdgeInsets.all(DesignTokens.paddingScreen),
           itemCount: exercises.length,
           itemBuilder: (context, index) {
             final exercise = exercises[index];
             return _ExerciseCard(
-<<<<<<< Updated upstream
               exercise: exercise,
-=======
-              id: exercise.id,
-              name: exercise.name,
-              category: exercise.category ?? 'Unknown',
-              muscleGroup: exercise.primaryMuscleGroup ?? 'Unknown',
-              equipment: exercise.equipmentRequired ?? 'Unknown',
->>>>>>> Stashed changes
               onTap: () {
                 context.push('/exercises/${exercise.id}');
               },
@@ -391,7 +248,6 @@ class _ExerciseList extends ConsumerWidget {
           },
         );
       },
-<<<<<<< Updated upstream
       loading: () => const Center(child: LoadingWidget()),
       error: (error, stack) => Center(
         child: Padding(
@@ -411,26 +267,11 @@ class _ExerciseList extends ConsumerWidget {
               ),
               const SizedBox(height: DesignTokens.spacingS),
               ElevatedButton(
-                onPressed: () => ref.refresh(exercisesProvider),
+                onPressed: () => ref.refresh(exercisesProvider(query: searchQuery, category: category)),
                 child: const Text('Retry'),
               ),
             ],
           ),
-=======
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
-            const SizedBox(height: 16),
-            Text(
-              'Error loading exercises: $error',
-              style: const TextStyle(color: HevyColors.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-          ],
->>>>>>> Stashed changes
         ),
       ),
     );
@@ -439,23 +280,11 @@ class _ExerciseList extends ConsumerWidget {
 
 /// Exercise card widget
 class _ExerciseCard extends StatelessWidget {
-<<<<<<< Updated upstream
   final Exercise exercise;
-=======
-  final String id;
-  final String name;
-  final String category;
-  final String muscleGroup;
-  final String equipment;
->>>>>>> Stashed changes
   final VoidCallback onTap;
 
   const _ExerciseCard({
-    required this.id,
-    required this.name,
-    required this.category,
-    required this.muscleGroup,
-    required this.equipment,
+    required this.exercise,
     required this.onTap,
   });
 
@@ -505,11 +334,7 @@ class _ExerciseCard extends StatelessWidget {
                 width: 4,
                 height: 50,
                 decoration: BoxDecoration(
-<<<<<<< Updated upstream
                   color: categoryColor,
-=======
-                  color: _getCategoryColor(category),
->>>>>>> Stashed changes
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -520,16 +345,11 @@ class _ExerciseCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-<<<<<<< Updated upstream
                       exercise.name,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: HevyColors.textPrimary,
                             fontWeight: FontWeight.w600,
                           ),
-=======
-                      name,
-                      style: Theme.of(context).textTheme.titleMedium,
->>>>>>> Stashed changes
                     ),
                     const SizedBox(height: DesignTokens.spacingXXS),
                     Row(
@@ -542,13 +362,9 @@ class _ExerciseCard extends StatelessWidget {
                         const SizedBox(width: DesignTokens.spacingXXS),
                         Text(
                           muscleGroup,
-<<<<<<< Updated upstream
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: HevyColors.textSecondary,
                               ),
-=======
-                          style: Theme.of(context).textTheme.bodySmall,
->>>>>>> Stashed changes
                         ),
                         const SizedBox(width: DesignTokens.spacingS),
                         Icon(
@@ -559,13 +375,9 @@ class _ExerciseCard extends StatelessWidget {
                         const SizedBox(width: DesignTokens.spacingXXS),
                         Text(
                           equipment,
-<<<<<<< Updated upstream
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: HevyColors.textSecondary,
                               ),
-=======
-                          style: Theme.of(context).textTheme.bodySmall,
->>>>>>> Stashed changes
                         ),
                       ],
                     ),

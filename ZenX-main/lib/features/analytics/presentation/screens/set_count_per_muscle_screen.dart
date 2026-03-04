@@ -1,14 +1,6 @@
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-<<<<<<< Updated upstream
-import 'package:intl/intl.dart';
-import 'package:intl/intl.dart';
-import '../../../workouts/presentation/providers/workout_providers.dart';
-import '../../../workouts/domain/entities/workout.dart';
-=======
->>>>>>> Stashed changes
 import '../../../../core/presentation/base_screen.dart';
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/design/hevy_colors.dart';
@@ -68,66 +60,6 @@ class SetCountPerMuscleScreen extends BaseScreen {
   @override
   Widget buildBody(BuildContext context, WidgetRef ref) {
     const padding = DesignTokens.paddingScreen;
-    
-<<<<<<< Updated upstream
-    // Real data calculation
-    final now = DateTime.now();
-    final startDate = now.subtract(const Duration(days: 30));
-    final workoutsAsync = ref.watch(workoutsProvider);
-    
-    // UI strings
-    const selectedDateRange = 'Last 30 days';
-    const selectedTimeGranularity = 'Week';
-    final dateFormat = DateFormat('d MMM');
-    final dateRange = '${dateFormat.format(startDate)} - ${dateFormat.format(now)}';
-    
-    return workoutsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
-      data: (workouts) {
-        // Filter workouts for last 30 days
-        final recentWorkouts = workouts.where((w) {
-          final date = w.completedAt ?? w.createdAt;
-          return date.isAfter(startDate) && date.isBefore(now.add(const Duration(days: 1)));
-        }).toList();
-
-        // Calculate total sets per muscle
-        final muscleSets = <String, double>{};
-        final muscleColors = {
-          'Chest': Colors.blue,
-          'Back': Colors.purple,
-          'Legs': Colors.orange,
-          'Shoulders': Colors.red,
-          'Arms': Colors.yellow,
-          'Core': Colors.green,
-          'Cardio': Colors.cyan,
-        };
-
-        for (var w in recentWorkouts) {
-          for (var e in w.exercises) {
-            final muscle = e.exercise?.primaryMuscleGroup ?? 'Other';
-            // Normalize muscle name
-            final key = muscle.isEmpty ? 'Other' : muscle;
-            // Count sets
-            muscleSets[key] = (muscleSets[key] ?? 0) + e.sets.length;
-          }
-        }
-
-        // Convert to list and sort
-        final muscleGroups = muscleSets.entries.map((e) {
-          return _MuscleGroupData(
-            name: e.key,
-            color: muscleColors[e.key] ?? Colors.grey,
-            isSelected: true, // Default to selected
-            totalSets: e.value,
-          );
-        }).toList()..sort((a, b) => b.totalSets.compareTo(a.totalSets));
-
-        // If no data, show empty state
-        if (muscleGroups.isEmpty) {
-           return const Center(child: Text('No workout data in last 30 days'));
-        }
-=======
     final selectedRange = ref.watch(selectedRangeProvider);
     final selectedMuscles = ref.watch(selectedMusclesProvider);
     
@@ -167,7 +99,6 @@ class SetCountPerMuscleScreen extends BaseScreen {
         
         // Sort by sets desc
         muscleGroups.sort((a, b) => b.totalSets.compareTo(a.totalSets));
->>>>>>> Stashed changes
 
         return SingleChildScrollView(
           child: Column(
@@ -188,12 +119,11 @@ class SetCountPerMuscleScreen extends BaseScreen {
                       ),
                     ),
                     const SizedBox(width: DesignTokens.spacingM),
-                    // Granularity is fixed for now or can be derived
                     Expanded(
                       child: _FilterButton(
                         label: 'Week', 
                         isSelected: false,
-                        onTap: () {}, // Not implemented yet
+                        onTap: () {}, // TODO: Implement granularity picker
                       ),
                     ),
                   ],
@@ -202,7 +132,7 @@ class SetCountPerMuscleScreen extends BaseScreen {
               
               const SizedBox(height: padding),
               
-              // Graph section - Simple bar chart showing current period totals
+              // Graph section
               Container(
                 height: 300,
                 margin: const EdgeInsets.symmetric(horizontal: padding),
@@ -214,7 +144,7 @@ class SetCountPerMuscleScreen extends BaseScreen {
                 ),
                 child: muscleGroups.isEmpty 
                   ? const Center(child: Text('No data for selected period', style: TextStyle(color: HevyColors.textSecondary)))
-                  : _MuscleGroupChart(muscleGroups: muscleGroups.take(5).toList()), // Show top 5 muscles
+                  : _MuscleGroupChart(muscleGroups: muscleGroups.take(5).toList()),
               ),
               
               const SizedBox(height: padding),
@@ -251,33 +181,49 @@ class SetCountPerMuscleScreen extends BaseScreen {
   void _showRangePicker(BuildContext context, WidgetRef ref, String current) {
     showModalBottomSheet(
       context: context,
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          'Last 7 days', 'Last 30 days', 'Last 3 months', 'Last year', 'All time'
-        ].map((range) => ListTile(
-          title: Text(range),
-          trailing: range == current ? const Icon(Icons.check) : null,
-          onTap: () {
-            ref.read(selectedRangeProvider.notifier).state = range;
-            context.pop();
-          },
-        )).toList(),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(DesignTokens.radiusXL)),
       ),
-    );
-      },
+      backgroundColor: HevyColors.surface,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(DesignTokens.spacingL),
+              child: Text(
+                'Select Date Range',
+                style: TextStyle(
+                  fontSize: DesignTokens.titleMedium,
+                  fontWeight: FontWeight.bold,
+                  color: HevyColors.textPrimary,
+                ),
+              ),
+            ),
+            const Divider(height: 1),
+            ...['Last 7 days', 'Last 30 days', 'Last 3 months', 'Last year', 'All time'].map((range) => ListTile(
+              title: Text(range),
+              trailing: range == current ? const Icon(Icons.check, color: HevyColors.primary) : null,
+              onTap: () {
+                ref.read(selectedRangeProvider.notifier).state = range;
+                Navigator.pop(context);
+              },
+            )),
+          ],
+        ),
+      ),
     );
   }
   
   Color _getMuscleColor(String muscle) {
-    // Map muscle names to colors
     switch (muscle.toLowerCase()) {
-      case 'chest': return Colors.blue;
-      case 'back': return Colors.grey;
-      case 'legs': return Colors.red;
-      case 'shoulders': return Colors.orange;
-      case 'arms': return Colors.yellow;
-      default: return Colors.teal;
+      case 'chest': return HevyColors.categoryChest;
+      case 'back': return HevyColors.categoryBack;
+      case 'legs': return HevyColors.categoryLegs;
+      case 'shoulders': return HevyColors.categoryShoulders;
+      case 'arms': return HevyColors.categoryArms;
+      case 'core': return HevyColors.categoryCore;
+      default: return HevyColors.textTertiary;
     }
   }
 }
@@ -340,7 +286,7 @@ class _FilterButton extends StatelessWidget {
   }
 }
 
-/// Muscle group graph - Simple bar chart showing current totals
+/// Muscle group graph
 class _MuscleGroupChart extends StatelessWidget {
   final List<_MuscleGroupData> muscleGroups;
 
@@ -350,16 +296,8 @@ class _MuscleGroupChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (muscleGroups.isEmpty) {
-      return const Center(
-        child: Text(
-          'No muscle group data',
-          style: TextStyle(color: HevyColors.textSecondary),
-        ),
-      );
-    }
+    if (muscleGroups.isEmpty) return const SizedBox.shrink();
 
-    // Find max value for scaling
     final maxSets = muscleGroups.map((m) => m.totalSets).reduce((a, b) => a > b ? a : b);
     
     return Column(
@@ -378,14 +316,13 @@ class _MuscleGroupChart extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: muscleGroups.map((muscle) {
-              final heightFraction = muscle.totalSets / maxSets;
+              final heightFraction = (maxSets > 0) ? (muscle.totalSets / maxSets) : 0.0;
               return Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      // Set count label
                       Text(
                         muscle.totalSets.toInt().toString(),
                         style: const TextStyle(
@@ -394,7 +331,6 @@ class _MuscleGroupChart extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      // Bar
                       Container(
                         width: double.infinity,
                         height: 180 * heightFraction,
@@ -406,7 +342,6 @@ class _MuscleGroupChart extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      // Muscle name (abbreviated)
                       Text(
                         _abbreviateMuscle(muscle.name),
                         style: const TextStyle(
@@ -429,7 +364,6 @@ class _MuscleGroupChart extends StatelessWidget {
   }
 
   String _abbreviateMuscle(String name) {
-    // Abbreviate long muscle names for chart labels
     final abbreviations = {
       'Chest': 'Chest',
       'Back': 'Back',
@@ -443,8 +377,9 @@ class _MuscleGroupChart extends StatelessWidget {
       'Glutes': 'Glute',
       'Calves': 'Calf',
       'Cardio': 'Card',
+      'Full Body': 'Full',
     };
-    return abbreviations[name] ?? name.substring(0, name.length > 4 ? 4 : name.length);
+    return abbreviations[name] ?? (name.length > 4 ? name.substring(0, 4) : name);
   }
 }
 
@@ -481,12 +416,10 @@ class _MuscleListItem extends StatelessWidget {
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: DesignTokens.paddingScreen,
             vertical: DesignTokens.spacingM,
           ),
           child: Row(
             children: [
-              // Checkbox
               Container(
                 width: 24,
                 height: 24,
@@ -507,28 +440,20 @@ class _MuscleListItem extends StatelessWidget {
                     : null,
               ),
               const SizedBox(width: DesignTokens.spacingM),
-              // Muscle name
               Expanded(
                 child: Text(
                   muscle.name,
                   style: const TextStyle(
                     fontSize: DesignTokens.bodyLarge,
                     color: HevyColors.textPrimary,
-                    letterSpacing: -0.41,
-                    height: 1.29,
                   ),
                 ),
               ),
-              // Set count
               Text(
-                muscle.totalSets == muscle.totalSets.toInt()
-                    ? '${muscle.totalSets.toInt()}'
-                    : muscle.totalSets.toString(),
+                muscle.totalSets.toInt().toString(),
                 style: const TextStyle(
                   fontSize: DesignTokens.bodyLarge,
                   color: HevyColors.textPrimary,
-                  letterSpacing: -0.41,
-                  height: 1.29,
                 ),
               ),
             ],

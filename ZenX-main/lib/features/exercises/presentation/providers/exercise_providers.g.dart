@@ -6,7 +6,7 @@ part of 'exercise_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$exercisesHash() => r'2e185117c198e738d8d9c9654732c0dd72470978';
+String _$exercisesHash() => r'faadc37eff54f02a021d0f44d6e9b5d44a20cca2';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -472,6 +472,147 @@ class _ExercisesByCategoryProviderElement
 
   @override
   String get category => (origin as ExercisesByCategoryProvider).category;
+}
+
+String _$exerciseHash() => r'909dc7c96f90c3a50f1c7e7a9ebe6f0a1b62e5e1';
+
+/// Provider for single exercise
+///
+/// Copied from [exercise].
+@ProviderFor(exercise)
+const exerciseProvider = ExerciseFamily();
+
+/// Provider for single exercise
+///
+/// Copied from [exercise].
+class ExerciseFamily extends Family<AsyncValue<Exercise?>> {
+  /// Provider for single exercise
+  ///
+  /// Copied from [exercise].
+  const ExerciseFamily();
+
+  /// Provider for single exercise
+  ///
+  /// Copied from [exercise].
+  ExerciseProvider call(
+    String id,
+  ) {
+    return ExerciseProvider(
+      id,
+    );
+  }
+
+  @override
+  ExerciseProvider getProviderOverride(
+    covariant ExerciseProvider provider,
+  ) {
+    return call(
+      provider.id,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'exerciseProvider';
+}
+
+/// Provider for single exercise
+///
+/// Copied from [exercise].
+class ExerciseProvider extends AutoDisposeFutureProvider<Exercise?> {
+  /// Provider for single exercise
+  ///
+  /// Copied from [exercise].
+  ExerciseProvider(
+    String id,
+  ) : this._internal(
+          (ref) => exercise(
+            ref as ExerciseRef,
+            id,
+          ),
+          from: exerciseProvider,
+          name: r'exerciseProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$exerciseHash,
+          dependencies: ExerciseFamily._dependencies,
+          allTransitiveDependencies: ExerciseFamily._allTransitiveDependencies,
+          id: id,
+        );
+
+  ExerciseProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.id,
+  }) : super.internal();
+
+  final String id;
+
+  @override
+  Override overrideWith(
+    FutureOr<Exercise?> Function(ExerciseRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: ExerciseProvider._internal(
+        (ref) => create(ref as ExerciseRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        id: id,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<Exercise?> createElement() {
+    return _ExerciseProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ExerciseProvider && other.id == id;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, id.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin ExerciseRef on AutoDisposeFutureProviderRef<Exercise?> {
+  /// The parameter `id` of this provider.
+  String get id;
+}
+
+class _ExerciseProviderElement
+    extends AutoDisposeFutureProviderElement<Exercise?> with ExerciseRef {
+  _ExerciseProviderElement(super.provider);
+
+  @override
+  String get id => (origin as ExerciseProvider).id;
 }
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

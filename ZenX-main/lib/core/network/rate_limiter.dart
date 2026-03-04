@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 
 /// Rate limiter for API requests
 /// Implements token bucket algorithm to prevent exceeding rate limits

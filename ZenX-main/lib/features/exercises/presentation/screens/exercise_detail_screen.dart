@@ -135,7 +135,7 @@ class ExerciseDetailScreen extends BaseScreen {
                     ...performance.history.map((workout) => Padding(
                       padding: const EdgeInsets.only(bottom: DesignTokens.spacingS),
                       child: _RecentWorkoutRow(
-                        date: DateTime.parse(workout.date),
+                        date: workout.date ?? DateTime.now(),
                         sets: '-- sets', // Not available
                         volume: '${(workout.volume ?? 0).toInt()} kg',
                       ),

@@ -51,7 +51,7 @@ class MainExercisesScreen extends BaseScreen {
                 secondaryMuscles: [], 
                 totalSets: exercise.workoutCount, // Using workoutCount as proxy for frequency
                 heaviestWeight: exercise.averageWeight ?? 0.0,
-                lastWorkoutDate: exercise.lastPerformed != null ? DateTime.parse(exercise.lastPerformed!) : null,
+                lastWorkoutDate: exercise.lastPerformed,
               ),
               onTap: () {
                 // Navigate to exercise detail screen
