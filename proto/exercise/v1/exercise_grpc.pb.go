@@ -8,6 +8,7 @@ package exercisev1
 
 import (
 	context "context"
+	v1 "github.com/zenx/backend/proto/common/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -20,6 +21,8 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	ExerciseService_CreateExercise_FullMethodName = "/zenx.exercise.v1.ExerciseService/CreateExercise"
+	ExerciseService_UpdateExercise_FullMethodName = "/zenx.exercise.v1.ExerciseService/UpdateExercise"
+	ExerciseService_DeleteExercise_FullMethodName = "/zenx.exercise.v1.ExerciseService/DeleteExercise"
 	ExerciseService_GetExercise_FullMethodName    = "/zenx.exercise.v1.ExerciseService/GetExercise"
 	ExerciseService_ListExercises_FullMethodName  = "/zenx.exercise.v1.ExerciseService/ListExercises"
 )
@@ -29,6 +32,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ExerciseServiceClient interface {
 	CreateExercise(ctx context.Context, in *CreateExerciseRequest, opts ...grpc.CallOption) (*Exercise, error)
+	UpdateExercise(ctx context.Context, in *UpdateExerciseRequest, opts ...grpc.CallOption) (*Exercise, error)
+	DeleteExercise(ctx context.Context, in *DeleteExerciseRequest, opts ...grpc.CallOption) (*v1.Empty, error)
 	GetExercise(ctx context.Context, in *GetExerciseRequest, opts ...grpc.CallOption) (*Exercise, error)
 	ListExercises(ctx context.Context, in *ListExercisesRequest, opts ...grpc.CallOption) (*ListExercisesResponse, error)
 }
@@ -45,6 +50,26 @@ func (c *exerciseServiceClient) CreateExercise(ctx context.Context, in *CreateEx
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Exercise)
 	err := c.cc.Invoke(ctx, ExerciseService_CreateExercise_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *exerciseServiceClient) UpdateExercise(ctx context.Context, in *UpdateExerciseRequest, opts ...grpc.CallOption) (*Exercise, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Exercise)
+	err := c.cc.Invoke(ctx, ExerciseService_UpdateExercise_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *exerciseServiceClient) DeleteExercise(ctx context.Context, in *DeleteExerciseRequest, opts ...grpc.CallOption) (*v1.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Empty)
+	err := c.cc.Invoke(ctx, ExerciseService_DeleteExercise_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -76,6 +101,8 @@ func (c *exerciseServiceClient) ListExercises(ctx context.Context, in *ListExerc
 // for forward compatibility.
 type ExerciseServiceServer interface {
 	CreateExercise(context.Context, *CreateExerciseRequest) (*Exercise, error)
+	UpdateExercise(context.Context, *UpdateExerciseRequest) (*Exercise, error)
+	DeleteExercise(context.Context, *DeleteExerciseRequest) (*v1.Empty, error)
 	GetExercise(context.Context, *GetExerciseRequest) (*Exercise, error)
 	ListExercises(context.Context, *ListExercisesRequest) (*ListExercisesResponse, error)
 	mustEmbedUnimplementedExerciseServiceServer()
@@ -90,6 +117,12 @@ type UnimplementedExerciseServiceServer struct{}
 
 func (UnimplementedExerciseServiceServer) CreateExercise(context.Context, *CreateExerciseRequest) (*Exercise, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateExercise not implemented")
+}
+func (UnimplementedExerciseServiceServer) UpdateExercise(context.Context, *UpdateExerciseRequest) (*Exercise, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateExercise not implemented")
+}
+func (UnimplementedExerciseServiceServer) DeleteExercise(context.Context, *DeleteExerciseRequest) (*v1.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteExercise not implemented")
 }
 func (UnimplementedExerciseServiceServer) GetExercise(context.Context, *GetExerciseRequest) (*Exercise, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetExercise not implemented")
@@ -132,6 +165,42 @@ func _ExerciseService_CreateExercise_Handler(srv interface{}, ctx context.Contex
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ExerciseServiceServer).CreateExercise(ctx, req.(*CreateExerciseRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ExerciseService_UpdateExercise_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateExerciseRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExerciseServiceServer).UpdateExercise(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExerciseService_UpdateExercise_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExerciseServiceServer).UpdateExercise(ctx, req.(*UpdateExerciseRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ExerciseService_DeleteExercise_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteExerciseRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExerciseServiceServer).DeleteExercise(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExerciseService_DeleteExercise_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExerciseServiceServer).DeleteExercise(ctx, req.(*DeleteExerciseRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -182,6 +251,14 @@ var ExerciseService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateExercise",
 			Handler:    _ExerciseService_CreateExercise_Handler,
+		},
+		{
+			MethodName: "UpdateExercise",
+			Handler:    _ExerciseService_UpdateExercise_Handler,
+		},
+		{
+			MethodName: "DeleteExercise",
+			Handler:    _ExerciseService_DeleteExercise_Handler,
 		},
 		{
 			MethodName: "GetExercise",

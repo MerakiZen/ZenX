@@ -8,6 +8,7 @@ import (
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
+	v11 "github.com/zenx/backend/proto/common/v1"
 	v1 "github.com/zenx/backend/proto/profile/v1"
 	http "net/http"
 	strings "strings"
@@ -45,6 +46,9 @@ const (
 	// ProfileServiceListMeasurementsProcedure is the fully-qualified name of the ProfileService's
 	// ListMeasurements RPC.
 	ProfileServiceListMeasurementsProcedure = "/zenx.profile.v1.ProfileService/ListMeasurements"
+	// ProfileServiceDeleteProfileProcedure is the fully-qualified name of the ProfileService's
+	// DeleteProfile RPC.
+	ProfileServiceDeleteProfileProcedure = "/zenx.profile.v1.ProfileService/DeleteProfile"
 )
 
 // ProfileServiceClient is a client for the zenx.profile.v1.ProfileService service.
@@ -53,6 +57,7 @@ type ProfileServiceClient interface {
 	UpdateProfile(context.Context, *connect.Request[v1.UpdateProfileRequest]) (*connect.Response[v1.Profile], error)
 	RecordMeasurement(context.Context, *connect.Request[v1.RecordMeasurementRequest]) (*connect.Response[v1.Measurement], error)
 	ListMeasurements(context.Context, *connect.Request[v1.ListMeasurementsRequest]) (*connect.Response[v1.ListMeasurementsResponse], error)
+	DeleteProfile(context.Context, *connect.Request[v1.DeleteProfileRequest]) (*connect.Response[v11.Empty], error)
 }
 
 // NewProfileServiceClient constructs a client for the zenx.profile.v1.ProfileService service. By
@@ -90,6 +95,12 @@ func NewProfileServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithSchema(profileServiceMethods.ByName("ListMeasurements")),
 			connect.WithClientOptions(opts...),
 		),
+		deleteProfile: connect.NewClient[v1.DeleteProfileRequest, v11.Empty](
+			httpClient,
+			baseURL+ProfileServiceDeleteProfileProcedure,
+			connect.WithSchema(profileServiceMethods.ByName("DeleteProfile")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -99,6 +110,7 @@ type profileServiceClient struct {
 	updateProfile     *connect.Client[v1.UpdateProfileRequest, v1.Profile]
 	recordMeasurement *connect.Client[v1.RecordMeasurementRequest, v1.Measurement]
 	listMeasurements  *connect.Client[v1.ListMeasurementsRequest, v1.ListMeasurementsResponse]
+	deleteProfile     *connect.Client[v1.DeleteProfileRequest, v11.Empty]
 }
 
 // GetProfile calls zenx.profile.v1.ProfileService.GetProfile.
@@ -121,12 +133,18 @@ func (c *profileServiceClient) ListMeasurements(ctx context.Context, req *connec
 	return c.listMeasurements.CallUnary(ctx, req)
 }
 
+// DeleteProfile calls zenx.profile.v1.ProfileService.DeleteProfile.
+func (c *profileServiceClient) DeleteProfile(ctx context.Context, req *connect.Request[v1.DeleteProfileRequest]) (*connect.Response[v11.Empty], error) {
+	return c.deleteProfile.CallUnary(ctx, req)
+}
+
 // ProfileServiceHandler is an implementation of the zenx.profile.v1.ProfileService service.
 type ProfileServiceHandler interface {
 	GetProfile(context.Context, *connect.Request[v1.GetProfileRequest]) (*connect.Response[v1.GetProfileResponse], error)
 	UpdateProfile(context.Context, *connect.Request[v1.UpdateProfileRequest]) (*connect.Response[v1.Profile], error)
 	RecordMeasurement(context.Context, *connect.Request[v1.RecordMeasurementRequest]) (*connect.Response[v1.Measurement], error)
 	ListMeasurements(context.Context, *connect.Request[v1.ListMeasurementsRequest]) (*connect.Response[v1.ListMeasurementsResponse], error)
+	DeleteProfile(context.Context, *connect.Request[v1.DeleteProfileRequest]) (*connect.Response[v11.Empty], error)
 }
 
 // NewProfileServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -160,6 +178,12 @@ func NewProfileServiceHandler(svc ProfileServiceHandler, opts ...connect.Handler
 		connect.WithSchema(profileServiceMethods.ByName("ListMeasurements")),
 		connect.WithHandlerOptions(opts...),
 	)
+	profileServiceDeleteProfileHandler := connect.NewUnaryHandler(
+		ProfileServiceDeleteProfileProcedure,
+		svc.DeleteProfile,
+		connect.WithSchema(profileServiceMethods.ByName("DeleteProfile")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/zenx.profile.v1.ProfileService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ProfileServiceGetProfileProcedure:
@@ -170,6 +194,8 @@ func NewProfileServiceHandler(svc ProfileServiceHandler, opts ...connect.Handler
 			profileServiceRecordMeasurementHandler.ServeHTTP(w, r)
 		case ProfileServiceListMeasurementsProcedure:
 			profileServiceListMeasurementsHandler.ServeHTTP(w, r)
+		case ProfileServiceDeleteProfileProcedure:
+			profileServiceDeleteProfileHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -193,4 +219,8 @@ func (UnimplementedProfileServiceHandler) RecordMeasurement(context.Context, *co
 
 func (UnimplementedProfileServiceHandler) ListMeasurements(context.Context, *connect.Request[v1.ListMeasurementsRequest]) (*connect.Response[v1.ListMeasurementsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenx.profile.v1.ProfileService.ListMeasurements is not implemented"))
+}
+
+func (UnimplementedProfileServiceHandler) DeleteProfile(context.Context, *connect.Request[v1.DeleteProfileRequest]) (*connect.Response[v11.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenx.profile.v1.ProfileService.DeleteProfile is not implemented"))
 }

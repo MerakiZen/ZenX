@@ -8,6 +8,7 @@ package workoutv1
 
 import (
 	context "context"
+	v1 "github.com/zenx/backend/proto/common/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -19,15 +20,18 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	WorkoutService_CreateWorkout_FullMethodName    = "/zenx.workout.v1.WorkoutService/CreateWorkout"
-	WorkoutService_GetWorkout_FullMethodName       = "/zenx.workout.v1.WorkoutService/GetWorkout"
-	WorkoutService_ListWorkouts_FullMethodName     = "/zenx.workout.v1.WorkoutService/ListWorkouts"
-	WorkoutService_ListFeedPosts_FullMethodName    = "/zenx.workout.v1.WorkoutService/ListFeedPosts"
-	WorkoutService_GetFeedPost_FullMethodName      = "/zenx.workout.v1.WorkoutService/GetFeedPost"
-	WorkoutService_ToggleFeedLike_FullMethodName   = "/zenx.workout.v1.WorkoutService/ToggleFeedLike"
-	WorkoutService_AddFeedComment_FullMethodName   = "/zenx.workout.v1.WorkoutService/AddFeedComment"
-	WorkoutService_ListFeedComments_FullMethodName = "/zenx.workout.v1.WorkoutService/ListFeedComments"
-	WorkoutService_StreamWorkout_FullMethodName    = "/zenx.workout.v1.WorkoutService/StreamWorkout"
+	WorkoutService_CreateWorkout_FullMethodName     = "/zenx.workout.v1.WorkoutService/CreateWorkout"
+	WorkoutService_UpdateWorkout_FullMethodName     = "/zenx.workout.v1.WorkoutService/UpdateWorkout"
+	WorkoutService_DeleteWorkout_FullMethodName     = "/zenx.workout.v1.WorkoutService/DeleteWorkout"
+	WorkoutService_GetWorkout_FullMethodName        = "/zenx.workout.v1.WorkoutService/GetWorkout"
+	WorkoutService_ListWorkouts_FullMethodName      = "/zenx.workout.v1.WorkoutService/ListWorkouts"
+	WorkoutService_ListFeedPosts_FullMethodName     = "/zenx.workout.v1.WorkoutService/ListFeedPosts"
+	WorkoutService_GetFeedPost_FullMethodName       = "/zenx.workout.v1.WorkoutService/GetFeedPost"
+	WorkoutService_ToggleFeedLike_FullMethodName    = "/zenx.workout.v1.WorkoutService/ToggleFeedLike"
+	WorkoutService_AddFeedComment_FullMethodName    = "/zenx.workout.v1.WorkoutService/AddFeedComment"
+	WorkoutService_ListFeedComments_FullMethodName  = "/zenx.workout.v1.WorkoutService/ListFeedComments"
+	WorkoutService_DeleteFeedComment_FullMethodName = "/zenx.workout.v1.WorkoutService/DeleteFeedComment"
+	WorkoutService_StreamWorkout_FullMethodName     = "/zenx.workout.v1.WorkoutService/StreamWorkout"
 )
 
 // WorkoutServiceClient is the client API for WorkoutService service.
@@ -35,6 +39,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WorkoutServiceClient interface {
 	CreateWorkout(ctx context.Context, in *CreateWorkoutRequest, opts ...grpc.CallOption) (*CreateWorkoutResponse, error)
+	UpdateWorkout(ctx context.Context, in *UpdateWorkoutRequest, opts ...grpc.CallOption) (*Workout, error)
+	DeleteWorkout(ctx context.Context, in *DeleteWorkoutRequest, opts ...grpc.CallOption) (*v1.Empty, error)
 	GetWorkout(ctx context.Context, in *GetWorkoutRequest, opts ...grpc.CallOption) (*GetWorkoutResponse, error)
 	ListWorkouts(ctx context.Context, in *ListWorkoutsRequest, opts ...grpc.CallOption) (*ListWorkoutsResponse, error)
 	ListFeedPosts(ctx context.Context, in *ListFeedPostsRequest, opts ...grpc.CallOption) (*ListFeedPostsResponse, error)
@@ -42,6 +48,7 @@ type WorkoutServiceClient interface {
 	ToggleFeedLike(ctx context.Context, in *ToggleFeedLikeRequest, opts ...grpc.CallOption) (*ToggleFeedLikeResponse, error)
 	AddFeedComment(ctx context.Context, in *AddFeedCommentRequest, opts ...grpc.CallOption) (*FeedComment, error)
 	ListFeedComments(ctx context.Context, in *ListFeedCommentsRequest, opts ...grpc.CallOption) (*ListFeedCommentsResponse, error)
+	DeleteFeedComment(ctx context.Context, in *DeleteFeedCommentRequest, opts ...grpc.CallOption) (*v1.Empty, error)
 	StreamWorkout(ctx context.Context, in *StreamWorkoutRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[WorkoutUpdate], error)
 }
 
@@ -57,6 +64,26 @@ func (c *workoutServiceClient) CreateWorkout(ctx context.Context, in *CreateWork
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CreateWorkoutResponse)
 	err := c.cc.Invoke(ctx, WorkoutService_CreateWorkout_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *workoutServiceClient) UpdateWorkout(ctx context.Context, in *UpdateWorkoutRequest, opts ...grpc.CallOption) (*Workout, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Workout)
+	err := c.cc.Invoke(ctx, WorkoutService_UpdateWorkout_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *workoutServiceClient) DeleteWorkout(ctx context.Context, in *DeleteWorkoutRequest, opts ...grpc.CallOption) (*v1.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Empty)
+	err := c.cc.Invoke(ctx, WorkoutService_DeleteWorkout_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -133,6 +160,16 @@ func (c *workoutServiceClient) ListFeedComments(ctx context.Context, in *ListFee
 	return out, nil
 }
 
+func (c *workoutServiceClient) DeleteFeedComment(ctx context.Context, in *DeleteFeedCommentRequest, opts ...grpc.CallOption) (*v1.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Empty)
+	err := c.cc.Invoke(ctx, WorkoutService_DeleteFeedComment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *workoutServiceClient) StreamWorkout(ctx context.Context, in *StreamWorkoutRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[WorkoutUpdate], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	stream, err := c.cc.NewStream(ctx, &WorkoutService_ServiceDesc.Streams[0], WorkoutService_StreamWorkout_FullMethodName, cOpts...)
@@ -157,6 +194,8 @@ type WorkoutService_StreamWorkoutClient = grpc.ServerStreamingClient[WorkoutUpda
 // for forward compatibility.
 type WorkoutServiceServer interface {
 	CreateWorkout(context.Context, *CreateWorkoutRequest) (*CreateWorkoutResponse, error)
+	UpdateWorkout(context.Context, *UpdateWorkoutRequest) (*Workout, error)
+	DeleteWorkout(context.Context, *DeleteWorkoutRequest) (*v1.Empty, error)
 	GetWorkout(context.Context, *GetWorkoutRequest) (*GetWorkoutResponse, error)
 	ListWorkouts(context.Context, *ListWorkoutsRequest) (*ListWorkoutsResponse, error)
 	ListFeedPosts(context.Context, *ListFeedPostsRequest) (*ListFeedPostsResponse, error)
@@ -164,6 +203,7 @@ type WorkoutServiceServer interface {
 	ToggleFeedLike(context.Context, *ToggleFeedLikeRequest) (*ToggleFeedLikeResponse, error)
 	AddFeedComment(context.Context, *AddFeedCommentRequest) (*FeedComment, error)
 	ListFeedComments(context.Context, *ListFeedCommentsRequest) (*ListFeedCommentsResponse, error)
+	DeleteFeedComment(context.Context, *DeleteFeedCommentRequest) (*v1.Empty, error)
 	StreamWorkout(*StreamWorkoutRequest, grpc.ServerStreamingServer[WorkoutUpdate]) error
 	mustEmbedUnimplementedWorkoutServiceServer()
 }
@@ -177,6 +217,12 @@ type UnimplementedWorkoutServiceServer struct{}
 
 func (UnimplementedWorkoutServiceServer) CreateWorkout(context.Context, *CreateWorkoutRequest) (*CreateWorkoutResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateWorkout not implemented")
+}
+func (UnimplementedWorkoutServiceServer) UpdateWorkout(context.Context, *UpdateWorkoutRequest) (*Workout, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateWorkout not implemented")
+}
+func (UnimplementedWorkoutServiceServer) DeleteWorkout(context.Context, *DeleteWorkoutRequest) (*v1.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteWorkout not implemented")
 }
 func (UnimplementedWorkoutServiceServer) GetWorkout(context.Context, *GetWorkoutRequest) (*GetWorkoutResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetWorkout not implemented")
@@ -198,6 +244,9 @@ func (UnimplementedWorkoutServiceServer) AddFeedComment(context.Context, *AddFee
 }
 func (UnimplementedWorkoutServiceServer) ListFeedComments(context.Context, *ListFeedCommentsRequest) (*ListFeedCommentsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListFeedComments not implemented")
+}
+func (UnimplementedWorkoutServiceServer) DeleteFeedComment(context.Context, *DeleteFeedCommentRequest) (*v1.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteFeedComment not implemented")
 }
 func (UnimplementedWorkoutServiceServer) StreamWorkout(*StreamWorkoutRequest, grpc.ServerStreamingServer[WorkoutUpdate]) error {
 	return status.Error(codes.Unimplemented, "method StreamWorkout not implemented")
@@ -237,6 +286,42 @@ func _WorkoutService_CreateWorkout_Handler(srv interface{}, ctx context.Context,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(WorkoutServiceServer).CreateWorkout(ctx, req.(*CreateWorkoutRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WorkoutService_UpdateWorkout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateWorkoutRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkoutServiceServer).UpdateWorkout(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkoutService_UpdateWorkout_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkoutServiceServer).UpdateWorkout(ctx, req.(*UpdateWorkoutRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WorkoutService_DeleteWorkout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteWorkoutRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkoutServiceServer).DeleteWorkout(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkoutService_DeleteWorkout_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkoutServiceServer).DeleteWorkout(ctx, req.(*DeleteWorkoutRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -367,6 +452,24 @@ func _WorkoutService_ListFeedComments_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WorkoutService_DeleteFeedComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteFeedCommentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkoutServiceServer).DeleteFeedComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkoutService_DeleteFeedComment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkoutServiceServer).DeleteFeedComment(ctx, req.(*DeleteFeedCommentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _WorkoutService_StreamWorkout_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(StreamWorkoutRequest)
 	if err := stream.RecvMsg(m); err != nil {
@@ -388,6 +491,14 @@ var WorkoutService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateWorkout",
 			Handler:    _WorkoutService_CreateWorkout_Handler,
+		},
+		{
+			MethodName: "UpdateWorkout",
+			Handler:    _WorkoutService_UpdateWorkout_Handler,
+		},
+		{
+			MethodName: "DeleteWorkout",
+			Handler:    _WorkoutService_DeleteWorkout_Handler,
 		},
 		{
 			MethodName: "GetWorkout",
@@ -416,6 +527,10 @@ var WorkoutService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListFeedComments",
 			Handler:    _WorkoutService_ListFeedComments_Handler,
+		},
+		{
+			MethodName: "DeleteFeedComment",
+			Handler:    _WorkoutService_DeleteFeedComment_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

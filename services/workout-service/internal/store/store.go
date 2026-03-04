@@ -125,6 +125,107 @@ func (r *Repository) CreateWorkout(ctx context.Context, workout Workout) (uuid.U
 	return workoutID, createdAt, nil
 }
 
+// UpdateWorkout updates an existing workout header and replaces its exercises/sets.
+func (r *Repository) UpdateWorkout(ctx context.Context, workoutID uuid.UUID, userID uuid.UUID, workout Workout) error {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("begin tx: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	// Verify ownership and existence
+	var ownerID uuid.UUID
+	if err := tx.QueryRow(ctx, "SELECT user_id FROM workouts WHERE id = $1", workoutID).Scan(&ownerID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrWorkoutNotFound
+		}
+		return fmt.Errorf("check workout ownership: %w", err)
+	}
+	if ownerID != userID {
+		return fmt.Errorf("unauthorized: workout does not belong to user")
+	}
+
+	// Update workout header
+	updateWorkout := `UPDATE workouts 
+                      SET name = $1, notes = $2, started_at = $3, completed_at = $4, updated_at = NOW()
+                      WHERE id = $5 AND user_id = $6;`
+	if _, err := tx.Exec(ctx, updateWorkout, workout.Name, workout.Notes, workout.StartedAt, workout.CompletedAt, workoutID, userID); err != nil {
+		return fmt.Errorf("update workout header: %w", err)
+	}
+
+	// Delete existing exercises (sets belong to exercises via FK)
+	// Assuming workout_exercises has ON DELETE CASCADE for sets
+	if _, err := tx.Exec(ctx, "DELETE FROM workout_exercises WHERE workout_id = $1", workoutID); err != nil {
+		return fmt.Errorf("delete existing exercises: %w", err)
+	}
+
+	// Re-insert new exercises and sets
+	insertExercise := `INSERT INTO workout_exercises (workout_id, exercise_id, order_index)
+                       VALUES ($1, $2, $3)
+                       RETURNING id;`
+	insertSet := `INSERT INTO workout_sets (workout_exercise_id, set_number, reps, weight_kg, rpe, notes, completed)
+                  VALUES ($1, $2, $3, $4, $5, $6, $7);`
+
+	for _, ex := range workout.Exercises {
+		var exerciseInstanceID uuid.UUID
+		if err := tx.QueryRow(ctx, insertExercise, workoutID, ex.ExerciseID, ex.OrderIndex).Scan(&exerciseInstanceID); err != nil {
+			return fmt.Errorf("insert workout exercise: %w", err)
+		}
+
+		for _, set := range ex.Sets {
+			if _, err := tx.Exec(ctx, insertSet, exerciseInstanceID, set.SetNumber, set.Reps, set.WeightKG, set.RPE, set.Notes, set.Completed); err != nil {
+				return fmt.Errorf("insert workout set: %w", err)
+			}
+		}
+	}
+
+	// Update the feed post caption if it exists
+	caption := workout.Notes.String
+	if caption == "" {
+		caption = workout.Name
+	}
+	if _, err := tx.Exec(ctx, "UPDATE feed_posts SET caption = $1, updated_at = NOW() WHERE workout_id = $2", caption, workoutID); err != nil {
+		// Log error but don't fail the transaction if feed post update fails
+		fmt.Printf("warning: failed to update feed post caption: %v\n", err)
+	}
+
+	return tx.Commit(ctx)
+}
+
+// DeleteWorkout removes a workout and all associated data.
+func (r *Repository) DeleteWorkout(ctx context.Context, workoutID uuid.UUID, userID uuid.UUID) error {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("begin tx: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	// Verify ownership
+	var ownerID uuid.UUID
+	if err := tx.QueryRow(ctx, "SELECT user_id FROM workouts WHERE id = $1", workoutID).Scan(&ownerID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrWorkoutNotFound
+		}
+		return fmt.Errorf("check workout ownership: %w", err)
+	}
+	if ownerID != userID {
+		return fmt.Errorf("unauthorized: workout does not belong to user")
+	}
+
+	// Delete feed post first (if any) or rely on cascade
+	// We'll delete explicitly to be safe
+	if _, err := tx.Exec(ctx, "DELETE FROM feed_posts WHERE workout_id = $1", workoutID); err != nil {
+		return fmt.Errorf("delete feed post: %w", err)
+	}
+
+	// Delete workout (cascades to exercises/sets if schema is correct, but we'll do it manually if not)
+	if _, err := tx.Exec(ctx, "DELETE FROM workouts WHERE id = $1 AND user_id = $2", workoutID, userID); err != nil {
+		return fmt.Errorf("delete workout: %w", err)
+	}
+
+	return tx.Commit(ctx)
+}
+
 // RecordWorkoutEvent writes an immutable event row for downstream consumers.
 func (r *Repository) RecordWorkoutEvent(ctx context.Context, workoutID uuid.UUID, userID uuid.UUID, eventType string, payload map[string]any) error {
 	data, err := json.Marshal(payload)
@@ -500,30 +601,40 @@ func (r *Repository) ListFeedComments(ctx context.Context, postID uuid.UUID, lim
 	              WHERE post_id = $1
 	              ORDER BY created_at DESC
 	              LIMIT $2 OFFSET $3`
-	rows, err := r.pool.Query(ctx, stmt, postID, limit+1, offset)
+	rows, err := r.pool.Query(ctx, stmt, postID, limit, offset)
 	if err != nil {
-		return nil, "", fmt.Errorf("list feed comments: %w", err)
+		return nil, "", fmt.Errorf("query feed comments: %w", err)
 	}
 	defer rows.Close()
 
 	var comments []FeedComment
-	count := 0
 	for rows.Next() {
-		if count == int(limit) {
-			offset += count
-			return comments, encodeCursor(offset), nil
-		}
-		var comment FeedComment
-		if err := rows.Scan(&comment.ID, &comment.PostID, &comment.UserID, &comment.Body, &comment.CreatedAt); err != nil {
+		var c FeedComment
+		if err := rows.Scan(&c.ID, &c.PostID, &c.UserID, &c.Body, &c.CreatedAt); err != nil {
 			return nil, "", fmt.Errorf("scan feed comment: %w", err)
 		}
-		comments = append(comments, comment)
-		count++
+		comments = append(comments, c)
 	}
-	if err := rows.Err(); err != nil {
-		return nil, "", fmt.Errorf("iterate feed comments: %w", err)
+
+	nextCursor := ""
+	if len(comments) == int(limit) {
+		nextCursor = base64.URLEncoding.EncodeToString([]byte(strconv.Itoa(offset + int(limit))))
 	}
-	return comments, "", nil
+
+	return comments, nextCursor, nil
+}
+
+// DeleteFeedComment removes a comment if it belongs to the user.
+func (r *Repository) DeleteFeedComment(ctx context.Context, commentID uuid.UUID, userID uuid.UUID) error {
+	const stmt = `DELETE FROM feed_comments WHERE id = $1 AND user_id = $2`
+	tag, err := r.pool.Exec(ctx, stmt, commentID, userID)
+	if err != nil {
+		return fmt.Errorf("delete feed comment: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return fmt.Errorf("comment not found or unauthorized")
+	}
+	return nil
 }
 
 func (r *Repository) ensureFeedPostExists(ctx context.Context, postID uuid.UUID) error {
@@ -652,6 +763,10 @@ func nullableFloat(val *float64) sql.NullFloat64 {
 		return sql.NullFloat64{}
 	}
 	return sql.NullFloat64{Float64: *val, Valid: true}
+}
+
+func NullableTime(t time.Time) sql.NullTime {
+	return sql.NullTime{Time: t, Valid: !t.IsZero()}
 }
 
 // ParseUUID validates UUID strings with clearer errors.

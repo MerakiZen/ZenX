@@ -11,6 +11,11 @@ service ProfileService {
   rpc UpdateProfile(UpdateProfileRequest) returns (Profile);
   rpc RecordMeasurement(RecordMeasurementRequest) returns (Measurement);
   rpc ListMeasurements(ListMeasurementsRequest) returns (ListMeasurementsResponse);
+  rpc DeleteProfile(DeleteProfileRequest) returns (common.v1.Empty);
+}
+
+message DeleteProfileRequest {
+  string user_id = 1;
 }
 
 message Profile {

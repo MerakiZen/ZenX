@@ -22,6 +22,58 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type DeleteFeedCommentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CommentId     string                 `protobuf:"bytes,1,opt,name=comment_id,json=commentId,proto3" json:"comment_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteFeedCommentRequest) Reset() {
+	*x = DeleteFeedCommentRequest{}
+	mi := &file_workout_v1_workout_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteFeedCommentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteFeedCommentRequest) ProtoMessage() {}
+
+func (x *DeleteFeedCommentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_workout_v1_workout_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteFeedCommentRequest.ProtoReflect.Descriptor instead.
+func (*DeleteFeedCommentRequest) Descriptor() ([]byte, []int) {
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *DeleteFeedCommentRequest) GetCommentId() string {
+	if x != nil {
+		return x.CommentId
+	}
+	return ""
+}
+
+func (x *DeleteFeedCommentRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
 type WorkoutExercise struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ExerciseId    string                 `protobuf:"bytes,1,opt,name=exercise_id,json=exerciseId,proto3" json:"exercise_id,omitempty"`
@@ -33,7 +85,7 @@ type WorkoutExercise struct {
 
 func (x *WorkoutExercise) Reset() {
 	*x = WorkoutExercise{}
-	mi := &file_workout_v1_workout_proto_msgTypes[0]
+	mi := &file_workout_v1_workout_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -45,7 +97,7 @@ func (x *WorkoutExercise) String() string {
 func (*WorkoutExercise) ProtoMessage() {}
 
 func (x *WorkoutExercise) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[0]
+	mi := &file_workout_v1_workout_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -58,7 +110,7 @@ func (x *WorkoutExercise) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WorkoutExercise.ProtoReflect.Descriptor instead.
 func (*WorkoutExercise) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{0}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *WorkoutExercise) GetExerciseId() string {
@@ -96,7 +148,7 @@ type WorkoutSet struct {
 
 func (x *WorkoutSet) Reset() {
 	*x = WorkoutSet{}
-	mi := &file_workout_v1_workout_proto_msgTypes[1]
+	mi := &file_workout_v1_workout_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -108,7 +160,7 @@ func (x *WorkoutSet) String() string {
 func (*WorkoutSet) ProtoMessage() {}
 
 func (x *WorkoutSet) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[1]
+	mi := &file_workout_v1_workout_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -121,7 +173,7 @@ func (x *WorkoutSet) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WorkoutSet.ProtoReflect.Descriptor instead.
 func (*WorkoutSet) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{1}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *WorkoutSet) GetSetNumber() int32 {
@@ -178,7 +230,7 @@ type CreateWorkoutRequest struct {
 
 func (x *CreateWorkoutRequest) Reset() {
 	*x = CreateWorkoutRequest{}
-	mi := &file_workout_v1_workout_proto_msgTypes[2]
+	mi := &file_workout_v1_workout_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -190,7 +242,7 @@ func (x *CreateWorkoutRequest) String() string {
 func (*CreateWorkoutRequest) ProtoMessage() {}
 
 func (x *CreateWorkoutRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[2]
+	mi := &file_workout_v1_workout_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -203,7 +255,7 @@ func (x *CreateWorkoutRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateWorkoutRequest.ProtoReflect.Descriptor instead.
 func (*CreateWorkoutRequest) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{2}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CreateWorkoutRequest) GetUserId() string {
@@ -244,7 +296,7 @@ type CreateWorkoutResponse struct {
 
 func (x *CreateWorkoutResponse) Reset() {
 	*x = CreateWorkoutResponse{}
-	mi := &file_workout_v1_workout_proto_msgTypes[3]
+	mi := &file_workout_v1_workout_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -256,7 +308,7 @@ func (x *CreateWorkoutResponse) String() string {
 func (*CreateWorkoutResponse) ProtoMessage() {}
 
 func (x *CreateWorkoutResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[3]
+	mi := &file_workout_v1_workout_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -269,7 +321,7 @@ func (x *CreateWorkoutResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateWorkoutResponse.ProtoReflect.Descriptor instead.
 func (*CreateWorkoutResponse) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{3}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *CreateWorkoutResponse) GetWorkoutId() string {
@@ -286,6 +338,150 @@ func (x *CreateWorkoutResponse) GetCreatedAt() int64 {
 	return 0
 }
 
+type UpdateWorkoutRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	WorkoutId     string                 `protobuf:"bytes,1,opt,name=workout_id,json=workoutId,proto3" json:"workout_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Notes         string                 `protobuf:"bytes,4,opt,name=notes,proto3" json:"notes,omitempty"`
+	Exercises     []*WorkoutExercise     `protobuf:"bytes,5,rep,name=exercises,proto3" json:"exercises,omitempty"`
+	StartedAt     int64                  `protobuf:"varint,6,opt,name=started_at,json=startedAt,proto3" json:"started_at,omitempty"`
+	CompletedAt   int64                  `protobuf:"varint,7,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateWorkoutRequest) Reset() {
+	*x = UpdateWorkoutRequest{}
+	mi := &file_workout_v1_workout_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateWorkoutRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateWorkoutRequest) ProtoMessage() {}
+
+func (x *UpdateWorkoutRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_workout_v1_workout_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateWorkoutRequest.ProtoReflect.Descriptor instead.
+func (*UpdateWorkoutRequest) Descriptor() ([]byte, []int) {
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *UpdateWorkoutRequest) GetWorkoutId() string {
+	if x != nil {
+		return x.WorkoutId
+	}
+	return ""
+}
+
+func (x *UpdateWorkoutRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *UpdateWorkoutRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateWorkoutRequest) GetNotes() string {
+	if x != nil {
+		return x.Notes
+	}
+	return ""
+}
+
+func (x *UpdateWorkoutRequest) GetExercises() []*WorkoutExercise {
+	if x != nil {
+		return x.Exercises
+	}
+	return nil
+}
+
+func (x *UpdateWorkoutRequest) GetStartedAt() int64 {
+	if x != nil {
+		return x.StartedAt
+	}
+	return 0
+}
+
+func (x *UpdateWorkoutRequest) GetCompletedAt() int64 {
+	if x != nil {
+		return x.CompletedAt
+	}
+	return 0
+}
+
+type DeleteWorkoutRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	WorkoutId     string                 `protobuf:"bytes,1,opt,name=workout_id,json=workoutId,proto3" json:"workout_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteWorkoutRequest) Reset() {
+	*x = DeleteWorkoutRequest{}
+	mi := &file_workout_v1_workout_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteWorkoutRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteWorkoutRequest) ProtoMessage() {}
+
+func (x *DeleteWorkoutRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_workout_v1_workout_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteWorkoutRequest.ProtoReflect.Descriptor instead.
+func (*DeleteWorkoutRequest) Descriptor() ([]byte, []int) {
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *DeleteWorkoutRequest) GetWorkoutId() string {
+	if x != nil {
+		return x.WorkoutId
+	}
+	return ""
+}
+
+func (x *DeleteWorkoutRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
 type GetWorkoutRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	WorkoutId     string                 `protobuf:"bytes,1,opt,name=workout_id,json=workoutId,proto3" json:"workout_id,omitempty"`
@@ -295,7 +491,7 @@ type GetWorkoutRequest struct {
 
 func (x *GetWorkoutRequest) Reset() {
 	*x = GetWorkoutRequest{}
-	mi := &file_workout_v1_workout_proto_msgTypes[4]
+	mi := &file_workout_v1_workout_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -307,7 +503,7 @@ func (x *GetWorkoutRequest) String() string {
 func (*GetWorkoutRequest) ProtoMessage() {}
 
 func (x *GetWorkoutRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[4]
+	mi := &file_workout_v1_workout_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -320,7 +516,7 @@ func (x *GetWorkoutRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetWorkoutRequest.ProtoReflect.Descriptor instead.
 func (*GetWorkoutRequest) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{4}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetWorkoutRequest) GetWorkoutId() string {
@@ -339,7 +535,7 @@ type GetWorkoutResponse struct {
 
 func (x *GetWorkoutResponse) Reset() {
 	*x = GetWorkoutResponse{}
-	mi := &file_workout_v1_workout_proto_msgTypes[5]
+	mi := &file_workout_v1_workout_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -351,7 +547,7 @@ func (x *GetWorkoutResponse) String() string {
 func (*GetWorkoutResponse) ProtoMessage() {}
 
 func (x *GetWorkoutResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[5]
+	mi := &file_workout_v1_workout_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -364,7 +560,7 @@ func (x *GetWorkoutResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetWorkoutResponse.ProtoReflect.Descriptor instead.
 func (*GetWorkoutResponse) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{5}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *GetWorkoutResponse) GetWorkout() *Workout {
@@ -384,7 +580,7 @@ type ListWorkoutsRequest struct {
 
 func (x *ListWorkoutsRequest) Reset() {
 	*x = ListWorkoutsRequest{}
-	mi := &file_workout_v1_workout_proto_msgTypes[6]
+	mi := &file_workout_v1_workout_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -396,7 +592,7 @@ func (x *ListWorkoutsRequest) String() string {
 func (*ListWorkoutsRequest) ProtoMessage() {}
 
 func (x *ListWorkoutsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[6]
+	mi := &file_workout_v1_workout_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -409,7 +605,7 @@ func (x *ListWorkoutsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListWorkoutsRequest.ProtoReflect.Descriptor instead.
 func (*ListWorkoutsRequest) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{6}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *ListWorkoutsRequest) GetUserId() string {
@@ -436,7 +632,7 @@ type ListWorkoutsResponse struct {
 
 func (x *ListWorkoutsResponse) Reset() {
 	*x = ListWorkoutsResponse{}
-	mi := &file_workout_v1_workout_proto_msgTypes[7]
+	mi := &file_workout_v1_workout_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -448,7 +644,7 @@ func (x *ListWorkoutsResponse) String() string {
 func (*ListWorkoutsResponse) ProtoMessage() {}
 
 func (x *ListWorkoutsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[7]
+	mi := &file_workout_v1_workout_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -461,7 +657,7 @@ func (x *ListWorkoutsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListWorkoutsResponse.ProtoReflect.Descriptor instead.
 func (*ListWorkoutsResponse) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{7}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *ListWorkoutsResponse) GetWorkouts() []*Workout {
@@ -489,7 +685,7 @@ type ListFeedPostsRequest struct {
 
 func (x *ListFeedPostsRequest) Reset() {
 	*x = ListFeedPostsRequest{}
-	mi := &file_workout_v1_workout_proto_msgTypes[8]
+	mi := &file_workout_v1_workout_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -501,7 +697,7 @@ func (x *ListFeedPostsRequest) String() string {
 func (*ListFeedPostsRequest) ProtoMessage() {}
 
 func (x *ListFeedPostsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[8]
+	mi := &file_workout_v1_workout_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -514,7 +710,7 @@ func (x *ListFeedPostsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFeedPostsRequest.ProtoReflect.Descriptor instead.
 func (*ListFeedPostsRequest) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{8}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ListFeedPostsRequest) GetUserId() string {
@@ -548,7 +744,7 @@ type ListFeedPostsResponse struct {
 
 func (x *ListFeedPostsResponse) Reset() {
 	*x = ListFeedPostsResponse{}
-	mi := &file_workout_v1_workout_proto_msgTypes[9]
+	mi := &file_workout_v1_workout_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -560,7 +756,7 @@ func (x *ListFeedPostsResponse) String() string {
 func (*ListFeedPostsResponse) ProtoMessage() {}
 
 func (x *ListFeedPostsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[9]
+	mi := &file_workout_v1_workout_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -573,7 +769,7 @@ func (x *ListFeedPostsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFeedPostsResponse.ProtoReflect.Descriptor instead.
 func (*ListFeedPostsResponse) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{9}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ListFeedPostsResponse) GetPosts() []*FeedPost {
@@ -600,7 +796,7 @@ type GetFeedPostRequest struct {
 
 func (x *GetFeedPostRequest) Reset() {
 	*x = GetFeedPostRequest{}
-	mi := &file_workout_v1_workout_proto_msgTypes[10]
+	mi := &file_workout_v1_workout_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -612,7 +808,7 @@ func (x *GetFeedPostRequest) String() string {
 func (*GetFeedPostRequest) ProtoMessage() {}
 
 func (x *GetFeedPostRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[10]
+	mi := &file_workout_v1_workout_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -625,7 +821,7 @@ func (x *GetFeedPostRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFeedPostRequest.ProtoReflect.Descriptor instead.
 func (*GetFeedPostRequest) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{10}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *GetFeedPostRequest) GetPostId() string {
@@ -662,7 +858,7 @@ type FeedPost struct {
 
 func (x *FeedPost) Reset() {
 	*x = FeedPost{}
-	mi := &file_workout_v1_workout_proto_msgTypes[11]
+	mi := &file_workout_v1_workout_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -674,7 +870,7 @@ func (x *FeedPost) String() string {
 func (*FeedPost) ProtoMessage() {}
 
 func (x *FeedPost) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[11]
+	mi := &file_workout_v1_workout_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -687,7 +883,7 @@ func (x *FeedPost) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FeedPost.ProtoReflect.Descriptor instead.
 func (*FeedPost) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{11}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *FeedPost) GetId() string {
@@ -784,7 +980,7 @@ type ToggleFeedLikeRequest struct {
 
 func (x *ToggleFeedLikeRequest) Reset() {
 	*x = ToggleFeedLikeRequest{}
-	mi := &file_workout_v1_workout_proto_msgTypes[12]
+	mi := &file_workout_v1_workout_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -796,7 +992,7 @@ func (x *ToggleFeedLikeRequest) String() string {
 func (*ToggleFeedLikeRequest) ProtoMessage() {}
 
 func (x *ToggleFeedLikeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[12]
+	mi := &file_workout_v1_workout_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -809,7 +1005,7 @@ func (x *ToggleFeedLikeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ToggleFeedLikeRequest.ProtoReflect.Descriptor instead.
 func (*ToggleFeedLikeRequest) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{12}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *ToggleFeedLikeRequest) GetPostId() string {
@@ -836,7 +1032,7 @@ type ToggleFeedLikeResponse struct {
 
 func (x *ToggleFeedLikeResponse) Reset() {
 	*x = ToggleFeedLikeResponse{}
-	mi := &file_workout_v1_workout_proto_msgTypes[13]
+	mi := &file_workout_v1_workout_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -848,7 +1044,7 @@ func (x *ToggleFeedLikeResponse) String() string {
 func (*ToggleFeedLikeResponse) ProtoMessage() {}
 
 func (x *ToggleFeedLikeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[13]
+	mi := &file_workout_v1_workout_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -861,7 +1057,7 @@ func (x *ToggleFeedLikeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ToggleFeedLikeResponse.ProtoReflect.Descriptor instead.
 func (*ToggleFeedLikeResponse) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{13}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *ToggleFeedLikeResponse) GetLiked() bool {
@@ -889,7 +1085,7 @@ type AddFeedCommentRequest struct {
 
 func (x *AddFeedCommentRequest) Reset() {
 	*x = AddFeedCommentRequest{}
-	mi := &file_workout_v1_workout_proto_msgTypes[14]
+	mi := &file_workout_v1_workout_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -901,7 +1097,7 @@ func (x *AddFeedCommentRequest) String() string {
 func (*AddFeedCommentRequest) ProtoMessage() {}
 
 func (x *AddFeedCommentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[14]
+	mi := &file_workout_v1_workout_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -914,7 +1110,7 @@ func (x *AddFeedCommentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddFeedCommentRequest.ProtoReflect.Descriptor instead.
 func (*AddFeedCommentRequest) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{14}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *AddFeedCommentRequest) GetPostId() string {
@@ -951,7 +1147,7 @@ type FeedComment struct {
 
 func (x *FeedComment) Reset() {
 	*x = FeedComment{}
-	mi := &file_workout_v1_workout_proto_msgTypes[15]
+	mi := &file_workout_v1_workout_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -963,7 +1159,7 @@ func (x *FeedComment) String() string {
 func (*FeedComment) ProtoMessage() {}
 
 func (x *FeedComment) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[15]
+	mi := &file_workout_v1_workout_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -976,7 +1172,7 @@ func (x *FeedComment) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FeedComment.ProtoReflect.Descriptor instead.
 func (*FeedComment) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{15}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *FeedComment) GetId() string {
@@ -1024,7 +1220,7 @@ type ListFeedCommentsRequest struct {
 
 func (x *ListFeedCommentsRequest) Reset() {
 	*x = ListFeedCommentsRequest{}
-	mi := &file_workout_v1_workout_proto_msgTypes[16]
+	mi := &file_workout_v1_workout_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1036,7 +1232,7 @@ func (x *ListFeedCommentsRequest) String() string {
 func (*ListFeedCommentsRequest) ProtoMessage() {}
 
 func (x *ListFeedCommentsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[16]
+	mi := &file_workout_v1_workout_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1049,7 +1245,7 @@ func (x *ListFeedCommentsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFeedCommentsRequest.ProtoReflect.Descriptor instead.
 func (*ListFeedCommentsRequest) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{16}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *ListFeedCommentsRequest) GetPostId() string {
@@ -1076,7 +1272,7 @@ type ListFeedCommentsResponse struct {
 
 func (x *ListFeedCommentsResponse) Reset() {
 	*x = ListFeedCommentsResponse{}
-	mi := &file_workout_v1_workout_proto_msgTypes[17]
+	mi := &file_workout_v1_workout_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1088,7 +1284,7 @@ func (x *ListFeedCommentsResponse) String() string {
 func (*ListFeedCommentsResponse) ProtoMessage() {}
 
 func (x *ListFeedCommentsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[17]
+	mi := &file_workout_v1_workout_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1101,7 +1297,7 @@ func (x *ListFeedCommentsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFeedCommentsResponse.ProtoReflect.Descriptor instead.
 func (*ListFeedCommentsResponse) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{17}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ListFeedCommentsResponse) GetComments() []*FeedComment {
@@ -1127,7 +1323,7 @@ type StreamWorkoutRequest struct {
 
 func (x *StreamWorkoutRequest) Reset() {
 	*x = StreamWorkoutRequest{}
-	mi := &file_workout_v1_workout_proto_msgTypes[18]
+	mi := &file_workout_v1_workout_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1139,7 +1335,7 @@ func (x *StreamWorkoutRequest) String() string {
 func (*StreamWorkoutRequest) ProtoMessage() {}
 
 func (x *StreamWorkoutRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[18]
+	mi := &file_workout_v1_workout_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1152,7 +1348,7 @@ func (x *StreamWorkoutRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamWorkoutRequest.ProtoReflect.Descriptor instead.
 func (*StreamWorkoutRequest) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{18}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *StreamWorkoutRequest) GetWorkoutId() string {
@@ -1174,7 +1370,7 @@ type WorkoutUpdate struct {
 
 func (x *WorkoutUpdate) Reset() {
 	*x = WorkoutUpdate{}
-	mi := &file_workout_v1_workout_proto_msgTypes[19]
+	mi := &file_workout_v1_workout_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1186,7 +1382,7 @@ func (x *WorkoutUpdate) String() string {
 func (*WorkoutUpdate) ProtoMessage() {}
 
 func (x *WorkoutUpdate) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[19]
+	mi := &file_workout_v1_workout_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1199,7 +1395,7 @@ func (x *WorkoutUpdate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WorkoutUpdate.ProtoReflect.Descriptor instead.
 func (*WorkoutUpdate) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{19}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *WorkoutUpdate) GetWorkoutId() string {
@@ -1245,7 +1441,7 @@ type Workout struct {
 
 func (x *Workout) Reset() {
 	*x = Workout{}
-	mi := &file_workout_v1_workout_proto_msgTypes[20]
+	mi := &file_workout_v1_workout_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1257,7 +1453,7 @@ func (x *Workout) String() string {
 func (*Workout) ProtoMessage() {}
 
 func (x *Workout) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_v1_workout_proto_msgTypes[20]
+	mi := &file_workout_v1_workout_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1270,7 +1466,7 @@ func (x *Workout) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Workout.ProtoReflect.Descriptor instead.
 func (*Workout) Descriptor() ([]byte, []int) {
-	return file_workout_v1_workout_proto_rawDescGZIP(), []int{20}
+	return file_workout_v1_workout_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *Workout) GetId() string {
@@ -1326,7 +1522,11 @@ var File_workout_v1_workout_proto protoreflect.FileDescriptor
 
 const file_workout_v1_workout_proto_rawDesc = "" +
 	"\n" +
-	"\x18workout/v1/workout.proto\x12\x0fzenx.workout.v1\x1a\x16common/v1/common.proto\"y\n" +
+	"\x18workout/v1/workout.proto\x12\x0fzenx.workout.v1\x1a\x16common/v1/common.proto\"R\n" +
+	"\x18DeleteFeedCommentRequest\x12\x1d\n" +
+	"\n" +
+	"comment_id\x18\x01 \x01(\tR\tcommentId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"y\n" +
 	"\x0fWorkoutExercise\x12\x1f\n" +
 	"\vexercise_id\x18\x01 \x01(\tR\n" +
 	"exerciseId\x12\x14\n" +
@@ -1350,7 +1550,21 @@ const file_workout_v1_workout_proto_rawDesc = "" +
 	"\n" +
 	"workout_id\x18\x01 \x01(\tR\tworkoutId\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x02 \x01(\x03R\tcreatedAt\"2\n" +
+	"created_at\x18\x02 \x01(\x03R\tcreatedAt\"\xfa\x01\n" +
+	"\x14UpdateWorkoutRequest\x12\x1d\n" +
+	"\n" +
+	"workout_id\x18\x01 \x01(\tR\tworkoutId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x14\n" +
+	"\x05notes\x18\x04 \x01(\tR\x05notes\x12>\n" +
+	"\texercises\x18\x05 \x03(\v2 .zenx.workout.v1.WorkoutExerciseR\texercises\x12\x1d\n" +
+	"\n" +
+	"started_at\x18\x06 \x01(\x03R\tstartedAt\x12!\n" +
+	"\fcompleted_at\x18\a \x01(\x03R\vcompletedAt\"N\n" +
+	"\x14DeleteWorkoutRequest\x12\x1d\n" +
+	"\n" +
+	"workout_id\x18\x01 \x01(\tR\tworkoutId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"2\n" +
 	"\x11GetWorkoutRequest\x12\x1d\n" +
 	"\n" +
 	"workout_id\x18\x01 \x01(\tR\tworkoutId\"H\n" +
@@ -1441,9 +1655,11 @@ const file_workout_v1_workout_proto_rawDesc = "" +
 	"\n" +
 	"started_at\x18\x05 \x01(\x03R\tstartedAt\x12!\n" +
 	"\fcompleted_at\x18\x06 \x01(\x03R\vcompletedAt\x12>\n" +
-	"\texercises\x18\a \x03(\v2 .zenx.workout.v1.WorkoutExerciseR\texercises2\xd1\x06\n" +
+	"\texercises\x18\a \x03(\v2 .zenx.workout.v1.WorkoutExerciseR\texercises2\xc9\b\n" +
 	"\x0eWorkoutService\x12^\n" +
-	"\rCreateWorkout\x12%.zenx.workout.v1.CreateWorkoutRequest\x1a&.zenx.workout.v1.CreateWorkoutResponse\x12U\n" +
+	"\rCreateWorkout\x12%.zenx.workout.v1.CreateWorkoutRequest\x1a&.zenx.workout.v1.CreateWorkoutResponse\x12P\n" +
+	"\rUpdateWorkout\x12%.zenx.workout.v1.UpdateWorkoutRequest\x1a\x18.zenx.workout.v1.Workout\x12M\n" +
+	"\rDeleteWorkout\x12%.zenx.workout.v1.DeleteWorkoutRequest\x1a\x15.zenx.common.v1.Empty\x12U\n" +
 	"\n" +
 	"GetWorkout\x12\".zenx.workout.v1.GetWorkoutRequest\x1a#.zenx.workout.v1.GetWorkoutResponse\x12[\n" +
 	"\fListWorkouts\x12$.zenx.workout.v1.ListWorkoutsRequest\x1a%.zenx.workout.v1.ListWorkoutsResponse\x12^\n" +
@@ -1451,7 +1667,8 @@ const file_workout_v1_workout_proto_rawDesc = "" +
 	"\vGetFeedPost\x12#.zenx.workout.v1.GetFeedPostRequest\x1a\x19.zenx.workout.v1.FeedPost\x12a\n" +
 	"\x0eToggleFeedLike\x12&.zenx.workout.v1.ToggleFeedLikeRequest\x1a'.zenx.workout.v1.ToggleFeedLikeResponse\x12V\n" +
 	"\x0eAddFeedComment\x12&.zenx.workout.v1.AddFeedCommentRequest\x1a\x1c.zenx.workout.v1.FeedComment\x12g\n" +
-	"\x10ListFeedComments\x12(.zenx.workout.v1.ListFeedCommentsRequest\x1a).zenx.workout.v1.ListFeedCommentsResponse\x12X\n" +
+	"\x10ListFeedComments\x12(.zenx.workout.v1.ListFeedCommentsRequest\x1a).zenx.workout.v1.ListFeedCommentsResponse\x12U\n" +
+	"\x11DeleteFeedComment\x12).zenx.workout.v1.DeleteFeedCommentRequest\x1a\x15.zenx.common.v1.Empty\x12X\n" +
 	"\rStreamWorkout\x12%.zenx.workout.v1.StreamWorkoutRequest\x1a\x1e.zenx.workout.v1.WorkoutUpdate0\x01B4Z2github.com/zenx/backend/proto/workout/v1;workoutv1b\x06proto3"
 
 var (
@@ -1466,66 +1683,77 @@ func file_workout_v1_workout_proto_rawDescGZIP() []byte {
 	return file_workout_v1_workout_proto_rawDescData
 }
 
-var file_workout_v1_workout_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
+var file_workout_v1_workout_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
 var file_workout_v1_workout_proto_goTypes = []any{
-	(*WorkoutExercise)(nil),          // 0: zenx.workout.v1.WorkoutExercise
-	(*WorkoutSet)(nil),               // 1: zenx.workout.v1.WorkoutSet
-	(*CreateWorkoutRequest)(nil),     // 2: zenx.workout.v1.CreateWorkoutRequest
-	(*CreateWorkoutResponse)(nil),    // 3: zenx.workout.v1.CreateWorkoutResponse
-	(*GetWorkoutRequest)(nil),        // 4: zenx.workout.v1.GetWorkoutRequest
-	(*GetWorkoutResponse)(nil),       // 5: zenx.workout.v1.GetWorkoutResponse
-	(*ListWorkoutsRequest)(nil),      // 6: zenx.workout.v1.ListWorkoutsRequest
-	(*ListWorkoutsResponse)(nil),     // 7: zenx.workout.v1.ListWorkoutsResponse
-	(*ListFeedPostsRequest)(nil),     // 8: zenx.workout.v1.ListFeedPostsRequest
-	(*ListFeedPostsResponse)(nil),    // 9: zenx.workout.v1.ListFeedPostsResponse
-	(*GetFeedPostRequest)(nil),       // 10: zenx.workout.v1.GetFeedPostRequest
-	(*FeedPost)(nil),                 // 11: zenx.workout.v1.FeedPost
-	(*ToggleFeedLikeRequest)(nil),    // 12: zenx.workout.v1.ToggleFeedLikeRequest
-	(*ToggleFeedLikeResponse)(nil),   // 13: zenx.workout.v1.ToggleFeedLikeResponse
-	(*AddFeedCommentRequest)(nil),    // 14: zenx.workout.v1.AddFeedCommentRequest
-	(*FeedComment)(nil),              // 15: zenx.workout.v1.FeedComment
-	(*ListFeedCommentsRequest)(nil),  // 16: zenx.workout.v1.ListFeedCommentsRequest
-	(*ListFeedCommentsResponse)(nil), // 17: zenx.workout.v1.ListFeedCommentsResponse
-	(*StreamWorkoutRequest)(nil),     // 18: zenx.workout.v1.StreamWorkoutRequest
-	(*WorkoutUpdate)(nil),            // 19: zenx.workout.v1.WorkoutUpdate
-	(*Workout)(nil),                  // 20: zenx.workout.v1.Workout
-	(*v1.Pagination)(nil),            // 21: zenx.common.v1.Pagination
+	(*DeleteFeedCommentRequest)(nil), // 0: zenx.workout.v1.DeleteFeedCommentRequest
+	(*WorkoutExercise)(nil),          // 1: zenx.workout.v1.WorkoutExercise
+	(*WorkoutSet)(nil),               // 2: zenx.workout.v1.WorkoutSet
+	(*CreateWorkoutRequest)(nil),     // 3: zenx.workout.v1.CreateWorkoutRequest
+	(*CreateWorkoutResponse)(nil),    // 4: zenx.workout.v1.CreateWorkoutResponse
+	(*UpdateWorkoutRequest)(nil),     // 5: zenx.workout.v1.UpdateWorkoutRequest
+	(*DeleteWorkoutRequest)(nil),     // 6: zenx.workout.v1.DeleteWorkoutRequest
+	(*GetWorkoutRequest)(nil),        // 7: zenx.workout.v1.GetWorkoutRequest
+	(*GetWorkoutResponse)(nil),       // 8: zenx.workout.v1.GetWorkoutResponse
+	(*ListWorkoutsRequest)(nil),      // 9: zenx.workout.v1.ListWorkoutsRequest
+	(*ListWorkoutsResponse)(nil),     // 10: zenx.workout.v1.ListWorkoutsResponse
+	(*ListFeedPostsRequest)(nil),     // 11: zenx.workout.v1.ListFeedPostsRequest
+	(*ListFeedPostsResponse)(nil),    // 12: zenx.workout.v1.ListFeedPostsResponse
+	(*GetFeedPostRequest)(nil),       // 13: zenx.workout.v1.GetFeedPostRequest
+	(*FeedPost)(nil),                 // 14: zenx.workout.v1.FeedPost
+	(*ToggleFeedLikeRequest)(nil),    // 15: zenx.workout.v1.ToggleFeedLikeRequest
+	(*ToggleFeedLikeResponse)(nil),   // 16: zenx.workout.v1.ToggleFeedLikeResponse
+	(*AddFeedCommentRequest)(nil),    // 17: zenx.workout.v1.AddFeedCommentRequest
+	(*FeedComment)(nil),              // 18: zenx.workout.v1.FeedComment
+	(*ListFeedCommentsRequest)(nil),  // 19: zenx.workout.v1.ListFeedCommentsRequest
+	(*ListFeedCommentsResponse)(nil), // 20: zenx.workout.v1.ListFeedCommentsResponse
+	(*StreamWorkoutRequest)(nil),     // 21: zenx.workout.v1.StreamWorkoutRequest
+	(*WorkoutUpdate)(nil),            // 22: zenx.workout.v1.WorkoutUpdate
+	(*Workout)(nil),                  // 23: zenx.workout.v1.Workout
+	(*v1.Pagination)(nil),            // 24: zenx.common.v1.Pagination
+	(*v1.Empty)(nil),                 // 25: zenx.common.v1.Empty
 }
 var file_workout_v1_workout_proto_depIdxs = []int32{
-	1,  // 0: zenx.workout.v1.WorkoutExercise.sets:type_name -> zenx.workout.v1.WorkoutSet
-	0,  // 1: zenx.workout.v1.CreateWorkoutRequest.exercises:type_name -> zenx.workout.v1.WorkoutExercise
-	20, // 2: zenx.workout.v1.GetWorkoutResponse.workout:type_name -> zenx.workout.v1.Workout
-	21, // 3: zenx.workout.v1.ListWorkoutsRequest.pagination:type_name -> zenx.common.v1.Pagination
-	20, // 4: zenx.workout.v1.ListWorkoutsResponse.workouts:type_name -> zenx.workout.v1.Workout
-	21, // 5: zenx.workout.v1.ListFeedPostsRequest.pagination:type_name -> zenx.common.v1.Pagination
-	11, // 6: zenx.workout.v1.ListFeedPostsResponse.posts:type_name -> zenx.workout.v1.FeedPost
-	20, // 7: zenx.workout.v1.FeedPost.workout:type_name -> zenx.workout.v1.Workout
-	21, // 8: zenx.workout.v1.ListFeedCommentsRequest.pagination:type_name -> zenx.common.v1.Pagination
-	15, // 9: zenx.workout.v1.ListFeedCommentsResponse.comments:type_name -> zenx.workout.v1.FeedComment
-	0,  // 10: zenx.workout.v1.Workout.exercises:type_name -> zenx.workout.v1.WorkoutExercise
-	2,  // 11: zenx.workout.v1.WorkoutService.CreateWorkout:input_type -> zenx.workout.v1.CreateWorkoutRequest
-	4,  // 12: zenx.workout.v1.WorkoutService.GetWorkout:input_type -> zenx.workout.v1.GetWorkoutRequest
-	6,  // 13: zenx.workout.v1.WorkoutService.ListWorkouts:input_type -> zenx.workout.v1.ListWorkoutsRequest
-	8,  // 14: zenx.workout.v1.WorkoutService.ListFeedPosts:input_type -> zenx.workout.v1.ListFeedPostsRequest
-	10, // 15: zenx.workout.v1.WorkoutService.GetFeedPost:input_type -> zenx.workout.v1.GetFeedPostRequest
-	12, // 16: zenx.workout.v1.WorkoutService.ToggleFeedLike:input_type -> zenx.workout.v1.ToggleFeedLikeRequest
-	14, // 17: zenx.workout.v1.WorkoutService.AddFeedComment:input_type -> zenx.workout.v1.AddFeedCommentRequest
-	16, // 18: zenx.workout.v1.WorkoutService.ListFeedComments:input_type -> zenx.workout.v1.ListFeedCommentsRequest
-	18, // 19: zenx.workout.v1.WorkoutService.StreamWorkout:input_type -> zenx.workout.v1.StreamWorkoutRequest
-	3,  // 20: zenx.workout.v1.WorkoutService.CreateWorkout:output_type -> zenx.workout.v1.CreateWorkoutResponse
-	5,  // 21: zenx.workout.v1.WorkoutService.GetWorkout:output_type -> zenx.workout.v1.GetWorkoutResponse
-	7,  // 22: zenx.workout.v1.WorkoutService.ListWorkouts:output_type -> zenx.workout.v1.ListWorkoutsResponse
-	9,  // 23: zenx.workout.v1.WorkoutService.ListFeedPosts:output_type -> zenx.workout.v1.ListFeedPostsResponse
-	11, // 24: zenx.workout.v1.WorkoutService.GetFeedPost:output_type -> zenx.workout.v1.FeedPost
-	13, // 25: zenx.workout.v1.WorkoutService.ToggleFeedLike:output_type -> zenx.workout.v1.ToggleFeedLikeResponse
-	15, // 26: zenx.workout.v1.WorkoutService.AddFeedComment:output_type -> zenx.workout.v1.FeedComment
-	17, // 27: zenx.workout.v1.WorkoutService.ListFeedComments:output_type -> zenx.workout.v1.ListFeedCommentsResponse
-	19, // 28: zenx.workout.v1.WorkoutService.StreamWorkout:output_type -> zenx.workout.v1.WorkoutUpdate
-	20, // [20:29] is the sub-list for method output_type
-	11, // [11:20] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	2,  // 0: zenx.workout.v1.WorkoutExercise.sets:type_name -> zenx.workout.v1.WorkoutSet
+	1,  // 1: zenx.workout.v1.CreateWorkoutRequest.exercises:type_name -> zenx.workout.v1.WorkoutExercise
+	1,  // 2: zenx.workout.v1.UpdateWorkoutRequest.exercises:type_name -> zenx.workout.v1.WorkoutExercise
+	23, // 3: zenx.workout.v1.GetWorkoutResponse.workout:type_name -> zenx.workout.v1.Workout
+	24, // 4: zenx.workout.v1.ListWorkoutsRequest.pagination:type_name -> zenx.common.v1.Pagination
+	23, // 5: zenx.workout.v1.ListWorkoutsResponse.workouts:type_name -> zenx.workout.v1.Workout
+	24, // 6: zenx.workout.v1.ListFeedPostsRequest.pagination:type_name -> zenx.common.v1.Pagination
+	14, // 7: zenx.workout.v1.ListFeedPostsResponse.posts:type_name -> zenx.workout.v1.FeedPost
+	23, // 8: zenx.workout.v1.FeedPost.workout:type_name -> zenx.workout.v1.Workout
+	24, // 9: zenx.workout.v1.ListFeedCommentsRequest.pagination:type_name -> zenx.common.v1.Pagination
+	18, // 10: zenx.workout.v1.ListFeedCommentsResponse.comments:type_name -> zenx.workout.v1.FeedComment
+	1,  // 11: zenx.workout.v1.Workout.exercises:type_name -> zenx.workout.v1.WorkoutExercise
+	3,  // 12: zenx.workout.v1.WorkoutService.CreateWorkout:input_type -> zenx.workout.v1.CreateWorkoutRequest
+	5,  // 13: zenx.workout.v1.WorkoutService.UpdateWorkout:input_type -> zenx.workout.v1.UpdateWorkoutRequest
+	6,  // 14: zenx.workout.v1.WorkoutService.DeleteWorkout:input_type -> zenx.workout.v1.DeleteWorkoutRequest
+	7,  // 15: zenx.workout.v1.WorkoutService.GetWorkout:input_type -> zenx.workout.v1.GetWorkoutRequest
+	9,  // 16: zenx.workout.v1.WorkoutService.ListWorkouts:input_type -> zenx.workout.v1.ListWorkoutsRequest
+	11, // 17: zenx.workout.v1.WorkoutService.ListFeedPosts:input_type -> zenx.workout.v1.ListFeedPostsRequest
+	13, // 18: zenx.workout.v1.WorkoutService.GetFeedPost:input_type -> zenx.workout.v1.GetFeedPostRequest
+	15, // 19: zenx.workout.v1.WorkoutService.ToggleFeedLike:input_type -> zenx.workout.v1.ToggleFeedLikeRequest
+	17, // 20: zenx.workout.v1.WorkoutService.AddFeedComment:input_type -> zenx.workout.v1.AddFeedCommentRequest
+	19, // 21: zenx.workout.v1.WorkoutService.ListFeedComments:input_type -> zenx.workout.v1.ListFeedCommentsRequest
+	0,  // 22: zenx.workout.v1.WorkoutService.DeleteFeedComment:input_type -> zenx.workout.v1.DeleteFeedCommentRequest
+	21, // 23: zenx.workout.v1.WorkoutService.StreamWorkout:input_type -> zenx.workout.v1.StreamWorkoutRequest
+	4,  // 24: zenx.workout.v1.WorkoutService.CreateWorkout:output_type -> zenx.workout.v1.CreateWorkoutResponse
+	23, // 25: zenx.workout.v1.WorkoutService.UpdateWorkout:output_type -> zenx.workout.v1.Workout
+	25, // 26: zenx.workout.v1.WorkoutService.DeleteWorkout:output_type -> zenx.common.v1.Empty
+	8,  // 27: zenx.workout.v1.WorkoutService.GetWorkout:output_type -> zenx.workout.v1.GetWorkoutResponse
+	10, // 28: zenx.workout.v1.WorkoutService.ListWorkouts:output_type -> zenx.workout.v1.ListWorkoutsResponse
+	12, // 29: zenx.workout.v1.WorkoutService.ListFeedPosts:output_type -> zenx.workout.v1.ListFeedPostsResponse
+	14, // 30: zenx.workout.v1.WorkoutService.GetFeedPost:output_type -> zenx.workout.v1.FeedPost
+	16, // 31: zenx.workout.v1.WorkoutService.ToggleFeedLike:output_type -> zenx.workout.v1.ToggleFeedLikeResponse
+	18, // 32: zenx.workout.v1.WorkoutService.AddFeedComment:output_type -> zenx.workout.v1.FeedComment
+	20, // 33: zenx.workout.v1.WorkoutService.ListFeedComments:output_type -> zenx.workout.v1.ListFeedCommentsResponse
+	25, // 34: zenx.workout.v1.WorkoutService.DeleteFeedComment:output_type -> zenx.common.v1.Empty
+	22, // 35: zenx.workout.v1.WorkoutService.StreamWorkout:output_type -> zenx.workout.v1.WorkoutUpdate
+	24, // [24:36] is the sub-list for method output_type
+	12, // [12:24] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_workout_v1_workout_proto_init() }
@@ -1539,7 +1767,7 @@ func file_workout_v1_workout_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_workout_v1_workout_proto_rawDesc), len(file_workout_v1_workout_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   21,
+			NumMessages:   24,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

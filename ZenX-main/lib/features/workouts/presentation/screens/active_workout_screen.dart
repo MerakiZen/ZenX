@@ -6,7 +6,7 @@ import '../../../../core/design/design_tokens.dart';
 import '../../../../core/design/hevy_colors.dart';
 import '../providers/workout_providers.dart';
 import '../../../exercises/presentation/providers/exercise_providers.dart';
-import '../../../exercises/domain/entities/exercise.dart';
+import '../../../exercises/domain/models/exercise.dart';
 
 /// Active workout screen - Log Workout (matches screenshot exactly)
 class ActiveWorkoutScreen extends ConsumerStatefulWidget {
@@ -1408,7 +1408,7 @@ class _ExerciseSelectorBottomSheetState extends ConsumerState<_ExerciseSelectorB
     final screenHeight = MediaQuery.of(context).size.height;
     final exercisesAsync = _searchQuery.isNotEmpty
         ? ref.watch(searchExercisesProvider(_searchQuery))
-        : ref.watch(exercisesProvider);
+        : ref.watch(exercisesProvider(query: null, category: null));
 
     return Container(
       constraints: BoxConstraints(

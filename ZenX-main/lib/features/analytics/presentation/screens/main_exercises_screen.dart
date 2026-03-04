@@ -5,6 +5,8 @@ import '../../../../core/presentation/base_screen.dart';
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/design/hevy_colors.dart';
 
+import '../providers/analytics_providers.dart';
+
 /// Main Exercises screen - Shows list of exercises you do most often
 class MainExercisesScreen extends BaseScreen {
   const MainExercisesScreen({super.key});
@@ -29,117 +31,39 @@ class MainExercisesScreen extends BaseScreen {
 
   @override
   Widget buildBody(BuildContext context, WidgetRef ref) {
-    final mainExercises = _generateMockMainExercises();
+    final topExercisesAsync = ref.watch(topExercisesProvider(limit: 20));
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(DesignTokens.paddingScreen),
-      itemCount: mainExercises.length,
-      itemBuilder: (context, index) {
-        final exercise = mainExercises[index];
-        return _MainExerciseListItem(
-          exercise: exercise,
-          onTap: () {
-            // Navigate to exercise detail screen
-            context.push('/exercises/${exercise.id}');
+    return topExercisesAsync.when(
+      data: (exercises) {
+        if (exercises.isEmpty) {
+          return const Center(child: Text('No exercises found', style: TextStyle(color: HevyColors.textSecondary)));
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(DesignTokens.paddingScreen),
+          itemCount: exercises.length,
+          itemBuilder: (context, index) {
+            final exercise = exercises[index];
+            return _MainExerciseListItem(
+              exercise: _MainExercise(
+                id: exercise.exerciseName,
+                name: exercise.exerciseName,
+                primaryMuscle: '', // Not available in this query
+                secondaryMuscles: [], 
+                totalSets: exercise.workoutCount, // Using workoutCount as proxy for frequency
+                heaviestWeight: exercise.averageWeight ?? 0.0,
+                lastWorkoutDate: exercise.lastPerformed,
+              ),
+              onTap: () {
+                // Navigate to exercise detail screen
+                context.push('/exercises/${exercise.exerciseId}');
+              },
+            );
           },
         );
       },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Error: $e', style: const TextStyle(color: Colors.red))),
     );
-  }
-
-  List<_MainExercise> _generateMockMainExercises() {
-    return [
-      _MainExercise(
-        id: 'leg_press_machine',
-        name: 'Leg Press (Machine)',
-        primaryMuscle: 'Quadriceps',
-        secondaryMuscles: ['Glutes', 'Hamstrings'],
-        totalSets: 45,
-        heaviestWeight: 200.0,
-        lastWorkoutDate: DateTime.now().subtract(const Duration(days: 2)),
-      ),
-      _MainExercise(
-        id: 'bench_press_barbell',
-        name: 'Bench Press (Barbell)',
-        primaryMuscle: 'Chest',
-        secondaryMuscles: ['Shoulders', 'Triceps'],
-        totalSets: 52,
-        heaviestWeight: 120.0,
-        lastWorkoutDate: DateTime.now().subtract(const Duration(days: 1)),
-      ),
-      _MainExercise(
-        id: 'squat_barbell',
-        name: 'Squat (Barbell)',
-        primaryMuscle: 'Quadriceps',
-        secondaryMuscles: ['Glutes', 'Hamstrings'],
-        totalSets: 38,
-        heaviestWeight: 180.0,
-        lastWorkoutDate: DateTime.now().subtract(const Duration(days: 3)),
-      ),
-      _MainExercise(
-        id: 'deadlift_barbell',
-        name: 'Deadlift (Barbell)',
-        primaryMuscle: 'Upper Back',
-        secondaryMuscles: ['Hamstrings', 'Glutes'],
-        totalSets: 42,
-        heaviestWeight: 220.0,
-        lastWorkoutDate: DateTime.now().subtract(const Duration(days: 4)),
-      ),
-      _MainExercise(
-        id: 'lat_pulldown_cable',
-        name: 'Lat Pulldown (Cable)',
-        primaryMuscle: 'Lats',
-        secondaryMuscles: ['Biceps', 'Upper Back'],
-        totalSets: 48,
-        heaviestWeight: 90.0,
-        lastWorkoutDate: DateTime.now().subtract(const Duration(days: 2)),
-      ),
-      _MainExercise(
-        id: 'shoulder_press_dumbbell',
-        name: 'Shoulder Press (Dumbbell)',
-        primaryMuscle: 'Shoulders',
-        secondaryMuscles: ['Triceps'],
-        totalSets: 35,
-        heaviestWeight: 45.0,
-        lastWorkoutDate: DateTime.now().subtract(const Duration(days: 5)),
-      ),
-      _MainExercise(
-        id: 'triceps_rope_pushdown',
-        name: 'Triceps Rope Pushdown',
-        primaryMuscle: 'Triceps',
-        secondaryMuscles: [],
-        totalSets: 40,
-        heaviestWeight: 50.0,
-        lastWorkoutDate: DateTime.now().subtract(const Duration(days: 1)),
-      ),
-      _MainExercise(
-        id: 'bicep_curl_dumbbell',
-        name: 'Bicep Curl (Dumbbell)',
-        primaryMuscle: 'Biceps',
-        secondaryMuscles: [],
-        totalSets: 44,
-        heaviestWeight: 25.0,
-        lastWorkoutDate: DateTime.now().subtract(const Duration(days: 2)),
-      ),
-      _MainExercise(
-        id: 'row_cable',
-        name: 'Seated Cable Row',
-        primaryMuscle: 'Upper Back',
-        secondaryMuscles: ['Biceps', 'Lats'],
-        totalSets: 41,
-        heaviestWeight: 80.0,
-        lastWorkoutDate: DateTime.now().subtract(const Duration(days: 3)),
-      ),
-      _MainExercise(
-        id: 'leg_extension_machine',
-        name: 'Leg Extension (Machine)',
-        primaryMuscle: 'Quadriceps',
-        secondaryMuscles: [],
-        totalSets: 33,
-        heaviestWeight: 100.0,
-        lastWorkoutDate: DateTime.now().subtract(const Duration(days: 6)),
-      ),
-    ];
   }
 }
 
@@ -150,7 +74,7 @@ class _MainExercise {
   final List<String> secondaryMuscles;
   final int totalSets;
   final double heaviestWeight;
-  final DateTime lastWorkoutDate;
+  final DateTime? lastWorkoutDate;
 
   _MainExercise({
     required this.id,
@@ -159,7 +83,7 @@ class _MainExercise {
     required this.secondaryMuscles,
     required this.totalSets,
     required this.heaviestWeight,
-    required this.lastWorkoutDate,
+    this.lastWorkoutDate,
   });
 }
 
@@ -172,7 +96,8 @@ class _MainExerciseListItem extends StatelessWidget {
     required this.onTap,
   });
 
-  String _formatDate(DateTime date) {
+  String _formatDate(DateTime? date) {
+    if (date == null) return '';
     final now = DateTime.now();
     final difference = now.difference(date);
     
@@ -233,13 +158,14 @@ class _MainExerciseListItem extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: DesignTokens.spacingXXS),
-                  Text(
-                    'Primary: ${exercise.primaryMuscle}',
-                    style: const TextStyle(
-                      fontSize: DesignTokens.bodySmall,
-                      color: HevyColors.textSecondary,
+                  if (exercise.primaryMuscle.isNotEmpty)
+                    Text(
+                      'Primary: ${exercise.primaryMuscle}',
+                      style: const TextStyle(
+                        fontSize: DesignTokens.bodySmall,
+                        color: HevyColors.textSecondary,
+                      ),
                     ),
-                  ),
                   if (exercise.secondaryMuscles.isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Text(
@@ -256,7 +182,7 @@ class _MainExerciseListItem extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        '${exercise.heaviestWeight.toInt()} kg',
+                        '${exercise.heaviestWeight.toInt()} kg (avg)',
                         style: const TextStyle(
                           fontSize: DesignTokens.bodyMedium,
                           fontWeight: FontWeight.w600,
@@ -264,13 +190,14 @@ class _MainExerciseListItem extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: DesignTokens.spacingS),
-                      Text(
-                        _formatDate(exercise.lastWorkoutDate),
-                        style: const TextStyle(
-                          fontSize: DesignTokens.bodySmall,
-                          color: HevyColors.textSecondary,
+                      if (exercise.lastWorkoutDate != null)
+                        Text(
+                          _formatDate(exercise.lastWorkoutDate),
+                          style: const TextStyle(
+                            fontSize: DesignTokens.bodySmall,
+                            color: HevyColors.textSecondary,
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ],
@@ -287,7 +214,7 @@ class _MainExerciseListItem extends StatelessWidget {
                 borderRadius: BorderRadius.circular(DesignTokens.radiusS),
               ),
               child: Text(
-                '${exercise.totalSets} sets',
+                '${exercise.totalSets} workouts',
                 style: const TextStyle(
                   fontSize: DesignTokens.bodySmall,
                   fontWeight: FontWeight.w600,

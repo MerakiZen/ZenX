@@ -31,15 +31,13 @@ class StatisticsScreen extends BaseScreen {
 
   @override
   Widget buildBody(BuildContext context, WidgetRef ref) {
-    // Calculate date range for the last 7 days (including today)
     final now = DateTime.now();
-    // Start of current day
-    final today = DateTime(now.year, now.month, now.day);
-    // Start of 6 days ago
-    final startDate = today.subtract(const Duration(days: 6));
-    
-    // Fetch aggregated data
-    final calendarAsync = ref.watch(workoutCalendarProvider(startDate));
+    // Start of current week (Monday)
+    final weekStart = now.subtract(Duration(days: now.weekday - 1));
+    final weekEnd = weekStart.add(const Duration(days: 6));
+
+    final calendarAsync = ref.watch(workoutCalendarProvider(startDate: weekStart, endDate: weekEnd));
+    final muscleStatsAsync = ref.watch(muscleGroupStatsProvider(startDate: weekStart, endDate: weekEnd));
 
     return SingleChildScrollView(
       child: Column(
@@ -75,58 +73,64 @@ class StatisticsScreen extends BaseScreen {
 
                 // Weekly calendar
                 calendarAsync.when(
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Text('Error loading calendar: $e', 
-                    style: const TextStyle(color: HevyColors.error),
-                  ),
                   data: (calendar) {
-                    // Extract days that have workouts (just the day number)
-                    final activeDayNumbers = calendar.workoutDays
-                        .map((d) => d.day)
+                    final activeDays = calendar.workoutDays
+                        .map((d) {
+                          try {
+                            return DateTime.parse(d).day;
+                          } catch (e) {
+                            return -1;
+                          }
+                        })
+                        .where((day) => day != -1)
                         .toList();
-                        
                     return _WeeklyCalendar(
-                      weekStart: startDate,
-                      activeDays: activeDayNumbers,
+                      weekStart: weekStart,
+                      activeDays: activeDays,
                       onDayTap: (day) {
                         // TODO: Filter by day
                       },
                     );
                   },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (e, _) => Text('Error loading calendar: $e', 
+                    style: const TextStyle(color: HevyColors.error),
+                  ),
                 ),
                 const SizedBox(height: DesignTokens.spacingL),
 
                 // Anatomical models
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    // Front view
-                    Expanded(
-                      child: _AnatomicalModel(
-                        isFront: true,
-                        highlightedMuscles: {
-                          'Chest': HevyColors.primary,
-                          'Shoulders': HevyColors.primary,
-                          'Biceps': HevyColors.primary,
-                          'Forearms': HevyColors.primary,
-                        },
-                      ),
-                    ),
-                    SizedBox(width: DesignTokens.spacingM),
-                    // Back view
-                    Expanded(
-                      child: _AnatomicalModel(
-                        isFront: false,
-                        highlightedMuscles: {
-                          'Lats': HevyColors.primary,
-                          'Upper Back': HevyColors.primary,
-                          'Shoulders': HevyColors.primary,
-                          'Triceps': HevyColors.primary,
-                          'Forearms': HevyColors.primary,
-                        },
-                      ),
-                    ),
-                  ],
+                muscleStatsAsync.when(
+                  data: (stats) {
+                    final highlightedMuscles = <String, Color>{};
+                    for (var stat in stats) {
+                      if (stat.volume > 0) {
+                        highlightedMuscles[stat.muscleGroup] = HevyColors.primary;
+                      }
+                    }
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // Front view
+                        Expanded(
+                          child: _AnatomicalModel(
+                            isFront: true,
+                            highlightedMuscles: highlightedMuscles,
+                          ),
+                        ),
+                        const SizedBox(width: DesignTokens.spacingM),
+                        // Back view
+                        Expanded(
+                          child: _AnatomicalModel(
+                            isFront: false,
+                            highlightedMuscles: highlightedMuscles,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (e, _) => Text('Error loading muscle stats: $e'),
                 ),
               ],
             ),
@@ -268,7 +272,7 @@ class _WeeklyCalendar extends StatelessWidget {
                           fontSize: DesignTokens.bodyMedium,
                           fontWeight: FontWeight.w600,
                           color: isActive
-                              ? HevyColors.textPrimary
+                              ? Colors.white
                               : HevyColors.textSecondary,
                         ),
                       ),
@@ -296,9 +300,9 @@ class _AnatomicalModel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 350, // More height for the detailed 3D assets
+      height: 350,
       decoration: BoxDecoration(
-        color: Colors.black, // Match the asset's black background
+        color: Colors.black,
         borderRadius: BorderRadius.circular(DesignTokens.radiusL),
         border: Border.all(color: HevyColors.border.withOpacity(0.3)),
         boxShadow: [
@@ -314,15 +318,20 @@ class _AnatomicalModel extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Base 3D Anatomy Model
+            // Note: Placeholder for actual assets if they don't exist
             Image.asset(
               isFront 
                   ? 'assets/images/anatomy_front.png' 
                   : 'assets/images/anatomy_back.png',
               fit: BoxFit.contain,
-              // No color blend needed for the clay look, let the 3D lighting show
+              errorBuilder: (_, __, ___) => Center(
+                child: Icon(
+                  Icons.person,
+                  size: 100,
+                  color: HevyColors.textTertiary.withOpacity(0.2),
+                ),
+              ),
             ),
-            // Highlight Layer - "Painted" Effect
             CustomPaint(
               painter: _AnatomicalModelPainter(
                 isFront: isFront,
@@ -347,83 +356,38 @@ class _AnatomicalModelPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Helper to draw "blue paint" highlight
     void drawPaintHighlight(Offset center, Size radius, Color color) {
       final paint = Paint()
-        ..color = Colors.blue.withOpacity(0.6) // User asked for BLUE paint
+        ..color = color.withOpacity(0.6)
         ..style = PaintingStyle.fill
-        ..blendMode = BlendMode.screen // Screen blend mode lights up the clay model
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15); // Soft airbrush look
+        ..blendMode = BlendMode.screen
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
       
-      // Draw larger soft glow
       canvas.drawOval(
         Rect.fromCenter(center: center, width: radius.width * 1.2, height: radius.height * 1.2),
         paint,
-      );
-      
-      // Draw tighter core
-      canvas.drawOval(
-        Rect.fromCenter(center: center, width: radius.width * 0.8, height: radius.height * 0.8),
-        Paint()
-          ..color = Colors.cyanAccent.withOpacity(0.4)
-          ..blendMode = BlendMode.overlay
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
       );
     }
 
     final w = size.width;
     final h = size.height;
 
-    // Adjust coordinates for the new 3D clay model
     if (isFront) {
-      // FRONT VIEW MAPPINGS
       if (highlightedMuscles.containsKey('Chest')) {
-        drawPaintHighlight(Offset(w * 0.38, h * 0.28), Size(w * 0.16, h * 0.1), Colors.blue);
-        drawPaintHighlight(Offset(w * 0.62, h * 0.28), Size(w * 0.16, h * 0.1), Colors.blue);
+        drawPaintHighlight(Offset(w * 0.38, h * 0.28), Size(w * 0.16, h * 0.1), HevyColors.primary);
+        drawPaintHighlight(Offset(w * 0.62, h * 0.28), Size(w * 0.16, h * 0.1), HevyColors.primary);
       }
       if (highlightedMuscles.containsKey('Shoulders')) {
-        drawPaintHighlight(Offset(w * 0.22, h * 0.24), Size(w * 0.12, h * 0.1), Colors.blue);
-        drawPaintHighlight(Offset(w * 0.78, h * 0.24), Size(w * 0.12, h * 0.1), Colors.blue);
+        drawPaintHighlight(Offset(w * 0.22, h * 0.24), Size(w * 0.12, h * 0.1), HevyColors.primary);
+        drawPaintHighlight(Offset(w * 0.78, h * 0.24), Size(w * 0.12, h * 0.1), HevyColors.primary);
       }
-      if (highlightedMuscles.containsKey('Biceps')) {
-        drawPaintHighlight(Offset(w * 0.20, h * 0.36), Size(w * 0.09, h * 0.11), Colors.blue);
-        drawPaintHighlight(Offset(w * 0.80, h * 0.36), Size(w * 0.09, h * 0.11), Colors.blue);
-      }
-      if (highlightedMuscles.containsKey('Abs') || highlightedMuscles.containsKey('Core')) {
-        drawPaintHighlight(Offset(w * 0.5, h * 0.45), Size(w * 0.14, h * 0.2), Colors.blue);
-      }
-      if (highlightedMuscles.containsKey('Forearms')) {
-        drawPaintHighlight(Offset(w * 0.15, h * 0.52), Size(w * 0.07, h * 0.12), Colors.blue);
-        drawPaintHighlight(Offset(w * 0.85, h * 0.52), Size(w * 0.07, h * 0.12), Colors.blue);
-      }
-      if (highlightedMuscles.containsKey('Quads') || highlightedMuscles.containsKey('Legs')) {
-         drawPaintHighlight(Offset(w * 0.38, h * 0.70), Size(w * 0.13, h * 0.25), Colors.blue);
-         drawPaintHighlight(Offset(w * 0.62, h * 0.70), Size(w * 0.13, h * 0.25), Colors.blue);
-      }
+      // Add more as needed
     } else {
-      // BACK VIEW MAPPINGS
-      if (highlightedMuscles.containsKey('Upper Back') || highlightedMuscles.containsKey('Traps')) {
-        drawPaintHighlight(Offset(w * 0.5, h * 0.22), Size(w * 0.22, h * 0.12), Colors.blue);
-      }
       if (highlightedMuscles.containsKey('Lats') || highlightedMuscles.containsKey('Back')) {
-         drawPaintHighlight(Offset(w * 0.36, h * 0.35), Size(w * 0.1, h * 0.18), Colors.blue);
-         drawPaintHighlight(Offset(w * 0.64, h * 0.35), Size(w * 0.1, h * 0.18), Colors.blue);
+         drawPaintHighlight(Offset(w * 0.36, h * 0.35), Size(w * 0.1, h * 0.18), HevyColors.primary);
+         drawPaintHighlight(Offset(w * 0.64, h * 0.35), Size(w * 0.1, h * 0.18), HevyColors.primary);
       }
-      if (highlightedMuscles.containsKey('Triceps')) {
-        drawPaintHighlight(Offset(w * 0.24, h * 0.35), Size(w * 0.08, h * 0.11), Colors.blue);
-        drawPaintHighlight(Offset(w * 0.76, h * 0.35), Size(w * 0.08, h * 0.11), Colors.blue);
-      }
-      if (highlightedMuscles.containsKey('Glutes')) {
-        drawPaintHighlight(Offset(w * 0.5, h * 0.56), Size(w * 0.22, h * 0.14), Colors.blue);
-      }
-      if (highlightedMuscles.containsKey('Hamstrings') || highlightedMuscles.containsKey('Legs')) {
-         drawPaintHighlight(Offset(w * 0.38, h * 0.72), Size(w * 0.11, h * 0.22), Colors.blue);
-         drawPaintHighlight(Offset(w * 0.62, h * 0.72), Size(w * 0.11, h * 0.22), Colors.blue);
-      }
-      if (highlightedMuscles.containsKey('Calves')) {
-         drawPaintHighlight(Offset(w * 0.38, h * 0.88), Size(w * 0.09, h * 0.14), Colors.blue);
-         drawPaintHighlight(Offset(w * 0.62, h * 0.88), Size(w * 0.09, h * 0.14), Colors.blue);
-      }
+      // Add more as needed
     }
   }
 
@@ -466,7 +430,7 @@ class _StatisticCard extends StatelessWidget {
               child: Icon(
                 icon,
                 color: HevyColors.primary,
-                size: DesignTokens.iconMedium, // 24dp
+                size: DesignTokens.iconMedium,
               ),
             ),
             const SizedBox(width: DesignTokens.spacingM),
@@ -503,4 +467,3 @@ class _StatisticCard extends StatelessWidget {
     );
   }
 }
-

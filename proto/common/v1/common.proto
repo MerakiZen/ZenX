@@ -19,3 +19,5 @@ message TimestampRange {
   int64 start = 1;
   int64 end = 2;
 }
+
+message Empty {}

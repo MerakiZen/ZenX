@@ -2,10 +2,14 @@ syntax = "proto3";
 
 package zenx.exercise.v1;
 
+import "common/v1/common.proto";
+
 option go_package = "github.com/zenx/backend/proto/exercise/v1;exercisev1";
 
 service ExerciseService {
   rpc CreateExercise(CreateExerciseRequest) returns (Exercise);
+  rpc UpdateExercise(UpdateExerciseRequest) returns (Exercise);
+  rpc DeleteExercise(DeleteExerciseRequest) returns (common.v1.Empty);
   rpc GetExercise(GetExerciseRequest) returns (Exercise);
   rpc ListExercises(ListExercisesRequest) returns (ListExercisesResponse);
 }
@@ -25,6 +29,15 @@ message Exercise {
 
 message CreateExerciseRequest {
   Exercise exercise = 1;
+}
+
+message UpdateExerciseRequest {
+  string exercise_id = 1;
+  Exercise exercise = 2;
+}
+
+message DeleteExerciseRequest {
+  string exercise_id = 1;
 }
 
 message GetExerciseRequest {

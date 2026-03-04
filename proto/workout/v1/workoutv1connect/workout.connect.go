@@ -8,6 +8,7 @@ import (
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
+	v11 "github.com/zenx/backend/proto/common/v1"
 	v1 "github.com/zenx/backend/proto/workout/v1"
 	http "net/http"
 	strings "strings"
@@ -36,6 +37,12 @@ const (
 	// WorkoutServiceCreateWorkoutProcedure is the fully-qualified name of the WorkoutService's
 	// CreateWorkout RPC.
 	WorkoutServiceCreateWorkoutProcedure = "/zenx.workout.v1.WorkoutService/CreateWorkout"
+	// WorkoutServiceUpdateWorkoutProcedure is the fully-qualified name of the WorkoutService's
+	// UpdateWorkout RPC.
+	WorkoutServiceUpdateWorkoutProcedure = "/zenx.workout.v1.WorkoutService/UpdateWorkout"
+	// WorkoutServiceDeleteWorkoutProcedure is the fully-qualified name of the WorkoutService's
+	// DeleteWorkout RPC.
+	WorkoutServiceDeleteWorkoutProcedure = "/zenx.workout.v1.WorkoutService/DeleteWorkout"
 	// WorkoutServiceGetWorkoutProcedure is the fully-qualified name of the WorkoutService's GetWorkout
 	// RPC.
 	WorkoutServiceGetWorkoutProcedure = "/zenx.workout.v1.WorkoutService/GetWorkout"
@@ -57,6 +64,9 @@ const (
 	// WorkoutServiceListFeedCommentsProcedure is the fully-qualified name of the WorkoutService's
 	// ListFeedComments RPC.
 	WorkoutServiceListFeedCommentsProcedure = "/zenx.workout.v1.WorkoutService/ListFeedComments"
+	// WorkoutServiceDeleteFeedCommentProcedure is the fully-qualified name of the WorkoutService's
+	// DeleteFeedComment RPC.
+	WorkoutServiceDeleteFeedCommentProcedure = "/zenx.workout.v1.WorkoutService/DeleteFeedComment"
 	// WorkoutServiceStreamWorkoutProcedure is the fully-qualified name of the WorkoutService's
 	// StreamWorkout RPC.
 	WorkoutServiceStreamWorkoutProcedure = "/zenx.workout.v1.WorkoutService/StreamWorkout"
@@ -65,6 +75,8 @@ const (
 // WorkoutServiceClient is a client for the zenx.workout.v1.WorkoutService service.
 type WorkoutServiceClient interface {
 	CreateWorkout(context.Context, *connect.Request[v1.CreateWorkoutRequest]) (*connect.Response[v1.CreateWorkoutResponse], error)
+	UpdateWorkout(context.Context, *connect.Request[v1.UpdateWorkoutRequest]) (*connect.Response[v1.Workout], error)
+	DeleteWorkout(context.Context, *connect.Request[v1.DeleteWorkoutRequest]) (*connect.Response[v11.Empty], error)
 	GetWorkout(context.Context, *connect.Request[v1.GetWorkoutRequest]) (*connect.Response[v1.GetWorkoutResponse], error)
 	ListWorkouts(context.Context, *connect.Request[v1.ListWorkoutsRequest]) (*connect.Response[v1.ListWorkoutsResponse], error)
 	ListFeedPosts(context.Context, *connect.Request[v1.ListFeedPostsRequest]) (*connect.Response[v1.ListFeedPostsResponse], error)
@@ -72,6 +84,7 @@ type WorkoutServiceClient interface {
 	ToggleFeedLike(context.Context, *connect.Request[v1.ToggleFeedLikeRequest]) (*connect.Response[v1.ToggleFeedLikeResponse], error)
 	AddFeedComment(context.Context, *connect.Request[v1.AddFeedCommentRequest]) (*connect.Response[v1.FeedComment], error)
 	ListFeedComments(context.Context, *connect.Request[v1.ListFeedCommentsRequest]) (*connect.Response[v1.ListFeedCommentsResponse], error)
+	DeleteFeedComment(context.Context, *connect.Request[v1.DeleteFeedCommentRequest]) (*connect.Response[v11.Empty], error)
 	StreamWorkout(context.Context, *connect.Request[v1.StreamWorkoutRequest]) (*connect.ServerStreamForClient[v1.WorkoutUpdate], error)
 }
 
@@ -90,6 +103,18 @@ func NewWorkoutServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			httpClient,
 			baseURL+WorkoutServiceCreateWorkoutProcedure,
 			connect.WithSchema(workoutServiceMethods.ByName("CreateWorkout")),
+			connect.WithClientOptions(opts...),
+		),
+		updateWorkout: connect.NewClient[v1.UpdateWorkoutRequest, v1.Workout](
+			httpClient,
+			baseURL+WorkoutServiceUpdateWorkoutProcedure,
+			connect.WithSchema(workoutServiceMethods.ByName("UpdateWorkout")),
+			connect.WithClientOptions(opts...),
+		),
+		deleteWorkout: connect.NewClient[v1.DeleteWorkoutRequest, v11.Empty](
+			httpClient,
+			baseURL+WorkoutServiceDeleteWorkoutProcedure,
+			connect.WithSchema(workoutServiceMethods.ByName("DeleteWorkout")),
 			connect.WithClientOptions(opts...),
 		),
 		getWorkout: connect.NewClient[v1.GetWorkoutRequest, v1.GetWorkoutResponse](
@@ -134,6 +159,12 @@ func NewWorkoutServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithSchema(workoutServiceMethods.ByName("ListFeedComments")),
 			connect.WithClientOptions(opts...),
 		),
+		deleteFeedComment: connect.NewClient[v1.DeleteFeedCommentRequest, v11.Empty](
+			httpClient,
+			baseURL+WorkoutServiceDeleteFeedCommentProcedure,
+			connect.WithSchema(workoutServiceMethods.ByName("DeleteFeedComment")),
+			connect.WithClientOptions(opts...),
+		),
 		streamWorkout: connect.NewClient[v1.StreamWorkoutRequest, v1.WorkoutUpdate](
 			httpClient,
 			baseURL+WorkoutServiceStreamWorkoutProcedure,
@@ -145,20 +176,33 @@ func NewWorkoutServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 
 // workoutServiceClient implements WorkoutServiceClient.
 type workoutServiceClient struct {
-	createWorkout    *connect.Client[v1.CreateWorkoutRequest, v1.CreateWorkoutResponse]
-	getWorkout       *connect.Client[v1.GetWorkoutRequest, v1.GetWorkoutResponse]
-	listWorkouts     *connect.Client[v1.ListWorkoutsRequest, v1.ListWorkoutsResponse]
-	listFeedPosts    *connect.Client[v1.ListFeedPostsRequest, v1.ListFeedPostsResponse]
-	getFeedPost      *connect.Client[v1.GetFeedPostRequest, v1.FeedPost]
-	toggleFeedLike   *connect.Client[v1.ToggleFeedLikeRequest, v1.ToggleFeedLikeResponse]
-	addFeedComment   *connect.Client[v1.AddFeedCommentRequest, v1.FeedComment]
-	listFeedComments *connect.Client[v1.ListFeedCommentsRequest, v1.ListFeedCommentsResponse]
-	streamWorkout    *connect.Client[v1.StreamWorkoutRequest, v1.WorkoutUpdate]
+	createWorkout     *connect.Client[v1.CreateWorkoutRequest, v1.CreateWorkoutResponse]
+	updateWorkout     *connect.Client[v1.UpdateWorkoutRequest, v1.Workout]
+	deleteWorkout     *connect.Client[v1.DeleteWorkoutRequest, v11.Empty]
+	getWorkout        *connect.Client[v1.GetWorkoutRequest, v1.GetWorkoutResponse]
+	listWorkouts      *connect.Client[v1.ListWorkoutsRequest, v1.ListWorkoutsResponse]
+	listFeedPosts     *connect.Client[v1.ListFeedPostsRequest, v1.ListFeedPostsResponse]
+	getFeedPost       *connect.Client[v1.GetFeedPostRequest, v1.FeedPost]
+	toggleFeedLike    *connect.Client[v1.ToggleFeedLikeRequest, v1.ToggleFeedLikeResponse]
+	addFeedComment    *connect.Client[v1.AddFeedCommentRequest, v1.FeedComment]
+	listFeedComments  *connect.Client[v1.ListFeedCommentsRequest, v1.ListFeedCommentsResponse]
+	deleteFeedComment *connect.Client[v1.DeleteFeedCommentRequest, v11.Empty]
+	streamWorkout     *connect.Client[v1.StreamWorkoutRequest, v1.WorkoutUpdate]
 }
 
 // CreateWorkout calls zenx.workout.v1.WorkoutService.CreateWorkout.
 func (c *workoutServiceClient) CreateWorkout(ctx context.Context, req *connect.Request[v1.CreateWorkoutRequest]) (*connect.Response[v1.CreateWorkoutResponse], error) {
 	return c.createWorkout.CallUnary(ctx, req)
+}
+
+// UpdateWorkout calls zenx.workout.v1.WorkoutService.UpdateWorkout.
+func (c *workoutServiceClient) UpdateWorkout(ctx context.Context, req *connect.Request[v1.UpdateWorkoutRequest]) (*connect.Response[v1.Workout], error) {
+	return c.updateWorkout.CallUnary(ctx, req)
+}
+
+// DeleteWorkout calls zenx.workout.v1.WorkoutService.DeleteWorkout.
+func (c *workoutServiceClient) DeleteWorkout(ctx context.Context, req *connect.Request[v1.DeleteWorkoutRequest]) (*connect.Response[v11.Empty], error) {
+	return c.deleteWorkout.CallUnary(ctx, req)
 }
 
 // GetWorkout calls zenx.workout.v1.WorkoutService.GetWorkout.
@@ -196,6 +240,11 @@ func (c *workoutServiceClient) ListFeedComments(ctx context.Context, req *connec
 	return c.listFeedComments.CallUnary(ctx, req)
 }
 
+// DeleteFeedComment calls zenx.workout.v1.WorkoutService.DeleteFeedComment.
+func (c *workoutServiceClient) DeleteFeedComment(ctx context.Context, req *connect.Request[v1.DeleteFeedCommentRequest]) (*connect.Response[v11.Empty], error) {
+	return c.deleteFeedComment.CallUnary(ctx, req)
+}
+
 // StreamWorkout calls zenx.workout.v1.WorkoutService.StreamWorkout.
 func (c *workoutServiceClient) StreamWorkout(ctx context.Context, req *connect.Request[v1.StreamWorkoutRequest]) (*connect.ServerStreamForClient[v1.WorkoutUpdate], error) {
 	return c.streamWorkout.CallServerStream(ctx, req)
@@ -204,6 +253,8 @@ func (c *workoutServiceClient) StreamWorkout(ctx context.Context, req *connect.R
 // WorkoutServiceHandler is an implementation of the zenx.workout.v1.WorkoutService service.
 type WorkoutServiceHandler interface {
 	CreateWorkout(context.Context, *connect.Request[v1.CreateWorkoutRequest]) (*connect.Response[v1.CreateWorkoutResponse], error)
+	UpdateWorkout(context.Context, *connect.Request[v1.UpdateWorkoutRequest]) (*connect.Response[v1.Workout], error)
+	DeleteWorkout(context.Context, *connect.Request[v1.DeleteWorkoutRequest]) (*connect.Response[v11.Empty], error)
 	GetWorkout(context.Context, *connect.Request[v1.GetWorkoutRequest]) (*connect.Response[v1.GetWorkoutResponse], error)
 	ListWorkouts(context.Context, *connect.Request[v1.ListWorkoutsRequest]) (*connect.Response[v1.ListWorkoutsResponse], error)
 	ListFeedPosts(context.Context, *connect.Request[v1.ListFeedPostsRequest]) (*connect.Response[v1.ListFeedPostsResponse], error)
@@ -211,6 +262,7 @@ type WorkoutServiceHandler interface {
 	ToggleFeedLike(context.Context, *connect.Request[v1.ToggleFeedLikeRequest]) (*connect.Response[v1.ToggleFeedLikeResponse], error)
 	AddFeedComment(context.Context, *connect.Request[v1.AddFeedCommentRequest]) (*connect.Response[v1.FeedComment], error)
 	ListFeedComments(context.Context, *connect.Request[v1.ListFeedCommentsRequest]) (*connect.Response[v1.ListFeedCommentsResponse], error)
+	DeleteFeedComment(context.Context, *connect.Request[v1.DeleteFeedCommentRequest]) (*connect.Response[v11.Empty], error)
 	StreamWorkout(context.Context, *connect.Request[v1.StreamWorkoutRequest], *connect.ServerStream[v1.WorkoutUpdate]) error
 }
 
@@ -225,6 +277,18 @@ func NewWorkoutServiceHandler(svc WorkoutServiceHandler, opts ...connect.Handler
 		WorkoutServiceCreateWorkoutProcedure,
 		svc.CreateWorkout,
 		connect.WithSchema(workoutServiceMethods.ByName("CreateWorkout")),
+		connect.WithHandlerOptions(opts...),
+	)
+	workoutServiceUpdateWorkoutHandler := connect.NewUnaryHandler(
+		WorkoutServiceUpdateWorkoutProcedure,
+		svc.UpdateWorkout,
+		connect.WithSchema(workoutServiceMethods.ByName("UpdateWorkout")),
+		connect.WithHandlerOptions(opts...),
+	)
+	workoutServiceDeleteWorkoutHandler := connect.NewUnaryHandler(
+		WorkoutServiceDeleteWorkoutProcedure,
+		svc.DeleteWorkout,
+		connect.WithSchema(workoutServiceMethods.ByName("DeleteWorkout")),
 		connect.WithHandlerOptions(opts...),
 	)
 	workoutServiceGetWorkoutHandler := connect.NewUnaryHandler(
@@ -269,6 +333,12 @@ func NewWorkoutServiceHandler(svc WorkoutServiceHandler, opts ...connect.Handler
 		connect.WithSchema(workoutServiceMethods.ByName("ListFeedComments")),
 		connect.WithHandlerOptions(opts...),
 	)
+	workoutServiceDeleteFeedCommentHandler := connect.NewUnaryHandler(
+		WorkoutServiceDeleteFeedCommentProcedure,
+		svc.DeleteFeedComment,
+		connect.WithSchema(workoutServiceMethods.ByName("DeleteFeedComment")),
+		connect.WithHandlerOptions(opts...),
+	)
 	workoutServiceStreamWorkoutHandler := connect.NewServerStreamHandler(
 		WorkoutServiceStreamWorkoutProcedure,
 		svc.StreamWorkout,
@@ -279,6 +349,10 @@ func NewWorkoutServiceHandler(svc WorkoutServiceHandler, opts ...connect.Handler
 		switch r.URL.Path {
 		case WorkoutServiceCreateWorkoutProcedure:
 			workoutServiceCreateWorkoutHandler.ServeHTTP(w, r)
+		case WorkoutServiceUpdateWorkoutProcedure:
+			workoutServiceUpdateWorkoutHandler.ServeHTTP(w, r)
+		case WorkoutServiceDeleteWorkoutProcedure:
+			workoutServiceDeleteWorkoutHandler.ServeHTTP(w, r)
 		case WorkoutServiceGetWorkoutProcedure:
 			workoutServiceGetWorkoutHandler.ServeHTTP(w, r)
 		case WorkoutServiceListWorkoutsProcedure:
@@ -293,6 +367,8 @@ func NewWorkoutServiceHandler(svc WorkoutServiceHandler, opts ...connect.Handler
 			workoutServiceAddFeedCommentHandler.ServeHTTP(w, r)
 		case WorkoutServiceListFeedCommentsProcedure:
 			workoutServiceListFeedCommentsHandler.ServeHTTP(w, r)
+		case WorkoutServiceDeleteFeedCommentProcedure:
+			workoutServiceDeleteFeedCommentHandler.ServeHTTP(w, r)
 		case WorkoutServiceStreamWorkoutProcedure:
 			workoutServiceStreamWorkoutHandler.ServeHTTP(w, r)
 		default:
@@ -306,6 +382,14 @@ type UnimplementedWorkoutServiceHandler struct{}
 
 func (UnimplementedWorkoutServiceHandler) CreateWorkout(context.Context, *connect.Request[v1.CreateWorkoutRequest]) (*connect.Response[v1.CreateWorkoutResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenx.workout.v1.WorkoutService.CreateWorkout is not implemented"))
+}
+
+func (UnimplementedWorkoutServiceHandler) UpdateWorkout(context.Context, *connect.Request[v1.UpdateWorkoutRequest]) (*connect.Response[v1.Workout], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenx.workout.v1.WorkoutService.UpdateWorkout is not implemented"))
+}
+
+func (UnimplementedWorkoutServiceHandler) DeleteWorkout(context.Context, *connect.Request[v1.DeleteWorkoutRequest]) (*connect.Response[v11.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenx.workout.v1.WorkoutService.DeleteWorkout is not implemented"))
 }
 
 func (UnimplementedWorkoutServiceHandler) GetWorkout(context.Context, *connect.Request[v1.GetWorkoutRequest]) (*connect.Response[v1.GetWorkoutResponse], error) {
@@ -334,6 +418,10 @@ func (UnimplementedWorkoutServiceHandler) AddFeedComment(context.Context, *conne
 
 func (UnimplementedWorkoutServiceHandler) ListFeedComments(context.Context, *connect.Request[v1.ListFeedCommentsRequest]) (*connect.Response[v1.ListFeedCommentsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenx.workout.v1.WorkoutService.ListFeedComments is not implemented"))
+}
+
+func (UnimplementedWorkoutServiceHandler) DeleteFeedComment(context.Context, *connect.Request[v1.DeleteFeedCommentRequest]) (*connect.Response[v11.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenx.workout.v1.WorkoutService.DeleteFeedComment is not implemented"))
 }
 
 func (UnimplementedWorkoutServiceHandler) StreamWorkout(context.Context, *connect.Request[v1.StreamWorkoutRequest], *connect.ServerStream[v1.WorkoutUpdate]) error {

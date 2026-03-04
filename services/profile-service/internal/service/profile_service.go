@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	commonv1 "github.com/zenx/backend/proto/common/v1"
 	profilev1 "github.com/zenx/backend/proto/profile/v1"
 	"github.com/zenx/backend/services/profile-service/internal/store"
 	"google.golang.org/grpc/codes"
@@ -127,6 +128,20 @@ func (s *ProfileService) ListMeasurements(ctx context.Context, req *profilev1.Li
 		resp.Measurements = append(resp.Measurements, toProtoMeasurement(m))
 	}
 	return resp, nil
+}
+
+// DeleteProfile removes a user profile and measurements.
+func (s *ProfileService) DeleteProfile(ctx context.Context, req *profilev1.DeleteProfileRequest) (*commonv1.Empty, error) {
+	userID, err := parseUUID(req.GetUserId())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if err := s.repo.DeleteProfile(ctx, userID); err != nil {
+		return nil, status.Errorf(codes.Internal, "delete profile: %v", err)
+	}
+
+	return &commonv1.Empty{}, nil
 }
 
 func toProtoProfile(p store.Profile) *profilev1.Profile {

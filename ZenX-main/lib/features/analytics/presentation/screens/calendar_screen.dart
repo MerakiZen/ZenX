@@ -1,37 +1,94 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/presentation/base_screen.dart';
 import '../../../../core/design/design_tokens.dart';
 import '../../../../core/design/hevy_colors.dart';
 import '../../../../core/utils/share_service.dart';
-import '../../../../core/utils/help_dialog_helper.dart';
 import 'package:intl/intl.dart';
+import '../providers/analytics_providers.dart';
 
 /// Calendar screen - Shows workout calendar with months
-class CalendarScreen extends BaseScreen {
+class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
 
   @override
-  PreferredSizeWidget? buildAppBar(BuildContext context, WidgetRef ref) {
+  ConsumerState<CalendarScreen> createState() => _CalendarScreenState();
+}
+
+class _CalendarScreenState extends ConsumerState<CalendarScreen> {
+  static const List<String> _timeFilters = ['All Workouts', 'Strength', 'Cardio', 'Rest Days'];
+  final List<DateTime> _availableMonths = List.generate(
+    12,
+    (index) => DateTime(2025, 12 - index),
+  );
+
+  late DateTime _selectedMonth;
+  String _selectedFilter = _timeFilters.first;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedMonth = DateTime.now();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Calculate range for current view (selected month + next month)
+    final start = DateTime(_selectedMonth.year, _selectedMonth.month, 1);
+    final end = DateTime(_selectedMonth.year, _selectedMonth.month + 2, 0);
+
+    final calendarAsync = ref.watch(workoutCalendarProvider(startDate: start, endDate: end));
+
+    return Scaffold(
+      backgroundColor: HevyColors.background,
+      appBar: _buildAppBar(),
+      body: calendarAsync.when(
+        data: (calendar) {
+          final workoutsByDate = _processWorkouts(calendar.workoutDays);
+          return _buildBody(workoutsByDate);
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text('Error: $e')),
+      ),
+    );
+  }
+
+  Map<String, Map<int, String>> _processWorkouts(List<String> workoutDays) {
+    final Map<String, Map<int, String>> result = {};
+    
+    for (final dateStr in workoutDays) {
+      try {
+        final date = DateTime.parse(dateStr);
+        final monthKey = _formatMonthKey(date);
+        
+        if (!result.containsKey(monthKey)) {
+          result[monthKey] = {};
+        }
+        
+        result[monthKey]![date.day] = 'Workout';
+      } catch (e) {
+        debugPrint('Error parsing workout date: $dateStr');
+      }
+    }
+    
+    return result;
+  }
+
+  PreferredSizeWidget _buildAppBar() {
     return AppBar(
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () => context.pop(),
       ),
-      title: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text('Month'),
-          IconButton(
-            icon: const Icon(Icons.arrow_drop_down, size: 20),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            onPressed: () {
-              // TODO: Show month picker
-            },
-          ),
-        ],
+      title: InkWell(
+        onTap: _showMonthPicker,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(DateFormat('MMMM yyyy').format(_selectedMonth)),
+            const Icon(Icons.arrow_drop_down, size: 20),
+          ],
+        ),
       ),
       titleTextStyle: const TextStyle(
         fontSize: DesignTokens.titleLarge,
@@ -56,144 +113,250 @@ class CalendarScreen extends BaseScreen {
           icon: const Icon(Icons.filter_list),
           color: HevyColors.textPrimary,
           onPressed: () {
-            // TODO: Show filter options
+            _showFilterOptions();
           },
         ),
       ],
     );
   }
 
-  @override
-  Widget buildBody(BuildContext context, WidgetRef ref) {
+  Widget _buildBody(Map<String, Map<int, String>> workoutsByMonth) {
+    final monthsToDisplay = <DateTime>[
+      _selectedMonth,
+      DateTime(_selectedMonth.year, _selectedMonth.month + 1, 1),
+    ];
+
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Summary bar
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: DesignTokens.paddingScreen,
-              vertical: DesignTokens.spacingM,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.local_fire_department,
-                      color: Colors.orange,
-                      size: 20,
-                    ),
-                    const SizedBox(width: DesignTokens.spacingXS),
-                    const Text(
-                      '9 week streak',
-                      style: TextStyle(
-                        fontSize: DesignTokens.bodyMedium,
-                        fontWeight: FontWeight.w500,
-                        color: HevyColors.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.nightlight_round,
-                      color: HevyColors.textSecondary,
-                      size: 20,
-                    ),
-                    const SizedBox(width: DesignTokens.spacingXS),
-                    const Text(
-                      '1 rest day',
-                      style: TextStyle(
-                        fontSize: DesignTokens.bodyMedium,
-                        fontWeight: FontWeight.w500,
-                        color: HevyColors.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          // October Calendar
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: DesignTokens.paddingScreen),
-            child: _MonthCalendar(
-              year: 2025,
-              month: 10,
-              workouts: _getOctoberWorkouts(),
-            ),
-          ),
-
-          const SizedBox(height: DesignTokens.spacingXL),
-
-          // November 2025 label
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: DesignTokens.paddingScreen),
-            child: const Text(
-              'November 2025',
-              style: TextStyle(
-                fontSize: DesignTokens.titleLarge,
-                fontWeight: FontWeight.w600,
-                color: HevyColors.textPrimary,
+          _buildSummaryBar(),
+          
+          const Divider(height: 1),
+          
+          ...monthsToDisplay.map((month) {
+            final monthKey = _formatMonthKey(month);
+            final monthWorkouts = workoutsByMonth[monthKey] ?? {};
+            
+            return Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: DesignTokens.paddingScreen,
+                vertical: DesignTokens.spacingL,
               ),
-            ),
-          ),
-
-          const SizedBox(height: DesignTokens.spacingM),
-
-          // November Calendar
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: DesignTokens.paddingScreen),
-            child: _MonthCalendar(
-              year: 2025,
-              month: 11,
-              workouts: _getNovemberWorkouts(),
-            ),
-          ),
-
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    DateFormat('MMMM yyyy').format(month),
+                    style: const TextStyle(
+                      fontSize: DesignTokens.titleLarge,
+                      fontWeight: FontWeight.w600,
+                      color: HevyColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: DesignTokens.spacingM),
+                  _MonthCalendar(
+                    year: month.year,
+                    month: month.month,
+                    workouts: _filterWorkouts(monthWorkouts),
+                  ),
+                ],
+              ),
+            );
+          }),
+          
           const SizedBox(height: DesignTokens.spacingXL),
         ],
       ),
     );
   }
 
-  Map<int, String> _getOctoberWorkouts() {
-    return {
-      6: 'Let workout',
-      7: 'Chest',
-      8: 'Back workou',
-      10: 'Late night wo',
-      12: 'Arms workou',
-      13: 'Cardio',
-      14: 'Chest and sh',
-      15: 'Cardio',
-      24: 'Leg day work',
-      25: 'Chest',
-      28: 'Back workou',
-      29: 'Legs',
-      31: 'Arms',
-    };
+  Widget _buildSummaryBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: DesignTokens.paddingScreen,
+        vertical: DesignTokens.spacingM,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.local_fire_department,
+                color: Colors.orange,
+                size: 20,
+              ),
+              const SizedBox(width: DesignTokens.spacingXS),
+              const Text(
+                'Workout Hot Streak',
+                style: TextStyle(
+                  fontSize: DesignTokens.bodyMedium,
+                  fontWeight: FontWeight.w500,
+                  color: HevyColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const Row(
+            children: [
+              Icon(
+                Icons.nightlight_round,
+                color: HevyColors.textSecondary,
+                size: 20,
+              ),
+              SizedBox(width: DesignTokens.spacingXS),
+              Text(
+                'Rest Days',
+                style: TextStyle(
+                  fontSize: DesignTokens.bodyMedium,
+                  fontWeight: FontWeight.w500,
+                  color: HevyColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
-  Map<int, String> _getNovemberWorkouts() {
-    return {
-      4: 'Push',
-      5: 'Cardio',
-      6: 'Back workou',
-      8: 'Arms',
-      10: 'Leg',
-      13: 'Push',
-      14: 'Back workou',
-      16: 'Arms',
-      17: 'Legs',
-      20: 'Push',
-      22: 'Back workou',
-      24: 'Legs',
-    };
+  Map<int, String> _filterWorkouts(Map<int, String> workouts) {
+    if (_selectedFilter == 'All Workouts') return Map.from(workouts);
+    // Note: Actual filtering by type (Strength/Cardio) isn't implemented in the dummy logic
+    // but the UI structure remains to support it
+    return Map.from(workouts);
+  }
+
+  String _formatMonthKey(DateTime date) => DateFormat('yyyy-MM').format(date);
+
+  void _showMonthPicker() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: HevyColors.surface,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(DesignTokens.radiusXL),
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: HevyColors.textSecondary.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: DesignTokens.spacingL,
+                  vertical: DesignTokens.spacingM,
+                ),
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Select Month',
+                        style: TextStyle(
+                          fontSize: DesignTokens.titleMedium,
+                          fontWeight: FontWeight.w600,
+                          color: HevyColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: HevyColors.textSecondary),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(color: HevyColors.border),
+              SizedBox(
+                height: 300,
+                child: ListView.builder(
+                  itemCount: _availableMonths.length,
+                  itemBuilder: (context, index) {
+                    final month = _availableMonths[index];
+                    final title = DateFormat('MMMM yyyy').format(month);
+                    final isSelected =
+                        month.year == _selectedMonth.year && month.month == _selectedMonth.month;
+                    return ListTile(
+                      title: Text(
+                        title,
+                        style: TextStyle(
+                          color: isSelected ? HevyColors.primary : HevyColors.textPrimary,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                        ),
+                      ),
+                      trailing: isSelected ? const Icon(Icons.check, color: HevyColors.primary) : null,
+                      onTap: () {
+                        setState(() {
+                          _selectedMonth = month;
+                        });
+                        Navigator.pop(context);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showFilterOptions() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: HevyColors.surface,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(DesignTokens.radiusXL),
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(DesignTokens.spacingL),
+                child: const Text(
+                  'Show',
+                  style: TextStyle(
+                    fontSize: DesignTokens.titleMedium,
+                    fontWeight: FontWeight.w600,
+                    color: HevyColors.textPrimary,
+                  ),
+                ),
+              ),
+              ..._timeFilters.map((filter) => ListTile(
+                title: Text(filter),
+                trailing: _selectedFilter == filter ? const Icon(Icons.check, color: HevyColors.primary) : null,
+                onTap: () {
+                  setState(() {
+                    _selectedFilter = filter;
+                  });
+                  Navigator.pop(context);
+                },
+              )),
+              const SizedBox(height: DesignTokens.spacingL),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

@@ -8,6 +8,7 @@ import (
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
+	v11 "github.com/zenx/backend/proto/common/v1"
 	v1 "github.com/zenx/backend/proto/exercise/v1"
 	http "net/http"
 	strings "strings"
@@ -36,6 +37,12 @@ const (
 	// ExerciseServiceCreateExerciseProcedure is the fully-qualified name of the ExerciseService's
 	// CreateExercise RPC.
 	ExerciseServiceCreateExerciseProcedure = "/zenx.exercise.v1.ExerciseService/CreateExercise"
+	// ExerciseServiceUpdateExerciseProcedure is the fully-qualified name of the ExerciseService's
+	// UpdateExercise RPC.
+	ExerciseServiceUpdateExerciseProcedure = "/zenx.exercise.v1.ExerciseService/UpdateExercise"
+	// ExerciseServiceDeleteExerciseProcedure is the fully-qualified name of the ExerciseService's
+	// DeleteExercise RPC.
+	ExerciseServiceDeleteExerciseProcedure = "/zenx.exercise.v1.ExerciseService/DeleteExercise"
 	// ExerciseServiceGetExerciseProcedure is the fully-qualified name of the ExerciseService's
 	// GetExercise RPC.
 	ExerciseServiceGetExerciseProcedure = "/zenx.exercise.v1.ExerciseService/GetExercise"
@@ -47,6 +54,8 @@ const (
 // ExerciseServiceClient is a client for the zenx.exercise.v1.ExerciseService service.
 type ExerciseServiceClient interface {
 	CreateExercise(context.Context, *connect.Request[v1.CreateExerciseRequest]) (*connect.Response[v1.Exercise], error)
+	UpdateExercise(context.Context, *connect.Request[v1.UpdateExerciseRequest]) (*connect.Response[v1.Exercise], error)
+	DeleteExercise(context.Context, *connect.Request[v1.DeleteExerciseRequest]) (*connect.Response[v11.Empty], error)
 	GetExercise(context.Context, *connect.Request[v1.GetExerciseRequest]) (*connect.Response[v1.Exercise], error)
 	ListExercises(context.Context, *connect.Request[v1.ListExercisesRequest]) (*connect.Response[v1.ListExercisesResponse], error)
 }
@@ -68,6 +77,18 @@ func NewExerciseServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithSchema(exerciseServiceMethods.ByName("CreateExercise")),
 			connect.WithClientOptions(opts...),
 		),
+		updateExercise: connect.NewClient[v1.UpdateExerciseRequest, v1.Exercise](
+			httpClient,
+			baseURL+ExerciseServiceUpdateExerciseProcedure,
+			connect.WithSchema(exerciseServiceMethods.ByName("UpdateExercise")),
+			connect.WithClientOptions(opts...),
+		),
+		deleteExercise: connect.NewClient[v1.DeleteExerciseRequest, v11.Empty](
+			httpClient,
+			baseURL+ExerciseServiceDeleteExerciseProcedure,
+			connect.WithSchema(exerciseServiceMethods.ByName("DeleteExercise")),
+			connect.WithClientOptions(opts...),
+		),
 		getExercise: connect.NewClient[v1.GetExerciseRequest, v1.Exercise](
 			httpClient,
 			baseURL+ExerciseServiceGetExerciseProcedure,
@@ -86,6 +107,8 @@ func NewExerciseServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 // exerciseServiceClient implements ExerciseServiceClient.
 type exerciseServiceClient struct {
 	createExercise *connect.Client[v1.CreateExerciseRequest, v1.Exercise]
+	updateExercise *connect.Client[v1.UpdateExerciseRequest, v1.Exercise]
+	deleteExercise *connect.Client[v1.DeleteExerciseRequest, v11.Empty]
 	getExercise    *connect.Client[v1.GetExerciseRequest, v1.Exercise]
 	listExercises  *connect.Client[v1.ListExercisesRequest, v1.ListExercisesResponse]
 }
@@ -93,6 +116,16 @@ type exerciseServiceClient struct {
 // CreateExercise calls zenx.exercise.v1.ExerciseService.CreateExercise.
 func (c *exerciseServiceClient) CreateExercise(ctx context.Context, req *connect.Request[v1.CreateExerciseRequest]) (*connect.Response[v1.Exercise], error) {
 	return c.createExercise.CallUnary(ctx, req)
+}
+
+// UpdateExercise calls zenx.exercise.v1.ExerciseService.UpdateExercise.
+func (c *exerciseServiceClient) UpdateExercise(ctx context.Context, req *connect.Request[v1.UpdateExerciseRequest]) (*connect.Response[v1.Exercise], error) {
+	return c.updateExercise.CallUnary(ctx, req)
+}
+
+// DeleteExercise calls zenx.exercise.v1.ExerciseService.DeleteExercise.
+func (c *exerciseServiceClient) DeleteExercise(ctx context.Context, req *connect.Request[v1.DeleteExerciseRequest]) (*connect.Response[v11.Empty], error) {
+	return c.deleteExercise.CallUnary(ctx, req)
 }
 
 // GetExercise calls zenx.exercise.v1.ExerciseService.GetExercise.
@@ -108,6 +141,8 @@ func (c *exerciseServiceClient) ListExercises(ctx context.Context, req *connect.
 // ExerciseServiceHandler is an implementation of the zenx.exercise.v1.ExerciseService service.
 type ExerciseServiceHandler interface {
 	CreateExercise(context.Context, *connect.Request[v1.CreateExerciseRequest]) (*connect.Response[v1.Exercise], error)
+	UpdateExercise(context.Context, *connect.Request[v1.UpdateExerciseRequest]) (*connect.Response[v1.Exercise], error)
+	DeleteExercise(context.Context, *connect.Request[v1.DeleteExerciseRequest]) (*connect.Response[v11.Empty], error)
 	GetExercise(context.Context, *connect.Request[v1.GetExerciseRequest]) (*connect.Response[v1.Exercise], error)
 	ListExercises(context.Context, *connect.Request[v1.ListExercisesRequest]) (*connect.Response[v1.ListExercisesResponse], error)
 }
@@ -123,6 +158,18 @@ func NewExerciseServiceHandler(svc ExerciseServiceHandler, opts ...connect.Handl
 		ExerciseServiceCreateExerciseProcedure,
 		svc.CreateExercise,
 		connect.WithSchema(exerciseServiceMethods.ByName("CreateExercise")),
+		connect.WithHandlerOptions(opts...),
+	)
+	exerciseServiceUpdateExerciseHandler := connect.NewUnaryHandler(
+		ExerciseServiceUpdateExerciseProcedure,
+		svc.UpdateExercise,
+		connect.WithSchema(exerciseServiceMethods.ByName("UpdateExercise")),
+		connect.WithHandlerOptions(opts...),
+	)
+	exerciseServiceDeleteExerciseHandler := connect.NewUnaryHandler(
+		ExerciseServiceDeleteExerciseProcedure,
+		svc.DeleteExercise,
+		connect.WithSchema(exerciseServiceMethods.ByName("DeleteExercise")),
 		connect.WithHandlerOptions(opts...),
 	)
 	exerciseServiceGetExerciseHandler := connect.NewUnaryHandler(
@@ -141,6 +188,10 @@ func NewExerciseServiceHandler(svc ExerciseServiceHandler, opts ...connect.Handl
 		switch r.URL.Path {
 		case ExerciseServiceCreateExerciseProcedure:
 			exerciseServiceCreateExerciseHandler.ServeHTTP(w, r)
+		case ExerciseServiceUpdateExerciseProcedure:
+			exerciseServiceUpdateExerciseHandler.ServeHTTP(w, r)
+		case ExerciseServiceDeleteExerciseProcedure:
+			exerciseServiceDeleteExerciseHandler.ServeHTTP(w, r)
 		case ExerciseServiceGetExerciseProcedure:
 			exerciseServiceGetExerciseHandler.ServeHTTP(w, r)
 		case ExerciseServiceListExercisesProcedure:
@@ -156,6 +207,14 @@ type UnimplementedExerciseServiceHandler struct{}
 
 func (UnimplementedExerciseServiceHandler) CreateExercise(context.Context, *connect.Request[v1.CreateExerciseRequest]) (*connect.Response[v1.Exercise], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenx.exercise.v1.ExerciseService.CreateExercise is not implemented"))
+}
+
+func (UnimplementedExerciseServiceHandler) UpdateExercise(context.Context, *connect.Request[v1.UpdateExerciseRequest]) (*connect.Response[v1.Exercise], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenx.exercise.v1.ExerciseService.UpdateExercise is not implemented"))
+}
+
+func (UnimplementedExerciseServiceHandler) DeleteExercise(context.Context, *connect.Request[v1.DeleteExerciseRequest]) (*connect.Response[v11.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenx.exercise.v1.ExerciseService.DeleteExercise is not implemented"))
 }
 
 func (UnimplementedExerciseServiceHandler) GetExercise(context.Context, *connect.Request[v1.GetExerciseRequest]) (*connect.Response[v1.Exercise], error) {

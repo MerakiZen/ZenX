@@ -6,7 +6,7 @@ import '../../../../core/design/design_tokens.dart';
 import '../../../../core/design/hevy_colors.dart';
 import '../providers/workout_providers.dart';
 import '../../../exercises/presentation/providers/exercise_providers.dart';
-import '../../../exercises/domain/entities/exercise.dart';
+import '../../../exercises/domain/models/exercise.dart';
 
 /// Create workout screen (Hevy style)
 class CreateWorkoutScreen extends ConsumerStatefulWidget {
@@ -285,7 +285,7 @@ class _CreateWorkoutScreenState extends ConsumerState<CreateWorkoutScreen> {
 class _ExerciseSelectorBottomSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final exercisesAsync = ref.watch(exercisesProvider);
+    final exercisesAsync = ref.watch(exercisesProvider(query: null, category: null));
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Container(

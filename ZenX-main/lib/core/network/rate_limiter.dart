@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 
 /// Rate limiter for API requests
 /// Implements token bucket algorithm to prevent exceeding rate limits
@@ -84,6 +85,7 @@ class GraphQLRateLimiter {
   Future<void> waitIfNeeded() async {
     final waitTime = getTimeUntilNextRequest();
     if (waitTime != null) {
+      debugPrint('Rate limit hit, waiting ${waitTime.inMilliseconds}ms');
       await Future.delayed(waitTime);
     }
   }
